@@ -23,7 +23,7 @@ The Stage 1-5 tests import Uniswap's real `PoolManager`, official pool types/lib
 
 Stage 6A adds a TypeScript source workspace under `tooling/receipt-codec`. Its runtime codec has no third-party dependencies. Development dependencies are locked in `package-lock.json` and declared at exact versions: Node.js 20 or newer, TypeScript `5.7.3`, `@types/node` `22.10.2`, and `@noble/hashes` `1.7.1`. The hash library is used only to verify selector and freeze-manifest Keccak hashes; it is not imported by the codec runtime. The allowlisted runtime was briefly published as `@swaputer/receipt-codec@0.1.0` and withdrawn on September 6, 2026; the source workspace remains marked private to prevent accidental whole-workspace publication.
 
-Stage 6B adds the private `tooling/indexer` workspace on Node.js 22. It reuses `@swaputer/receipt-codec` through an exact local file dependency and locks all packages in its own `package-lock.json`. Runtime dependencies are `better-sqlite3` `13.0.3` (MIT, SQLite persistence and synchronous transaction boundary) and `@noble/hashes` `1.7.1` (MIT, exact outer `VMLog` Keccak topic). Development dependencies are TypeScript `5.7.3`, `@types/node` `22.10.2`, and `@types/better-sqlite3` `9.6.0`, all MIT. No ORM, RPC vendor SDK or ABI framework is used. The SQLite native dependency is confined to the offchain indexer process and never enters onchain or receipt-codec code.
+Stage 6B adds the private `tooling/indexer` workspace on Node.js 22. It reuses `@swaputer-labs/receipt-codec` through an exact local file dependency and locks all packages in its own `package-lock.json`. Runtime dependencies are `better-sqlite3` `13.0.3` (MIT, SQLite persistence and synchronous transaction boundary) and `@noble/hashes` `1.7.1` (MIT, exact outer `VMLog` Keccak topic). Development dependencies are TypeScript `5.7.3`, `@types/node` `22.10.2`, and `@types/better-sqlite3` `9.6.0`, all MIT. No ORM, RPC vendor SDK or ABI framework is used. The SQLite native dependency is confined to the offchain indexer process and never enters onchain or receipt-codec code.
 
 Stage 6C adds no package dependency. It reuses the indexer's pinned hash library for selectors and deterministic descriptor hashes, SQLite for migration 002, and the local receipt codec's strict record types. The built-in verified registry is generated only from repository reference artifacts and checked during build/typecheck; external descriptors are always registered as `declared_unverified`.
 
@@ -31,7 +31,7 @@ Stage 6D1 adds the `tooling/tinysol` source workspace on Node.js 22. Its only ru
 
 Stage 6D2 adds no dependency. The lexer, parser, semantic analysis, deterministic compiler, fixture generator and CLI extensions use the same exact Node.js/TypeScript/hash-library lock. The Stage 6C compiler-event E2E reuses the existing indexer, local Anvil and Foundry tooling; it does not add an RPC SDK, parser generator, ABI framework, simulator or wallet library.
 
-Stage 6D3 adds exact runtime dependency `@noble/curves` `1.8.1` (MIT) to the TinySol workspace solely for local secp256k1 public-key recovery required by ISA `ECRECOVER`. The interpreter, journal, package/state model, byte estimator and differential corpus otherwise use project code and Node built-ins; they do not use RPC, an EVM emulator, a Solidity subprocess or wallet software. The workspace package is `0.3.0`; compiler package bytes are unchanged, while deterministic compiler sidecars were refreshed because the exact workspace lock hash is part of compiler identity.
+Stage 6D3 adds exact runtime dependency `@noble/curves` `1.8.1` (MIT) to the TinySol workspace solely for local secp256k1 public-key recovery required by ISA `ECRECOVER`. The interpreter, journal, package/state model, byte estimator and differential corpus otherwise use project code and Node built-ins; they do not use RPC, an EVM emulator, a Solidity subprocess or wallet software. The Stage 6D3 workspace package was `0.3.0`; the current package-only distribution is prepared as `@swaputer-labs/tinysol@0.3.1`. Compiler package bytes are unchanged, while deterministic compiler sidecars were refreshed because the package manifest and exact workspace lock hash are part of compiler identity.
 
 Stage 6E adds no runtime or development dependency and no fourth npm workspace. Its orchestration script uses Node.js built-ins plus the already built codec, indexer and TinySol packages, and invokes the pinned local Foundry/Anvil/cast toolchain. All state is isolated to an ephemeral local Anvil chain and temporary SQLite database; no public RPC or deployment dependency is introduced.
 
@@ -50,6 +50,14 @@ exact-pinned in `requirements-security.txt`. It is never imported by production
 contracts or TypeScript runtime code. `script/run-slither.sh` invokes the Foundry
 adapter with `--skip-clean`, filters dependency/test/script paths, and compares the
 machine result to the explicit triage in `security-results/slither-summary.json`.
+
+The current npm package boundary prepares exactly three MIT packages and does
+not publish them automatically: `@swaputer-labs/receipt-codec@0.1.1`,
+`@swaputer-labs/tinysol@0.3.1`, and `@swaputer-labs/cli@0.1.1`. Every source
+manifest remains `private: true`; only the Tooling repository's allowlisted
+temporary staging output may become public after an explicit release decision.
+The withdrawn `@swaputer/*` names remain historical publication evidence and
+are not reused or rewritten.
 
 Stage 7D-U1 adds no package. The release rehearsal uses Node built-ins, the four
 existing locked workspaces, and pinned Foundry/Anvil. Indexer health, backup and
