@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "result": "PASS",
+  "unifiedCommand": "./script/accept-stage7b.sh",
+  "unifiedExitCode": 0,
+  "baselineBeforeChanges": {
+    "command": "./script/accept-stage7a2.sh",
+    "exitCode": 0,
+    "foundryTests": 122,
+    "receiptCodecTests": 31,
+    "indexerMockTests": 45,
+    "indexerAnvilE2E": 2,
+    "tinySolTests": 62,
+    "manifestTests": 7
+  },
+  "final": {
+    "foundryTests": 194,
+    "foundryFailures": 0,
+    "receiptCodecTests": 31,
+    "tinySolTests": 63,
+    "manifestTests": 9,
+    "indexerMockTests": 45,
+    "indexerAnvilE2E": 2,
+    "npmAuditWorkspaces": 4,
+    "npmAuditVulnerabilities": 0,
+    "defaultFuzzExecutions": 7680,
+    "defaultFuzzSeed": "0x7b2026",
+    "defaultStatefulCalls": 24576,
+    "stage7bDefaultStatefulCalls": 8192,
+    "stage7bDeepFuzzExecutions": 12288,
+    "stage7bDeepRouterStatefulCalls": 32768,
+    "deepSeed": "0x7b2026",
+    "deepSimulatorDifferentialTests": 7,
+    "simulatorCodeCorpus": 292,
+    "simulatorPackageCorpus": 12,
+    "simulatorFixedSeedCases": 64,
+    "slitherResults": 124,
+    "slitherVersion": "0.11.4"
+  },
+  "checks": {
+    "frozenHashes": "PASS",
+    "isaSolidityDrift": "PASS",
+    "forgeFmt": "PASS",
+    "forgeBuildSizes": "PASS",
+    "forgeSnapshot": "PASS",
+    "gitDiffCheck": "PASS",
+    "routerAssetConservation": "PASS",
+    "poolManagerTransientDeltas": "PASS",
+    "factoryAtomicity": "PASS",
+    "manifestAdversarial": "PASS",
+    "staticAnalysisTriage": "PASS"
+  }
+}

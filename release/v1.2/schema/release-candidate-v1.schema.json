@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swaputer.local/schema/release-candidate-v1.schema.json",
+  "title": "Swaputer v1.2 local release candidate evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "release",
+    "sourceControl",
+    "scope",
+    "commitments",
+    "verification",
+    "signature",
+    "integrity"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "swaputer-release-candidate/1"
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "protocolVersion",
+        "status",
+        "candidateKind",
+        "mainnetAuthorized"
+      ],
+      "properties": {
+        "name": { "const": "swaputer-v1.2-stage7m-rc3" },
+        "protocolVersion": { "const": "1.2" },
+        "status": { "const": "unaudited experimental" },
+        "candidateKind": { "const": "local-candidate-freeze" },
+        "mainnetAuthorized": { "const": false }
+      }
+    },
+    "sourceControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateTag",
+        "tagStatus",
+        "tagObject",
+        "tagType",
+        "candidateCommit",
+        "candidateTree"
+      ],
+      "properties": {
+        "candidateTag": { "const": "swaputer-v1.2-stage7m-rc3" },
+        "tagStatus": { "const": "frozen" },
+        "tagObject": { "$ref": "#/$defs/gitObject" },
+        "tagType": { "const": "annotated" },
+        "candidateCommit": { "$ref": "#/$defs/gitObject" },
+        "candidateTree": { "$ref": "#/$defs/gitObject" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "profile", "includedContracts", "officialInterfaces", "excludedMainnetApplications"],
+      "properties": {
+        "path": { "const": "release/v1.2/candidate-scope.json" },
+        "profile": { "const": "core+explorer+studio+open-mint" },
+        "includedContracts": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "officialInterfaces": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "excludedMainnetApplications": { "type": "array", "items": { "enum": ["src20-market", "seth", "auction"] }, "minItems": 3, "maxItems": 3, "uniqueItems": true }
+      }
+    },
+    "commitments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scopeSha256",
+        "sourceListSha256",
+        "sourceFileCount",
+        "artifactInventorySha256",
+        "toolchainSha256",
+        "submodulesSha256",
+        "specSha256",
+        "isaKeccak256"
+      ],
+      "properties": {
+        "scopeSha256": { "$ref": "#/$defs/sha256" },
+        "sourceListSha256": { "$ref": "#/$defs/sha256" },
+        "sourceFileCount": { "type": "integer", "minimum": 1 },
+        "artifactInventorySha256": { "$ref": "#/$defs/sha256" },
+        "toolchainSha256": { "$ref": "#/$defs/sha256" },
+        "submodulesSha256": { "$ref": "#/$defs/sha256" },
+        "specSha256": { "$ref": "#/$defs/sha256" },
+        "isaKeccak256": { "$ref": "#/$defs/bytes32" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exactTrackedSourceHashes",
+        "submoduleCommits",
+        "artifactHashesAndSizes",
+        "secretScan",
+        "forbiddenPaths",
+        "featureScope",
+        "candidateTagResolved",
+        "tagPeelsToCandidateCommit"
+      ],
+      "properties": {
+        "exactTrackedSourceHashes": { "const": true },
+        "submoduleCommits": { "const": true },
+        "artifactHashesAndSizes": { "const": true },
+        "secretScan": { "const": true },
+        "forbiddenPaths": { "const": true },
+        "featureScope": { "const": true },
+        "candidateTagResolved": { "const": true },
+        "tagPeelsToCandidateCommit": { "const": true }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "algorithm", "signer", "message", "signature"],
+      "properties": {
+        "status": { "enum": ["not-required-for-local-candidate-freeze", "deferred"] },
+        "algorithm": { "type": "null" },
+        "signer": { "type": "null" },
+        "message": { "type": "null" },
+        "signature": { "type": "null" }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "reportHash"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "reportHash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  },
+  "$defs": {
+    "gitObject": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "bytes32": { "type": "string", "pattern": "^0x[0-9a-f]{64}$" }
+  }
+}

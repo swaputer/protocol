@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "swaputer-applications/1",
+  "release": "swaputer-v1.2-rc3",
+  "networkName": "Base Sepolia",
+  "chainId": 84532,
+  "protocolVersion": "1.2",
+  "sourceControlCommit": "3879da15bf6fb7edf1ff8c50abb95c1cf37b5345",
+  "deployedAt": "2026-09-05T05:45:00Z",
+  "core": {
+    "worldId": "0xe8f2c911549238112347b47a3710d916e51612eea3baa2f0676198d5c5afd973",
+    "factory": "0x2A1219A61D31e0E2D05E1CD124dce475EE634c29",
+    "router": "0xA8Ba8e0788Ec904F749EEc144e1F15f8a95244A5",
+    "kernel": "0x31a59D9d9923AfEc67730afE54783eC4130551A4",
+    "hook": "0x573e10833b20c532bE4DA7177A797Eec87a4E0CC",
+    "gasToken": "0x88898339896A9AdeA40894B15218A677C2Add09E",
+    "sealedAtBlock": 46409160,
+    "configHash": "0x4ad6f0cf4808c2e8442ea6480096590722eadcb50c42f7db88d7e3796b6b69e2"
+  },
+  "protocolFee": {
+    "feeBps": 300,
+    "feeController": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+    "feeAdmin": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+    "buyGrossWei": "10000000000000",
+    "buyFeeWei": "300000000000",
+    "sellGrossWei": "2410469319139",
+    "sellFeeWei": "72314079574",
+    "sellNetWei": "2338155239565",
+    "claimedWei": "702314079574",
+    "finalAccruedWei": "0",
+    "adminTransferRoundTrip": true,
+    "transactions": {
+      "buy": "0x55d1bfc37ac9b8b3a9a4ec6644af24bc484d2e420a3954a6063cef75d0f05c8b",
+      "sell": "0x2cf564b28b32887235ed6fe29a1e5eaa86e33b8f5e87d798501236bd19fbe747",
+      "claim": "0xb8b66142010dfa8d54be9a1d92c1adb0ac2ddb24c853d7eddd8ef107777f8ec3",
+      "claimRemaining": "0x13c5f430291e1527e53405f8bf3b4d957c2f872b7df10b0b3fa2c70e10349747",
+      "setFeeTo250Bps": "0x1ccfcf3530ff3ca63822ec529402118979231c8ab7defe33124ea3b4adf9fea2",
+      "setFeeTo300Bps": "0xaf528dc7bf17c51dbf4adb7d863930270394a26d512d339810d263d2b678354c",
+      "transferAdmin": "0xee6e42872752313cc5efc4425a1fec032ff0024b46f20feba5ea1ca7a4fa32b5",
+      "returnAdmin": "0x87b588eee0bb3b895eef94990e20ba720fa66f72a96f99591d71b3972d077fd5"
+    }
+  },
+  "market": {
+    "factory": "0x1ee15c8C16fb5C44DA090ede7dAD64860F5a5C8C",
+    "factoryRuntimeCodeHash": "0x840de20e72c9d58068d2ebbff269bf2f5f648e715a756f2bc5b3ccee6fc3dbd2",
+    "escrowCodeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b",
+    "reference": {
+      "token": "0x0167aa7246975a468acd1ee47708b5eb09c41f62d7844b6ef0808f9614204a69",
+      "escrow": "0x01c56bf181fc538c17dcabb924c119f4e7a897eee09156e5d87ec82459723547",
+      "market": "0xD7264aFA55C2150FC4a1861bcD0B19C6E6764Aa7",
+      "runtimeCodeHash": "0x96f665244b6082e01098557698c2786faca9859002ad3991aab1a2c89ac35acf",
+      "orderCount": 2,
+      "finalEscrowedTokenAmount": "0",
+      "finalLockedEthWei": "0"
+    }
+  },
+  "seth": {
+    "programId": "0x0102a197f57324690e669e396d50eaa99d91f3f8c83f451516467e50ce883905",
+    "codeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162",
+    "vault": "0xe18FB4343DE1bD599fc434eA41fE982f696423A2",
+    "vaultRuntimeCodeHash": "0x540ae3647dd572be5cbbdf70824125a1c9ada72f42093960d7096890071fb8a5",
+    "finalSupplyWei": "0",
+    "finalLockedEthWei": "0",
+    "finalVaultBalanceWei": "0",
+    "solvent": true
+  },
+  "auctionExample": {
+    "indexed": false,
+    "factory": "0x463824fb851E4f181C5305B5e9c4fa91773a7cdA",
+    "factoryRuntimeCodeHash": "0xdebfc801065f2361573213c5e75aca325701778530b174cf90c1e0688cb0b60f",
+    "escrowCodeHash": "0x0b68683f866e3e83789420824530612988d5e7bfa4f372c2f84c80b75c7cf53a"
+  }
+}

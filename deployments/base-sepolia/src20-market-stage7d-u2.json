@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "1",
+  "chainId": 84532,
+  "environment": "testnet",
+  "auditStatus": "unaudited",
+  "economicValue": "none",
+  "market": "0x7770ad52dfde0f9cf37d5894ec9235cd6b3667cb",
+  "marketRuntimeCodeHash": "0x2a0e3c3a8d45bd060f41b777f4808277d2c4162f1ca6093bd89c711bddbcd23e",
+  "worldId": "0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9",
+  "kernel": "0xa048c894a738185c24b4a5020fb6708dab160283",
+  "router": "0xedabf849f3f74fe3c92fcea50968332f77b06f07",
+  "programId": "0x012928db8f5a86bc849ed1a66d4ff19bb5af3a9a49688aa9d6d060f41f82d8d8",
+  "programCodeHash": "0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e",
+  "testParameters": {
+    "amount": "100000000000000000000",
+    "unitPriceWei": "10000000000000",
+    "priceWei": "1000000000000000",
+    "vmEthAmount": "1000000000000000",
+    "byteGasLimit": 500
+  },
+  "transactions": [
+    {
+      "action": "DEPLOY_MARKET",
+      "hash": "0xd3f2b4b15a9461ed0aba8e363d793da56b782cdaf3adac7182ebe79f45f86e94",
+      "blockNumber": 46108568,
+      "status": 1,
+      "gasUsed": "1669116",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "274402100602",
+      "totalNetworkFeeWei": "10289098100602"
+    },
+    {
+      "action": "CREATE_BUY_ORDER",
+      "hash": "0x0cbab20ea8698761df467e191f25595de802a7fa467322a3f07335b6a60988cf",
+      "blockNumber": 46108569,
+      "status": 1,
+      "gasUsed": "165389",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "6392443729",
+      "totalNetworkFeeWei": "998726443729"
+    },
+    {
+      "action": "FILL_BUY_ORDER",
+      "hash": "0xf441eeeb742de5e27eaf68689885e5aa725f1e1ed652b3329103bc088d446699",
+      "blockNumber": 46108570,
+      "status": 1,
+      "gasUsed": "1237721",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "18498297353",
+      "totalNetworkFeeWei": "7444824297353",
+      "vmLogCount": 1,
+      "executionHeight": 18,
+      "executedBytes": 396,
+      "tokenBurned": "396000000000000",
+      "grossTokenOut": "983034381777612",
+      "netTokenOut": "587034381777612"
+    },
+    {
+      "action": "CREATE_SELL_ORDER",
+      "hash": "0xd96a41265b9e588f74e0454d03e332af7ab35818a16338b6eb9d593942cd30ad",
+      "blockNumber": 46108571,
+      "status": 1,
+      "gasUsed": "126419",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "6158310907",
+      "totalNetworkFeeWei": "764672310907"
+    },
+    {
+      "action": "RESERVE_SELL_ORDER",
+      "hash": "0x99d7ddfeda06fc6e04c6e252e65922eb87f610e8ac01038997c1a98254a1b699",
+      "blockNumber": 46108572,
+      "status": 1,
+      "gasUsed": "83368",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "6158310907",
+      "totalNetworkFeeWei": "506366310907"
+    },
+    {
+      "action": "SETTLE_SELL_ORDER",
+      "hash": "0xee19fdb882f650e9a85159a6a245837333f8da43f9cdc9788dd2b76af39d9b88",
+      "blockNumber": 46108573,
+      "status": 1,
+      "gasUsed": "1215232",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "18498297353",
+      "totalNetworkFeeWei": "7309890297353",
+      "vmLogCount": 1,
+      "executionHeight": 19,
+      "executedBytes": 396,
+      "tokenBurned": "396000000000000",
+      "grossTokenOut": "982385904960694",
+      "netTokenOut": "586385904960694"
+    },
+    {
+      "action": "CREATE_BUY_ORDER_FOR_CANCEL",
+      "hash": "0x55d811aa47c9a972df7bc1c6a3f75eba8dc60ae9072b80d54cfe05968c360411",
+      "blockNumber": 46108574,
+      "status": 1,
+      "gasUsed": "148289",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "6392443729",
+      "totalNetworkFeeWei": "896126443729"
+    },
+    {
+      "action": "CANCEL_BUY_ORDER",
+      "hash": "0xef9f881c7d3125497d3c0f7a08a0ad17a5d67b537e874c5102b3d6cc3e291684",
+      "blockNumber": 46108575,
+      "status": 1,
+      "gasUsed": "40575",
+      "effectiveGasPrice": "6000000",
+      "l1Fee": "6222818881",
+      "totalNetworkFeeWei": "249672818881"
+    }
+  ],
+  "observedState": {
+    "orderCount": 3,
+    "orderStatuses": ["Filled", "Filled", "Cancelled"],
+    "lockedEth": "0",
+    "marketEthBalance": "0",
+    "executionHeightBefore": 17,
+    "executionHeightAfter": 19,
+    "actorNonceBefore": 14,
+    "actorNonceAfter": 16,
+    "src20ActorBalanceBefore": "4650000000000000000000",
+    "src20ActorBalanceAfter": "4650000000000000000000",
+    "src20TotalSupplyBefore": "6000000000000000000000",
+    "src20TotalSupplyAfter": "6000000000000000000000"
+  },
+  "feeAccounting": {
+    "executionGasUsed": "4686109",
+    "executionGasFeeWei": "28116654000000",
+    "l1DataFeeWei": "342723023461",
+    "totalNetworkFeeWei": "28459377023461",
+    "testVmEthConsumedWei": "2000000000000000",
+    "roundBalanceDecreaseWei": "2028459377023461",
+    "cumulativeBalanceDecreaseFromReleaseStartWei": "110770843281067993",
+    "releaseCapWei": "500000000000000000",
+    "remainingReleaseCapWei": "389229156718932007"
+  }
+}

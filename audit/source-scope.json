@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "pathFormat": "repository-relative-posix",
+  "rootFiles": [
+    ".gas-snapshot",
+    ".gitattributes",
+    ".gitignore",
+    ".gitmodules",
+    "README.md",
+    "foundry.toml",
+    "requirements-security.txt"
+  ],
+  "trees": [
+    ".github",
+    "audit",
+    "docs",
+    "reference",
+    "script",
+    "security-results",
+    "src",
+    "test",
+    "tooling"
+  ],
+  "excludedExact": [
+    "audit/source-files.sha256"
+  ],
+  "excludedNames": [
+    ".DS_Store",
+    "node_modules",
+    "dist",
+    "cache",
+    "out",
+    "broadcast",
+    ".security-tools"
+  ],
+  "excludedSuffixes": [
+    ".sqlite",
+    ".sqlite-shm",
+    ".sqlite-wal",
+    ".pem",
+    ".key",
+    ".keystore",
+    ".p12",
+    ".pfx"
+  ],
+  "submoduleGitlinks": [
+    "lib/forge-std",
+    "lib/v4-core",
+    "lib/v4-periphery"
+  ],
+  "forbiddenPaths": [
+    "wallet.txt",
+    ".env"
+  ]
+}

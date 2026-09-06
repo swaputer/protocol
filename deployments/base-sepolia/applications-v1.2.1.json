@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "swaputer-applications/1",
+  "networkName": "Base Sepolia",
+  "chainId": 84532,
+  "protocolVersion": "1.2",
+  "sourceControlCommit": "918d5119f74195f5cfc085565fa1e43e159a9bf2",
+  "core": {
+    "worldId": "0x20f614ee9d36602f82422765fa005cedcb6c042fe7fbf5b368124820a829f757",
+    "factory": "0xDAe77a4f1c6B1B25e640C30463d05E3139928B6b",
+    "router": "0xEe164c82878AE80F2BE88B10771FAB2c4E29b24B",
+    "kernel": "0xA751dAFFD61C2d259414573EfCD743cfB24ed10b"
+  },
+  "market": {
+    "factory": "0xc4aBacbD367bCDF1F250845749138D55C3071992",
+    "factoryRuntimeCodeHash": "0x4616afdf8d4dc34e91bd02667a535c3dca505d4009c1a997de2f73a6261fda56",
+    "escrowCodeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b",
+    "reference": {
+      "token": "0x01ddc42fa71a13cc1ac4fad55e5adf116d9f6a299c18b467b3b90a8b722f946e",
+      "escrow": "0x0182fbdf03d5b496c634e0eab2c603bea4297d738e5e1bb6083d98a4ccba2e3c",
+      "market": "0xE183C4d7Ad2F5D882B4c6025DBf4f47cD0669446",
+      "runtimeCodeHash": "0xb76393087aa0fa4da8ea090b2087ea6335d611ce6cbdb5a6fbbcbfec037de258",
+      "orderCount": 1,
+      "finalEscrowedTokenAmount": "0",
+      "finalLockedEthWei": "0"
+    },
+    "twoWalletExercise": {
+      "token": "0x01f184b344c083ef248d68a3b6b178f5a61270978ada6283325db0774be0437e",
+      "escrow": "0x015aaa1d8c35b979e09e903718c07bfa21f6841c9c56c85b938c67a3641cad7f",
+      "market": "0x38b4829A2901e7d45fBf32FAAd22BE3D0acc5884",
+      "runtimeCodeHash": "0x4706ece6b4f6f88dc48b1346672d7ef25cd2e78c0e4ffd16e229698634c9dbbc",
+      "buyOrderStatus": "filled",
+      "sellOrderStatus": "filled",
+      "finalEscrowedTokenAmount": "0",
+      "finalLockedEthWei": "0",
+      "finalBalances": {"actor": "988500000000000000000", "buyer": "11500000000000000000"},
+      "firstBlock": 46246592,
+      "lastBlock": 46246605
+    }
+  },
+  "seth": {
+    "programId": "0x01a52b4c4b0ff5cf872da9a8f8d2adc198896d515555cc1eb4a0ebf4d4ae8c7c",
+    "codeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162",
+    "vault": "0x8526b816eEc17F00D9c63A584dE421dB4a97dDE0",
+    "vaultRuntimeCodeHash": "0xfc681a05939534bd22e1d3df4fafb79d2a3c12b6aee22c75aaa051d170c27b94",
+    "finalSupplyWei": "0",
+    "finalLockedEthWei": "0",
+    "finalVaultBalanceWei": "0",
+    "solvent": true
+  },
+  "auctionExample": {
+    "indexed": false,
+    "factory": "0x7593ECA6175c44Af55871F3e15e6065aF39E1481",
+    "factoryRuntimeCodeHash": "0x2e52b0561b186b3314d19ff91e142b6b057152b6649207424e5ce6b18b4d1ec5",
+    "escrowCodeHash": "0x0b68683f866e3e83789420824530612988d5e7bfa4f372c2f84c80b75c7cf53a"
+  }
+}

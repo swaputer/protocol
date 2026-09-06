@@ -1,0 +1,114 @@
+{
+  "recursive": true,
+  "schemaVersion": "swaputer-submodules/1",
+  "submodules": [
+    {
+      "commit": "77041d2ce690e692d6e03cc812b57d1ddaa4d505",
+      "path": "lib/forge-std"
+    },
+    {
+      "commit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc",
+      "path": "lib/v4-core"
+    },
+    {
+      "commit": "1de6eecf821de7fe2c908cc48d3ab3dced20717f",
+      "path": "lib/v4-core/lib/forge-std"
+    },
+    {
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "path": "lib/v4-core/lib/openzeppelin-contracts"
+    },
+    {
+      "commit": "8b1d7c2ac248c33c3506b1bff8321758943c5e11",
+      "path": "lib/v4-core/lib/openzeppelin-contracts/lib/erc4626-tests"
+    },
+    {
+      "commit": "eb980e1d4f0e8173ec27da77297ae411840c8ccb",
+      "path": "lib/v4-core/lib/openzeppelin-contracts/lib/forge-std"
+    },
+    {
+      "commit": "cd98eff28324bfac652e63a239a60632a761790b",
+      "path": "lib/v4-core/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test"
+    },
+    {
+      "commit": "4b47a19038b798b4a33d9749d25e570443520647",
+      "path": "lib/v4-core/lib/solmate"
+    },
+    {
+      "commit": "cd98eff28324bfac652e63a239a60632a761790b",
+      "path": "lib/v4-core/lib/solmate/lib/ds-test"
+    },
+    {
+      "commit": "dce236d4e2057422d0791d9a973a58765eb46f65",
+      "path": "lib/v4-periphery"
+    },
+    {
+      "commit": "cc56ad0f3439c502c246fc5cfcc3db92bb8b7219",
+      "path": "lib/v4-periphery/lib/permit2"
+    },
+    {
+      "commit": "3c5d52a26169876a144f7690d2f9ef0200eb0791",
+      "path": "lib/v4-periphery/lib/permit2/lib/forge-gas-snapshot"
+    },
+    {
+      "commit": "2c7cbfc6fbede6d7c9e6b17afe997e3fdfe22fef",
+      "path": "lib/v4-periphery/lib/permit2/lib/forge-gas-snapshot/lib/forge-std"
+    },
+    {
+      "commit": "9310e879db8ba3ea6d5c6489a579118fd264a3f5",
+      "path": "lib/v4-periphery/lib/permit2/lib/forge-gas-snapshot/lib/forge-std/lib/ds-test"
+    },
+    {
+      "commit": "66bf4e2c92cf507531599845e8d5a08cc2e3b5bb",
+      "path": "lib/v4-periphery/lib/permit2/lib/forge-std"
+    },
+    {
+      "commit": "e282159d5170298eb2455a6c05280ab5a73a4ef0",
+      "path": "lib/v4-periphery/lib/permit2/lib/forge-std/lib/ds-test"
+    },
+    {
+      "commit": "d3ff81b37f3c773b44dcaf5fda212c7176eef0e2",
+      "path": "lib/v4-periphery/lib/permit2/lib/openzeppelin-contracts"
+    },
+    {
+      "commit": "8d910d876f51c3b2585c9109409d601f600e68e1",
+      "path": "lib/v4-periphery/lib/permit2/lib/solmate"
+    },
+    {
+      "commit": "9310e879db8ba3ea6d5c6489a579118fd264a3f5",
+      "path": "lib/v4-periphery/lib/permit2/lib/solmate/lib/ds-test"
+    },
+    {
+      "commit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc",
+      "path": "lib/v4-periphery/lib/v4-core"
+    },
+    {
+      "commit": "1de6eecf821de7fe2c908cc48d3ab3dced20717f",
+      "path": "lib/v4-periphery/lib/v4-core/lib/forge-std"
+    },
+    {
+      "commit": "dbb6104ce834628e473d2173bbc9d47f81a9eec3",
+      "path": "lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts"
+    },
+    {
+      "commit": "8b1d7c2ac248c33c3506b1bff8321758943c5e11",
+      "path": "lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/lib/erc4626-tests"
+    },
+    {
+      "commit": "eb980e1d4f0e8173ec27da77297ae411840c8ccb",
+      "path": "lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/lib/forge-std"
+    },
+    {
+      "commit": "cd98eff28324bfac652e63a239a60632a761790b",
+      "path": "lib/v4-periphery/lib/v4-core/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test"
+    },
+    {
+      "commit": "4b47a19038b798b4a33d9749d25e570443520647",
+      "path": "lib/v4-periphery/lib/v4-core/lib/solmate"
+    },
+    {
+      "commit": "cd98eff28324bfac652e63a239a60632a761790b",
+      "path": "lib/v4-periphery/lib/v4-core/lib/solmate/lib/ds-test"
+    }
+  ]
+}

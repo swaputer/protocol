@@ -1,0 +1,83 @@
+{
+  "buildConfigurationSha256": {
+    "foundry.toml": "976ee4875c3ab46e0d3612cf4f2021ef7a60e3f97e02acdf1d5a9dedf48dafe7",
+    "requirements-security.txt": "20d78252038dc22cc5a20b9c8771b4d4c1924158b8d1c63c92cbef3f3cacb6c7"
+  },
+  "containerImages": [
+    {
+      "digestPinned": false,
+      "dockerfile": "apps/swaputer-web/Dockerfile",
+      "reference": "node:22-alpine"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "apps/swaputer-web/Dockerfile",
+      "reference": "nginxinc/nginx-unprivileged:1.27-alpine"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "infra/testnet/backup.Dockerfile",
+      "reference": "postgres:16-alpine"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "infra/testnet/continuous-test.Dockerfile",
+      "reference": "alpine:3.22"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "infra/testnet/onchain-test.Dockerfile",
+      "reference": "alpine:3.22"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "services/svm-indexer/Dockerfile",
+      "reference": "golang:1.25-alpine"
+    },
+    {
+      "digestPinned": false,
+      "dockerfile": "services/svm-indexer/Dockerfile",
+      "reference": "alpine:3.22"
+    }
+  ],
+  "containerImagesFullyDigestPinned": false,
+  "dockerfilesSha256": {
+    "apps/swaputer-web/Dockerfile": "67d76d32a3622c30206b68e6bb8b4a9008a1c8b2fad0997eb3662d6f01ded965",
+    "infra/testnet/backup.Dockerfile": "39c6d4dc7686bac6d23ad06502ff8b2d0dd12d9de04487cd8a1cb97790a35ec9",
+    "infra/testnet/continuous-test.Dockerfile": "a34e9a19b638db9c3f7fe1942f550364d9877f17dd53e4772aac98496f118faf",
+    "infra/testnet/onchain-test.Dockerfile": "6226f6dd6f06e73d9a14cc8ec8980bd1c90f4a14bf4c8b8d3cb6bb2b236936f5",
+    "services/svm-indexer/Dockerfile": "26d7b3db64547ef5177a3357a3ef8fd428506c673ce94fd663f8416f8fa576f6"
+  },
+  "frozenFilesSha256": {
+    "docs/spec/SwapVM-ISA-v1.json": "91a6acc0ccc846c4f652a224029eae9df08cb88a558ce98646ba48d25a836d3f",
+    "docs/spec/SwapVM-ISA-v2.json": "e1c194b49a0275ce052758d18c834b0a6c8fedbb3932b0cf378b725c992ed389",
+    "docs/spec/SwapVM-v1.1-freeze-manifest.json": "dfa49ae424a1ca98ee27855eb4facc779b028f9387cc3f67e3049a6cb574bb2b",
+    "docs/spec/SwapVM-v1.1-frozen-spec.md": "2a138a4aa38615b55aff12d84aa9269a7417b23ed7c46314ac82a25b9322c73a",
+    "docs/spec/SwapVM-v1.2-executor-context-spec.md": "52e36b3b7c056868e8f0237f65e8aa6f70f70c20fbe6d85fc2c20709454b26dc",
+    "docs/spec/SwapVM-v1.2-freeze-manifest.json": "fd20aa06d8044015ab36daec150de68f3b633c0497d12fa3e8a6b4fc19c00380"
+  },
+  "goModuleFilesSha256": {
+    "services/svm-indexer/go.mod": "44ca301b76e0e0f8e3f227a9a555af027c4cd4c39f430781deb8349a9b48c0c0",
+    "services/svm-indexer/go.sum": "ade6b717dcb1abf31ecf05624556006a3e551f07d3bb86d108090791dccea907"
+  },
+  "lockfilesSha256": {
+    "apps/mint-ui/package-lock.json": "4c9140c99afc72b382142a58c4da68c05a2d747d302d50dcf8e84623a88c4aa5",
+    "apps/swaputer-docs/package-lock.json": "3be16a3791b4e4291d6f28c5eee1e4b349c964d884160fd9871d010f28607b4e",
+    "apps/swaputer-inspector/package-lock.json": "4e32fb117382c14c767809186dd559168be8979a810f6c50b0112a4359d2bf40",
+    "apps/swaputer-web/package-lock.json": "d79485646b3f3c463b406ccee858e3657330d7d9a7f0101b3995772ced483b9c",
+    "tooling/deployment-manifest/package-lock.json": "143ce47cc0ebeb1364b531c5f3fe4f7fdc65ec54d1946b23f63c8c79290dafaf",
+    "tooling/indexer/package-lock.json": "9b8842720975d0385d1fbd0208c7fc1431c620002807f89a5ebb0ea2c36abfa4",
+    "tooling/receipt-codec/package-lock.json": "e01646ca90eab51d7a8c3c840528f8bcd05bd8e58542eb2b1552977eae652832",
+    "tooling/tinysol/package-lock.json": "e17e5e5e5243f8460cb6cacb32d24063cb85536aa31b1c56eab24345301a7f42"
+  },
+  "mainnetImagePinningDeferred": true,
+  "schemaVersion": "swaputer-toolchain/1",
+  "versions": {
+    "cast": "cast Version: 1.5.1-stable\nCommit SHA: b0a9dd9ceda36f63e2326ce530c10e6916f4b8a2\nBuild Timestamp: 2025-12-22T11:41:09.812070000Z (1766403669)\nBuild Profile: maxperf",
+    "forge": "forge Version: 1.5.1-stable\nCommit SHA: b0a9dd9ceda36f63e2326ce530c10e6916f4b8a2\nBuild Timestamp: 2025-12-22T11:41:09.812070000Z (1766403669)\nBuild Profile: maxperf",
+    "go": "go version go1.25.4 darwin/arm64",
+    "node": "v22.21.0",
+    "npm": "10.9.4",
+    "python": "Python 3.9.6"
+  }
+}

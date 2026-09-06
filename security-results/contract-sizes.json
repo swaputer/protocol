@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "releaseLine": "SwapVM v1.2 Stage7M rc2 candidate",
+  "recordedFrom": "forge inspect against the candidate source tree; thresholds remain below EIP-170/EIP-3860",
+  "compiler": "solc-0.8.26-via-ir-optimizer-200",
+  "eip170RuntimeLimit": 24576,
+  "eip3860InitcodeLimit": 49152,
+  "kernelEip170Margin": 3150,
+  "contracts": {
+    "SwapVMGasToken": {"runtime": 1350, "initcode": 1554, "runtimeLimit": 1400, "initcodeLimit": 1600},
+    "SwapVMHook": {"runtime": 9535, "initcode": 11055, "runtimeLimit": 9800, "initcodeLimit": 11400},
+    "SwapVMKernel": {"runtime": 21426, "initcode": 21736, "runtimeLimit": 22050, "initcodeLimit": 22400},
+    "SwapVMReferenceRegistry": {"runtime": 1606, "initcode": 1632, "runtimeLimit": 1700, "initcodeLimit": 1750},
+    "SwapVMRouter": {"runtime": 7033, "initcode": 7379, "runtimeLimit": 7300, "initcodeLimit": 7700},
+    "SwapVMWorldDeployer": {"runtime": 2964, "initcode": 3228, "runtimeLimit": 3200, "initcodeLimit": 3500},
+    "SwapVMWorldFactory": {"runtime": 13891, "initcode": 24147, "runtimeLimit": 14500, "initcodeLimit": 25000},
+    "SwapVMCreationCodeStore": {"runtime": 57, "initcode": 279, "runtimeLimit": 100, "initcodeLimit": 400}
+  }
+}

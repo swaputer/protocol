@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "acceptance": {
+    "command": "./script/accept-stage7b.sh",
+    "exitCode": 0,
+    "elapsedSeconds": 514,
+    "startedAtUtc": "2026-08-29T01:18:02Z",
+    "finishedAtUtc": "2026-08-29T01:26:36Z"
+  },
+  "foundry": {
+    "testsPassed": 194,
+    "testsFailed": 0,
+    "defaultFuzzExecutions": 7680,
+    "defaultStatefulCalls": 24576,
+    "stage7bDeepFuzzExecutions": 12288,
+    "stage7bDeepRouterStatefulCalls": 32768,
+    "fixedSeed": "0x7b2026"
+  },
+  "tooling": {
+    "receiptCodecPassed": 31,
+    "indexerMockPassed": 45,
+    "indexerAnvilE2EPassed": 2,
+    "tinySolPassed": 63,
+    "manifestPassed": 9,
+    "npmAuditWorkspaces": 4,
+    "npmAuditVulnerabilities": 0
+  },
+  "staticAnalysis": {
+    "tool": "slither-analyzer",
+    "version": "0.11.4",
+    "results": 124,
+    "truePositiveOpen": 0,
+    "falsePositiveOrIntentional": 124
+  },
+  "contractSizesFile": "security-results/contract-sizes.json",
+  "stage7bMachineEvidence": "security-results/stage7b-execution.json"
+}

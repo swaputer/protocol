@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "tool": "slither-analyzer",
+  "version": "0.11.4",
+  "contractsAnalyzed": 37,
+  "detectorsEnabled": 100,
+  "resultCount": 124,
+  "counts": {
+    "arbitrary-send-erc20": 1,
+    "assembly": 14,
+    "cyclomatic-complexity": 6,
+    "dead-code": 1,
+    "encode-packed-collision": 3,
+    "incorrect-equality": 74,
+    "low-level-calls": 1,
+    "missing-zero-check": 5,
+    "reentrancy-benign": 1,
+    "reentrancy-events": 2,
+    "reentrancy-no-eth": 2,
+    "shadowing-state": 1,
+    "timestamp": 4,
+    "too-many-digits": 2,
+    "uninitialized-local": 2,
+    "unused-return": 5
+  },
+  "triage": {
+    "truePositiveFixed": 0,
+    "truePositiveOpen": 0,
+    "falsePositiveOrIntentional": 124
+  }
+}

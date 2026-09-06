@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "status": "unaudited-experimental",
+  "network": "base-sepolia",
+  "chainId": 84532,
+  "stage": "Stage 7D-U2",
+  "component": "SwapVMSRC20Market",
+  "release": "buy-only-v3",
+  "reason": "Replaces the v2 SRC20 market with a buy-order-only market. Standalone sell-order entrypoints now revert with SellOrdersUnsupported() because SRC20 v1 has no trustless escrow or allowance bridge for unknown future buyers.",
+  "supersedes": "0x30235aFDBf7d9f6FA2FFa775f4ad730691fF484B",
+  "market": "0xcEAEeA735412E893608a5b24a1d79B24856e11ba",
+  "runtimeCodeHash": "0x00a8b635489a3709c9484b4b0b4b803aa34fa380e629084239b11bf6d3f82554",
+  "bindings": {
+    "router": "0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07",
+    "kernel": "0xA048C894A738185c24B4A5020Fb6708dAb160283",
+    "worldId": "0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9",
+    "token": "0x012928db8f5a86bc849ed1a66d4ff19bb5af3a9a49688aa9d6d060f41f82d8d8",
+    "tokenCodeHash": "0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e"
+  },
+  "script": "script/Stage7DU2SRC20Market.s.sol:Stage7DU2SRC20MarketScript",
+  "broadcast": {
+    "blockNumber": 46128056,
+    "transactions": [
+      {
+        "label": "deployMarket",
+        "hash": "0x83d263c9d7aaa47fba96156d55f560769eedccbe9b4b6cf64aa641da97c56366",
+        "gasUsed": 1461375,
+        "effectiveGasPriceWei": "6000000",
+        "feeWei": "8768250000000"
+      },
+      {
+        "label": "createBuyOrder#1",
+        "hash": "0x02705a04f429b76e4ac78fb4d9ff39b1518153dafd1074c2a1c621ee6898bb60",
+        "gasUsed": 164814,
+        "effectiveGasPriceWei": "6000000",
+        "feeWei": "988884000000"
+      },
+      {
+        "label": "fillBuyOrder#1",
+        "hash": "0x817a9939cfcac6f16f17cad4ed9183b93c76183db46f9b3cbd92c12e9c0a001d",
+        "gasUsed": 1233905,
+        "effectiveGasPriceWei": "6000000",
+        "feeWei": "7403430000000"
+      },
+      {
+        "label": "createBuyOrder#2",
+        "hash": "0x32f8bf78df90ff15ecff6313ba05f948e5c05ae321d9d1349f270c0d0a5e4730",
+        "gasUsed": 40575,
+        "effectiveGasPriceWei": "6000000",
+        "feeWei": "243450000000"
+      },
+      {
+        "label": "cancelOrder#2",
+        "hash": "0x171a5c3b69662ac6a587068e97e67cc237885d7ce0902028eda7db84b8fd26c1",
+        "gasUsed": 147714,
+        "effectiveGasPriceWei": "6000000",
+        "feeWei": "886284000000"
+      }
+    ],
+    "totalGasUsed": 3048383,
+    "totalFeeWei": "18290298000000",
+    "totalFeeEth": "0.000018290298"
+  },
+  "postDeployChecks": {
+    "orderCount": 2,
+    "lockedEth": 0,
+    "sellOrderCreateSelector": "0x11dbab34",
+    "sellOrderCreateRevert": "SellOrdersUnsupported()",
+    "unaudited": true
+  }
+}

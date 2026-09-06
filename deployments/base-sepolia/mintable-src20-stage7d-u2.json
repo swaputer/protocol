@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1",
+  "chainId": 84532,
+  "environment": "testnet",
+  "auditStatus": "unaudited",
+  "economicValue": "none",
+  "worldId": "0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9",
+  "kernel": "0xa048c894a738185c24b4a5020fb6708dab160283",
+  "router": "0xedabf849f3f74fe3c92fcea50968332f77b06f07",
+  "program": {
+    "name": "MintableSRC20",
+    "packageHash": "0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e",
+    "contractId": "0x012928db8f5a86bc849ed1a66d4ff19bb5af3a9a49688aa9d6d060f41f82d8d8",
+    "decimals": 18,
+    "mintAmount": "1000000000000000000000",
+    "supplyCap": "10000000000000000000000000"
+  },
+  "accounts": {
+    "actor": "0x000000000000000000000000590a77ec892bb78206bcad2444b62d1bc31a2d03",
+    "recipient": "0x000000000000000000000000000000000000000000000000000000000000beef"
+  },
+  "transactions": [
+    {
+      "action": "DEPLOY",
+      "hash": "0x06f56504fed0bdb9316f040dd2ed12903ae3e718fb03431352519afdbf26afca",
+      "blockNumber": 46105455,
+      "status": 1,
+      "gasUsed": "3990743",
+      "effectiveGasPrice": "8728418",
+      "l1Fee": "6192539047",
+      "executionHeight": 9,
+      "executedBytes": 13,
+      "tokenBurned": "13000000000000",
+      "grossTokenOut": "988899678981380",
+      "netTokenOut": "975899678981380",
+      "vmLogCount": 1
+    },
+    {
+      "action": "MINT",
+      "hash": "0x5a2df75f6a4002e354ad509f2bf4d13648ebe935e3ff8164d97bbb2421e2e789",
+      "blockNumber": 46105457,
+      "status": 1,
+      "gasUsed": "1097793",
+      "effectiveGasPrice": "8589211",
+      "l1Fee": "5888271229",
+      "executionHeight": 10,
+      "executedBytes": 278,
+      "tokenBurned": "278000000000000",
+      "grossTokenOut": "988245390752642",
+      "netTokenOut": "710245390752642",
+      "vmLogCount": 1
+    },
+    {
+      "action": "TRANSFER",
+      "hash": "0xdb54ce4d11211bb063e94cc818daf8880afdb412fd01a896ebf8b9bdecd26398",
+      "blockNumber": 46105458,
+      "status": 1,
+      "gasUsed": "1201961",
+      "effectiveGasPrice": "8517962",
+      "l1Fee": "5888271229",
+      "executionHeight": 11,
+      "executedBytes": 396,
+      "tokenBurned": "396000000000000",
+      "grossTokenOut": "987591751656755",
+      "netTokenOut": "591591751656755",
+      "vmLogCount": 1
+    }
+  ],
+  "observedState": {
+    "blockNumber": 46105518,
+    "totalSupply": "1000000000000000000000",
+    "actorBalance": "750000000000000000000",
+    "recipientBalance": "250000000000000000000",
+    "executionHeight": 11,
+    "actionNonce": 9,
+    "creatorNonce": 4,
+    "totalExecutedBytes": 687,
+    "totalTokenBurned": "687000000000000"
+  },
+  "releaseEthAccounting": {
+    "transactionValue": "3000000000000000",
+    "roundBalanceDecrease": "3054579403029121",
+    "cumulativeBalanceDecreaseFromReleaseStart": "103708516023856948",
+    "releaseCap": "500000000000000000"
+  }
+}

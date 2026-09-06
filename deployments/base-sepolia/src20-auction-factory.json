@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "swaputer-src20-auction-factory/1",
+  "chainId": 84532,
+  "networkName": "Base Sepolia",
+  "protocolVersion": "1.2",
+  "purpose": "TinySol test example",
+  "indexed": false,
+  "sourceControlCommit": "918d5119f74195f5cfc085565fa1e43e159a9bf2",
+  "deployedAt": "2026-09-01T11:11:20Z",
+  "factory": "0x7593ECA6175c44Af55871F3e15e6065aF39E1481",
+  "runtimeCodeHash": "0x2e52b0561b186b3314d19ff91e142b6b057152b6649207424e5ce6b18b4d1ec5",
+  "bindings": {
+    "router": "0xEe164c82878AE80F2BE88B10771FAB2c4E29b24B",
+    "kernel": "0xA751dAFFD61C2d259414573EfCD743cfB24ed10b",
+    "worldId": "0x20f614ee9d36602f82422765fa005cedcb6c042fe7fbf5b368124820a829f757",
+    "auctionEscrowCodeHash": "0x0b68683f866e3e83789420824530612988d5e7bfa4f372c2f84c80b75c7cf53a",
+    "trustedTokenCodeHash": "0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b"
+  },
+  "deployment": {
+    "transactionHash": "0x9ca6ea9ed465a08bf83cb35f3565d7d68721a5e7680e1dfe45c3c4571ba7289d",
+    "blockNumber": 46246396,
+    "blockHash": "0x61b9a4ba54357a06ff16ccc5d09a1eddf8209009c1ac8bbba8f1730865e42122",
+    "status": 1,
+    "gasUsed": 2711006,
+    "effectiveGasPriceWei": "6000000"
+  }
+}

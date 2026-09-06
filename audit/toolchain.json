@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "solidity": "0.8.26",
+  "foundry": {
+    "version": "1.5.1-stable",
+    "commit": "b0a9dd9ceda36f63e2326ce530c10e6916f4b8a2"
+  },
+  "node": "22.21.0",
+  "npm": "10.9.4",
+  "python": "3.9.6",
+  "slither": "0.11.4",
+  "lockfilesSha256": {
+    "tooling/receipt-codec/package-lock.json": "209016636a34956b6fb14a25c7f3d3716d47b0bd00dbba6e2056feaac78e2cc5",
+    "tooling/indexer/package-lock.json": "4db8a1b3059b10450cd8c39ff929bba75d755f265e34e483862f9d403294d12d",
+    "tooling/tinysol/package-lock.json": "3e0d2b5bc7d7dcd143f252ad7f77d28c37ab5474504ddc2f9a2643690918d911",
+    "tooling/deployment-manifest/package-lock.json": "d908441cab85dc5ce2c7794878ab087afb4f2c5a1fbb9578a072d07b6daa5e25"
+  },
+  "frozenSha256": {
+    "docs/spec/SwapVM-v1.1-frozen-spec.md": "2a138a4aa38615b55aff12d84aa9269a7417b23ed7c46314ac82a25b9322c73a",
+    "docs/spec/SwapVM-ISA-v1.json": "91a6acc0ccc846c4f652a224029eae9df08cb88a558ce98646ba48d25a836d3f",
+    "docs/spec/SwapVM-v1.1-freeze-manifest.json": "dfa49ae424a1ca98ee27855eb4facc779b028f9387cc3f67e3049a6cb574bb2b",
+    "docs/spec/SwapVM-v1.0-frozen-spec.md": "8f5c980a5cd1221d48b18dc0c69de1e973c7ed8d2e1c80f4079512f0de080952",
+    "docs/spec/SwapVM-v1.0-freeze-manifest.json": "edafbcf913e9bd0567adb008a58cf4068bd8f37677612c2132db18c8214629c3"
+  },
+  "compilerIdentity": {
+    "sourceFingerprint": "0x90dc23464f9d04da55862e15dec7b4fd1d61421ca04b81074c11920a6e2af5ec",
+    "dependencyLockSha256": "3e0d2b5bc7d7dcd143f252ad7f77d28c37ab5474504ddc2f9a2643690918d911",
+    "generatedFileSha256": "d24878b9d66035a8c399bc5d50a9722c85eed6eff429335f7ea86e6dc7efd788"
+  },
+  "indexerSchemaVersion": 2,
+  "indexerMigrationsSha256": {
+    "001_initial.sql": "5aaecaecd93aa615c293f680ae39ef0cd1d10cfe9d48df9c680ebfb7629a1815",
+    "002_abi_registry.sql": "17a2ec2a46d03fc7d97b5de914970cd0a3e91376643544911e38321d5db31a58"
+  }
+}

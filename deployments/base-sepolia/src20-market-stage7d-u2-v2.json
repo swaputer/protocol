@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1",
+  "chainId": 84532,
+  "environment": "testnet",
+  "auditStatus": "unaudited",
+  "economicValue": "none",
+  "reason": "Replaces the initial SRC20 market with active sell exposure accounting so open and reserved sell orders cannot exceed a maker's current SRC20 balance.",
+  "market": "0x30235afdbf7d9f6fa2ffa775f4ad730691ff484b",
+  "marketRuntimeCodeHash": "0x9f395cdb145449252d6b1ea214769962c7fe09b1536164aa96d50b8489b4080a",
+  "supersedesMarket": "0x7770ad52dfde0f9cf37d5894ec9235cd6b3667cb",
+  "worldId": "0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9",
+  "kernel": "0xa048c894a738185c24b4a5020fb6708dab160283",
+  "router": "0xedabf849f3f74fe3c92fcea50968332f77b06f07",
+  "programId": "0x012928db8f5a86bc849ed1a66d4ff19bb5af3a9a49688aa9d6d060f41f82d8d8",
+  "programCodeHash": "0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e",
+  "testParameters": {
+    "amount": "100000000000000000000",
+    "unitPriceWei": "10000000000000",
+    "priceWei": "1000000000000000",
+    "vmEthAmount": "1000000000000000",
+    "byteGasLimit": 500
+  },
+  "transactions": [
+    {
+      "action": "DEPLOY_MARKET",
+      "hash": "0xe9a5b449459358d523e4a37e85160de09c533049c964361bcbdcede63ed6e3fb",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "1889689",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "18708988774285"
+    },
+    {
+      "action": "CREATE_BUY_ORDER",
+      "hash": "0x0911af35541c9ddade48cd70c0ac637f15128de8faab9f804422a665d13a0121",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "872139",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "8634668858535"
+    },
+    {
+      "action": "FILL_BUY_ORDER",
+      "hash": "0x836a2c09fe053977a52b13289610b2159f5ad34d35f175fbc820b9b60918c60e",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "148311",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "1468362695715"
+    },
+    {
+      "action": "CREATE_SELL_ORDER",
+      "hash": "0x600002854753ade1b7dc54c3cfe94f68676101c478fdfe518c3b268da761e397",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "40567",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "401636220355"
+    },
+    {
+      "action": "RESERVE_SELL_ORDER",
+      "hash": "0x572ec72de82458e1eaad1b542df09a9640f0da9c76994c84b5885d80206b7b21",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "165411",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "1637662357215"
+    },
+    {
+      "action": "SETTLE_SELL_ORDER",
+      "hash": "0x8ac186ef42568f44b84215d0611fdfa3ec054e5e07f01ecde5c700571e15c36b",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "1235146",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "12228643257490"
+    },
+    {
+      "action": "CREATE_BUY_ORDER_FOR_CANCEL",
+      "hash": "0xff05839cd6c5a2d761ab2945ea7544c3737b3afdd553222d4acc6a8723efe2f7",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "83390",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "825608115350"
+    },
+    {
+      "action": "CANCEL_BUY_ORDER",
+      "hash": "0x89f52841c09d509969812a42d082a09a328dd29067207eca1dd09cf62631646d",
+      "blockNumber": 46112012,
+      "status": 1,
+      "gasUsed": "1215971",
+      "effectiveGasPrice": "9900565",
+      "executionFeeWei": "12038799923615"
+    }
+  ],
+  "observedState": {
+    "orderCount": 3,
+    "orderStatuses": ["Filled", "Filled", "Cancelled"],
+    "lockedEth": "0",
+    "marketEthBalance": "0",
+    "activeSellAmountAfter": "0",
+    "executionHeightAfter": 21,
+    "unaudited": true
+  },
+  "feeAccounting": {
+    "gasUsed": "5650624",
+    "executionFeeWei": "55944370202560",
+    "executionFeeEth": "0.00005594437020256",
+    "scriptEstimatedGasUsed": "7934834",
+    "scriptEstimatedRequiredEth": "0.000160860056946262"
+  }
+}

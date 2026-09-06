@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "swaputer-release-rehearsal/1",
+  "release": "swaputer-v1.2-rc1",
+  "manifestHash": "0x3ac6cafdb85d2e542400bb2bc4302840cbf04f09542a5b57fa7f31d8ff6255fa",
+  "preflight": {
+    "release": "swaputer-v1.2-rc1",
+    "chainId": 84532,
+    "deployer": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+    "deployerBalanceWei": "12264686962616961942",
+    "codeHashesVerified": 8,
+    "status": "ready"
+  },
+  "status": "complete",
+  "addresses": {
+    "marketFactory": "0x185b4ea30e54b75b74e694fbd13ba0fa242c9ee5",
+    "referenceMarket": "0x57b647078990eeee465b7f0806f60196c8d86154",
+    "sethVault": "0x4290097d9cc002f8817d626152b6a9ba0baacffd"
+  },
+  "completed": [
+    {
+      "phase": "marketFactory",
+      "address": "0x185b4ea30e54b75b74e694fbd13ba0fa242c9ee5",
+      "transactions": [
+        "0x45e5b240671135b10b859dd3f9068f35d74ab32f74a21b98fab96e1a105d0a29"
+      ]
+    },
+    {
+      "phase": "referenceMarket",
+      "address": "0x57b647078990eeee465b7f0806f60196c8d86154",
+      "transactions": [
+        "0xf462f56b495df6413bf936fe8d0c9bbe486fdaf93afcc317645a85f880b5a1bd",
+        "0x3b3768cc6a7f70d9e48c6e8237330167d9099d11ce3f91f147150e0dd65a658d",
+        "0xfda6f26ec440d13e0a6937fc9953bbb164c36d6841698ebf851d0006727d9f47",
+        "0x6a173beac6a0f23deab6c4d4b642c44b4c5080639cf684ae3fceb85c17077d9e",
+        "0x4e21b22ecfaf91fa2dd5445c25d5085d10da56ba6c0906333f034f2114430873"
+      ]
+    },
+    {
+      "phase": "seth",
+      "address": "0x4290097d9cc002f8817d626152b6a9ba0baacffd",
+      "transactions": [
+        "0xce4244d13b8bdde79ac8342c13d86002941fd969f702baa958d941c6be71d9ab",
+        "0x7e681c3946a1ceaf28275c38ef495b7ecdc91288c5d2a6fd8043b3ba9de87709",
+        "0xa44fbf8f5ae3e6b6da9e8980e122bfdf562df5074942fb37550ad03da4c59c59",
+        "0xa9a158d1d956fedff40586910870d1024afd80444ee9d0efe51d9968eea6e3e4"
+      ]
+    },
+    {
+      "phase": "applicationExercise",
+      "transactions": [
+        "0x41fbd0e1b975ca71c102918c3bb41cb8e922305ffa0519e4ee4dc1a6f2ecb601",
+        "0x61775043d68ffb06912490f09445b29bc02d5e247cbb0a6c61ea4ce174d4d22a",
+        "0x6afb227b35342793f489d85a85fd3f8e212de2e7d540d755002b331c4871fb27",
+        "0xc7b7b9d8e16cada2bee250d6e69399a6dbb82a85fa86fefdb78fd2ed3317bd34",
+        "0x87fb123f88a83c16cf958ff63e5157b74049ec62d4315309f94cc00cc703a5d1",
+        "0x858e3aeb00c3400a310f0d91e9bf949380f196e165c916c2be56f2cc6eeb3f93",
+        "0x8e3a5c4da472a2cef1c2401db9a814d2fa88933dbc1d1b3cd7ff88f4ca9d1204",
+        "0x8b20e359ca33c2d587d7d6f35d0d79e0555917603884e25f9d7e2f54622453fa",
+        "0xa042ede25534091196399de7d6a6edde273a6e7f660ae763cc9e662abcaa5a3e",
+        "0x7e6d1345f081d73bccf1a3be2e87ca09e6119d1c20b03f01041110d13fe0e903",
+        "0xbce52b4ba90a5c660a156328398fb4026121eff764dd9ecf9a689f5e9370013e"
+      ]
+    }
+  ]
+}

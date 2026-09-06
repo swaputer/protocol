@@ -1,0 +1,73 @@
+{
+  "commitments": {
+    "artifactInventorySha256": "78cbef59547c15ae1432e855439e9550555c37107d55dbdc417ad01804c93336",
+    "isaKeccak256": "0x5958f1a3baf744e5ed92f096a964ee14779db2e32e70a2982c53080eb3cd92c2",
+    "scopeSha256": "bb573271870f3e1621fca24b22928aa4eb23b3cb7db93e898af3c884a79333de",
+    "sourceFileCount": 744,
+    "sourceListSha256": "8489808f65ee427345114641e96a80d2c68666568b31fca7e2f1c9e539eb845f",
+    "specSha256": "52e36b3b7c056868e8f0237f65e8aa6f70f70c20fbe6d85fc2c20709454b26dc",
+    "submodulesSha256": "8736ffd33448719dbfb9be96c9393bb50dfb331c5a3a30263c0f8d4538c9aa00",
+    "toolchainSha256": "cc44d8b41c18cf4b0fa8837dcf0b147b89db4645a8532ac97594a7131900ff4b"
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "reportHash": "2818b67b8186c8f118214d10a69db576fa1f40dcc2df9418aa7cd5451516bfcb"
+  },
+  "release": {
+    "candidateKind": "local-candidate-freeze",
+    "mainnetAuthorized": false,
+    "name": "swaputer-v1.2-stage7m-rc3",
+    "protocolVersion": "1.2",
+    "status": "unaudited experimental"
+  },
+  "schemaVersion": "swaputer-release-candidate/1",
+  "scope": {
+    "excludedMainnetApplications": [
+      "src20-market",
+      "seth",
+      "auction"
+    ],
+    "includedContracts": [
+      "SwapVMCreationCodeStore",
+      "SwapVMGasToken",
+      "SwapVMHook",
+      "SwapVMKernel",
+      "SwapVMReferenceRegistry",
+      "SwapVMRouter",
+      "SwapVMWorldDeployer",
+      "SwapVMWorldFactory"
+    ],
+    "officialInterfaces": [
+      "explorer",
+      "studio",
+      "open-mint-minter"
+    ],
+    "path": "release/v1.2/candidate-scope.json",
+    "profile": "core+explorer+studio+open-mint"
+  },
+  "signature": {
+    "algorithm": null,
+    "message": null,
+    "signature": null,
+    "signer": null,
+    "status": "not-required-for-local-candidate-freeze"
+  },
+  "sourceControl": {
+    "candidateCommit": "bb08340ebb4f4a1bfbcd46617e1cd0f5c4951abf",
+    "candidateTag": "swaputer-v1.2-stage7m-rc3",
+    "candidateTree": "779843a558458dc3b2459c4578ee5228279fbfd2",
+    "tagObject": "036b4c333d907546241a75f7cd83ab3c1904a44a",
+    "tagStatus": "frozen",
+    "tagType": "annotated"
+  },
+  "verification": {
+    "artifactHashesAndSizes": true,
+    "candidateTagResolved": true,
+    "exactTrackedSourceHashes": true,
+    "featureScope": true,
+    "forbiddenPaths": true,
+    "secretScan": true,
+    "submoduleCommits": true,
+    "tagPeelsToCandidateCommit": true
+  }
+}

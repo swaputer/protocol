@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "swaputer-testnet-evidence-v1",
+  "protocolVersion": "1.2",
+  "releaseStatus": "unaudited-experimental-zero-value",
+  "chainId": 84532,
+  "networkName": "Base Sepolia",
+  "sourceControlCommit": "afa54c2e02e7e91430b14b6884faff5e3f5867d9",
+  "sourceTreeStatus": "dirty-uncommitted-v1.2-development-tree",
+  "warning": "This deployment is not reproducible from sourceControlCommit alone and is not approved for real-value use.",
+  "deployer": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+  "releaseEthCapWei": "500000000000000000",
+  "startBalanceWei": "12288413975699574639",
+  "endBalanceWei": "12164494310145820528",
+  "totalBalanceDecreaseWei": "123919665553754111",
+  "transactionFeeWei": "259449105865394",
+  "totalGasUsed": "43068833",
+  "addresses": {
+    "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+    "positionManager": "0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    "kernelCreationCodeStore": "0x0A190a3E93B3bAEAAd8D063928855f18Ed6BF970",
+    "hookCreationCodeStore": "0xb5d6dDf79F7985b2c70b056F9770B00f05293C12",
+    "factory": "0x25be74e0FaB494D7cF0e7d681a3897f9d82908c1",
+    "router": "0x6719Fa2876EBce93c32490905C53e05ac1Da0109",
+    "referenceRegistry": "0xb55D7242180e098ADD9148f565d4E90262Fed21D",
+    "worldDeployer": "0x9E16FaC0BCe5e4FbECaC7312Cb7B5931773a3d64",
+    "gasToken": "0xC86ACee2A9fCf996cFaD1F31d6CC23Ee6ca0b27c",
+    "kernel": "0x135Eb1547f2350f85C1853899341f4cDe8531d30",
+    "hook": "0x169c60b43f14968691128d0d1EeC120d82458044",
+    "market": "0xa3a7AeE97552B0546EC00401C8b795eA0BdfcBa1"
+  },
+  "runtimeCodeHashes": {
+    "poolManager": "0x03c45db6d09b14da7c1f7239a5a49697f976d395277e6d2acb6fbed3f9e0249f",
+    "positionManager": "0xe8329b35b8b34290b6cf03affc0836f7b23205229cc96ffdc66544b93112c076",
+    "factory": "0x4aac054fc350138e88c54d33e4bf701ac51ffdbff7e006a62102d246a429a8cd",
+    "router": "0xc61e52cf5c63f088a821699b97bf37ad3e5c9089db790fc74ce1464fa9fe2ed9",
+    "referenceRegistry": "0x2946cb82853b48b67899d247ee1296a213c461af319c1d41db796326591235b6",
+    "gasToken": "0xcaeb77868e084ce07ed0788b053310a4e56fb38cd68b2a3bd14e9c4b22a22f5d",
+    "kernel": "0xffe8fbd6063a7481d664e4bfd9d6306714caf8f4202c91eb72144cece11fe527",
+    "hook": "0xa68cb5c3bc880e5ecdbdb3624dd9aaea56e013b79a5a63df88020ad710c7773e",
+    "market": "0xa3a6406c857b2ebb1793fa0624b05caf0e4e2b3eec8c09b0c6c2811e26c4b3aa"
+  },
+  "world": {
+    "worldId": "0x2e6da13a641feb223c8e8deacbc689aed41de0ce32d408fd1f35b564f21dd33b",
+    "configHash": "0x9a31c3aa7f18b63fbdb0181ace2ebbe40617cfa548ca2cf5630ff8c36d21596b",
+    "sealed": true,
+    "sealedAtBlock": 46137253,
+    "byteGasPrice": "1000000000000",
+    "poolFee": 3000,
+    "tickSpacing": 60,
+    "initialSqrtPriceX96": "79228162514264337593543950336",
+    "initialGasTokenSupply": "1000000000000000000000000000",
+    "distributionCommitment": "0x5c5b51ac7fb0ff6504fb40c7b45589b62852092050ae33d152fce5ca39900017"
+  },
+  "position": {
+    "tokenId": "27216",
+    "owner": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+    "liquidity": "3000000000000000000",
+    "tickLower": -600,
+    "tickUpper": 600,
+    "maximumNativeWei": "100000000000000000",
+    "maximumGasToken": "100000000000000000"
+  },
+  "programs": {
+    "mintableSRC20": {
+      "accountId": "0x01784c2662ebe10347da4a91d31e098defc323fc7ee8b38747235bccac0085c2",
+      "codeHash": "0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b",
+      "abiHash": "0xf6518e2d6671c42f1fa921077ac82214ca58214f9c72b8fee0444176e8416476",
+      "mintedSupply": "1000000000000000000000"
+    },
+    "marketEscrow": {
+      "accountId": "0x010339efc76ef9510a814bedce3f2c56332812a41dd9383c619b25e041924360",
+      "codeHash": "0x3b7416393025dec94fa6bebae4fad00142468be16dd62784027cb4a4d1eaddb6"
+    }
+  },
+  "marketExercise": {
+    "orderCount": 2,
+    "buyOrderStatus": "filled",
+    "sellOrderStatus": "filled",
+    "executionHeight": 7,
+    "executedBytesByCall": [13, 278, 58, 396, 245, 820, 558],
+    "totalExecutedBytes": 2368,
+    "totalTokenBurned": "2368000000000000",
+    "actorSRC20Balance": "1000000000000000000000",
+    "escrowSRC20Balance": "0",
+    "escrowAllowance": "0",
+    "lockedEth": "0",
+    "escrowedTokenAmount": "0",
+    "activeSellAmount": "0",
+    "marketEthBalance": "0",
+    "kernelVMLogCount": 7
+  },
+  "transactions": [
+    {"hash":"0x33434cf79f9472d0024a1ce0025644d698b4ede7c27672de78b75adc0e159357","gasUsed":5004654},
+    {"hash":"0xdea7e79d333f85b42396bbee448896eca392d6047083c2ce1a07450f0c276ccb","gasUsed":1582592},
+    {"hash":"0x6e6becc03169655dcfa85df66f3fed013fb981a2fa387e1653ab32e973a75db8","gasUsed":4611792},
+    {"hash":"0xe2face4c541a2301f569c3e139519d9ded99553692056abe21c432c7b32867cd","gasUsed":7106962},
+    {"hash":"0x593c9be1066ef39f239e89c3e78e97fe3b68fd0f73a230e273500fd7fcca300b","gasUsed":45877},
+    {"hash":"0x8c57c21f939e55bdd9192d33fc4d868a26bb1875fb93ce925d4629bf8344b6c9","gasUsed":47626},
+    {"hash":"0x91238cbf1fd84a1a5924f1306e5f660b146d6429f37cae0825b70d52db55b0f9","gasUsed":385986},
+    {"hash":"0x3d98c3577c8f4ec33130d94ce4556e61071cbaab25ca55eaf77535719d1b91ce","gasUsed":30396},
+    {"hash":"0xdaa87717f460debd6cbeb3b06499674461947054a69b6343d66fa6d7670e8c21","gasUsed":23905},
+    {"hash":"0x80393984095df0fc9397b2eef9e000564ca7550e841676ddf16b5533394a0b19","gasUsed":7445588},
+    {"hash":"0x6d56653571426d800613151c07b7a72824b039ddba8e5dda7e9a3ce39e7b9fe6","gasUsed":1502386},
+    {"hash":"0x892051191d6e7c3a7b634c102fa61ff68cd3fae9e43dfc71922c1d9f7789fcfa","gasUsed":2735924},
+    {"hash":"0xf0bd8e2662a347003c422b6091ac419e35416d8733643ff6d7094238cbc95538","gasUsed":2064401},
+    {"hash":"0x97e287e1b2db7b7fb886e2fe441b0de597e3fbe5d0210d4b6aae0fccb73f3eca","gasUsed":165568},
+    {"hash":"0x5e5fd4bf1439daf6babeaaf5d3e46387c916c97e624074d8586dace925044ba9","gasUsed":1642272},
+    {"hash":"0x9e0d5a63a327307b9c603363a7cd584ea93dd7c455a722c4b279dfe17e6634c3","gasUsed":1498344},
+    {"hash":"0x97831e44d644612797c210dc627142d2609405fb14b65c037fef0c97c7705590","gasUsed":3786728},
+    {"hash":"0x89d72e2b26db89cfd5b40f354c0575fffe01ddbb13c0e08ba1b89c030f43868c","gasUsed":3387832}
+  ]
+}

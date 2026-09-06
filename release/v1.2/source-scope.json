@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "swaputer-source-scope/1",
+  "pathFormat": "repository-relative-posix",
+  "trackedFiles": "all",
+  "excludedExact": [
+    "release/v1.2/candidate.json",
+    "release/v1.2/source-files.sha256",
+    "security-results/stage7m-s7b002.json",
+    "security-results/stage7m-multiseed.json",
+    "security-results/stage7m-base-mainnet-fork.json"
+  ],
+  "preparationFiles": [
+    "apps/swaputer-web/src/lib/releaseScope.ts",
+    "apps/swaputer-web/test/release-scope.test.mjs",
+    "release/v1.2/README.md",
+    "release/v1.2/artifacts.json",
+    "release/v1.2/candidate-scope.json",
+    "release/v1.2/schema/release-candidate-v1.schema.json",
+    "release/v1.2/source-scope.json",
+    "release/v1.2/submodules.json",
+    "release/v1.2/toolchain.json",
+    "script/release_candidate.py",
+    "script/verify-release-candidate.sh",
+    "test/test_release_candidate.py"
+  ],
+  "submoduleGitlinks": [
+    "lib/forge-std",
+    "lib/v4-core",
+    "lib/v4-periphery"
+  ],
+  "forbiddenBasenames": [
+    ".env",
+    "wallet.txt"
+  ],
+  "allowedEnvironmentExamples": [
+    ".env.example"
+  ],
+  "forbiddenDirectoryNames": [
+    ".security-tools",
+    "backups",
+    "broadcast",
+    "cache",
+    "dist",
+    "keystore",
+    "keystores",
+    "node_modules",
+    "out"
+  ],
+  "forbiddenSuffixes": [
+    ".key",
+    ".keystore",
+    ".p12",
+    ".pem",
+    ".pfx",
+    ".sqlite",
+    ".sqlite-shm",
+    ".sqlite-wal"
+  ],
+  "secretScanExceptions": [
+    {
+      "rule": "assigned-secret",
+      "path": "test/invariant/SwapVMStage4Invariant.t.sol"
+    },
+    {
+      "rule": "credentialed-url",
+      "path": "tooling/indexer/test/cli.test.ts"
+    },
+    {
+      "rule": "assigned-secret",
+      "path": "tooling/tinysol/src/errors.ts"
+    }
+  ]
+}

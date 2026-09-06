@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "result": "PASS_WITH_ACCEPTED_AVAILABILITY_RISK",
+  "finding": "S7B-002",
+  "severity": "Medium",
+  "fundSafetyImpact": "none observed; failed createWorld transactions commit no partial code, pool, or WorldConfig",
+  "tested": [
+    "copied full createWorld transaction",
+    "same tokenSalt with different bootstrapSalt/config",
+    "same bootstrapSalt with different tokenSalt/config",
+    "wrong predictedKernel",
+    "wrong predictedHook",
+    "wrong Hook permission bits",
+    "repeated creation after a successful seal",
+    "multiple heterogeneous Worlds without cross-contamination"
+  ],
+  "attackerCannot": [
+    "redirect initialSupply away from the declared initialHolder",
+    "modify an existing sealed WorldConfig",
+    "leave Token, Deployer, Kernel, Hook, pool, or config state after revert"
+  ],
+  "recovery": {
+    "requiresNewTokenOrBootstrapSalt": true,
+    "requiresRecomputedKernelAndHook": true,
+    "requiresInvalidatingOldManifestDraft": true,
+    "targetOperatorRecoveryMinutes": 15,
+    "requiresOwnerOrAllowlist": false
+  }
+}

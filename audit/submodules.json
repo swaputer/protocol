@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "submodules": [
+    {
+      "path": "lib/forge-std",
+      "commit": "77041d2ce690e692d6e03cc812b57d1ddaa4d505",
+      "expectedAuditCommit": "77041d2ce690e692d6e03cc812b57d1ddaa4d505",
+      "describe": "v1.9.7",
+      "dirty": false,
+      "remoteUrl": "https://github.com/foundry-rs/forge-std.git"
+    },
+    {
+      "path": "lib/v4-core",
+      "commit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc",
+      "expectedAuditCommit": "59d3ecf53afa9264a16bba0e38f4c5d2231f80bc",
+      "describe": "v4.0.0-12-g59d3ecf5",
+      "dirty": false,
+      "remoteUrl": "https://github.com/Uniswap/v4-core.git"
+    },
+    {
+      "path": "lib/v4-periphery",
+      "commit": "dce236d4e2057422d0791d9a973a58765eb46f65",
+      "expectedAuditCommit": "dce236d4e2057422d0791d9a973a58765eb46f65",
+      "describe": "dce236d4",
+      "dirty": false,
+      "remoteUrl": "https://github.com/Uniswap/v4-periphery"
+    }
+  ]
+}

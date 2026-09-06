@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1",
+  "release": "swaputer-v1.2-rc3",
+  "networkName": "base-sepolia",
+  "chainId": 84532,
+  "protocolVersion": "1.2",
+  "sourceControlCommit": "3879da15bf6fb7edf1ff8c50abb95c1cf37b5345",
+  "deployedAt": "2026-09-05T05:44:00Z",
+  "deploymentBlock": 46409396,
+  "bindings": {
+    "worldId": "0xe8f2c911549238112347b47a3710d916e51612eea3baa2f0676198d5c5afd973",
+    "factory": "0x2A1219A61D31e0E2D05E1CD124dce475EE634c29",
+    "router": "0xA8Ba8e0788Ec904F749EEc144e1F15f8a95244A5",
+    "kernel": "0x31a59D9d9923AfEc67730afE54783eC4130551A4",
+    "vault": "0xe18FB4343DE1bD599fc434eA41fE982f696423A2",
+    "vaultExtcodehash": "0x540ae3647dd572be5cbbdf70824125a1c9ada72f42093960d7096890071fb8a5",
+    "sethProgramId": "0x0102a197f57324690e669e396d50eaa99d91f3f8c83f451516467e50ce883905",
+    "sethCodeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
+  },
+  "atomicExercise": {
+    "finalSETHSupplyWei": "0",
+    "finalLockedEthWei": "0",
+    "finalVaultBalanceWei": "0",
+    "finalBackingSurplusWei": "0",
+    "finalSolvent": true
+  },
+  "transactions": {
+    "deploySETHProgram": { "hash": "0x980740f0f9d86a315bb790166dc3d640ed208d1874f111e141789cf45c8b411d", "blockNumber": 46409396, "status": 1 },
+    "deployVault": { "hash": "0xf6c2e7f206e80bde089b8029a6f8df81a15e223c0c6a96e67c98f3a17e7a6b52", "blockNumber": 46409398, "status": 1 },
+    "deposit": { "hash": "0x1710b7165d82c75f1c29791bc9ff328568b71e5671f3c8608f61ac8c75f83988", "blockNumber": 46409399, "status": 1 },
+    "redeem": { "hash": "0xf218d1b78bbc7cbda2a4607a2b32e614dd85fe2440f57d21b8ce9ceea8d53de8", "blockNumber": 46409401, "status": 1 }
+  }
+}

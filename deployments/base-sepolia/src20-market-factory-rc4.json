@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "swaputer-src20-market-factory/1",
+  "release": "swaputer-v1.2-rc4",
+  "chainId": 84532,
+  "networkName": "Base Sepolia",
+  "protocolVersion": "1.2",
+  "sourceControlCommit": "834816651c50026ee408438ee3b60fde3c3f4c04",
+  "deployedAt": "2026-09-05T06:54:48Z",
+  "factory": "0xDA8926d26461285Dab8fe79326624EaEc39CD757",
+  "runtimeCodeHash": "0xd4ef75dbec8f23eaa351017a9c6793d7321f66ccfb35ae2d1d1eeb8de09414f3",
+  "bindings": {
+    "router": "0xa70C0C74F2Dc2c0538730CA3687e078b3d0c2E56",
+    "kernel": "0xCc0f598e82E14035213ef470f19f3149005b5191",
+    "worldId": "0x6b0a7beb43df6641970b1f1878025f9bb629a379f73c64a83d4269a2a80996fd",
+    "marketEscrowCodeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b",
+    "trustedTokenCodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869"
+  },
+  "deployment": {
+    "transactionHash": "0xd6693dc285510296d81380dd9b9d6023eff4967660848c275a8bee71d01c3618",
+    "blockNumber": 46411510,
+    "blockHash": "0x5caf8f0c30723c4a6c2b253fe6697dd1d1119c3717aa5a536d2f897caa85e9fb",
+    "status": 1,
+    "gasUsed": 3152562,
+    "effectiveGasPriceWei": "6000000"
+  }
+}

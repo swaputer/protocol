@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "swaputer-testnet-release/1",
+  "release": "swaputer-v1.2-rc2",
+  "network": { "name": "Base Sepolia", "chainId": 84532 },
+  "sourceControlCommit": "ce5c71186469a169b224db39475c4f7c24bca850",
+  "deployedAt": "2026-09-02T02:39:43Z",
+  "addresses": {
+    "factory": "0x8e5ff9e7d4E4C8506582565738B344FB3943B8cf",
+    "router": "0x7aA9963ed7EC093C956201Cae0B576A706bcC76A",
+    "registry": "0x4440e770501602c7D6A5dCBD02dC116B423C135C",
+    "gasToken": "0x8ddAcF981c1C26b1c87E9e9c7B578ab0FD7b7E48",
+    "kernel": "0x3dB81620781189c410e7Ad0C7E887702ffC0300a",
+    "hook": "0xFd4fb0F1aa0195AAd9d3c18534a2471cf398e044",
+    "marketFactory": "0x0cD29A0EA2a2dB5E6F1FBd70E2B1551e6e05E93C",
+    "referenceMarket": "0xfB79DE1B47BFE85Ba455De917FF504e2d7557cb7",
+    "sethVault": "0x759B8d1eB85d14f8Dd3c06dF48881Ec05A4B056e",
+    "auctionFactory": "0xFcD43Fc4F285A74743Cf1165350460B5AF840993"
+  },
+  "worldId": "0x95df3f23d322bc9f4e12ba0d078388319145e77ed8b700db9cded83c625c20bc",
+  "worldConfigHash": "0xd027f9533d9c327fd79d69bb2a00e57cbdd564f741367cc3acaaaa8d92dd5bc2",
+  "startBlock": 46273803,
+  "programs": {
+    "defaultSrc20Id": "0x01c59cfd545675f9a524ea9573bcdd4139ab3f3cc69ace4efc1ba285c2cd144e",
+    "defaultSrc20CodeHash": "0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b",
+    "openMintSrc20CodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869",
+    "marketEscrowId": "0x01e286db7d15794a77bf194d3347b60c0cc21e404e8c12fbc7099f1b2e1d84b8",
+    "marketEscrowCodeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b",
+    "sethId": "0x01a573e477a5cc28e3b819dd1c5c246d2acf5d7ad8dcb7919dd44506669c8caf",
+    "sethCodeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
+  },
+  "acceptance": {
+    "coreReceipts": "4/4",
+    "bootstrapReceipts": "15/15",
+    "filledMarketReceipts": "11/11",
+    "openOrderReceipts": "8/8",
+    "sethReceipts": "4/4",
+    "allStatuses": 1,
+    "sethFinalSolvent": true,
+    "openOrdersPreserved": 2
+  }
+}

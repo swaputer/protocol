@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1",
+  "networkName": "base-sepolia",
+  "chainId": 84532,
+  "protocolVersion": "1.2",
+  "sourceControlCommit": "918d5119f74195f5cfc085565fa1e43e159a9bf2",
+  "deployedAt": "2026-09-01T11:15:04Z",
+  "deploymentBlock": 46246508,
+  "deploymentBlockHash": "0x203dff0b06cd0d4b5efbc63c00e1f6b29195cdd35eeb669240c333f0c3dabb90",
+  "bindings": {
+    "worldId": "0x20f614ee9d36602f82422765fa005cedcb6c042fe7fbf5b368124820a829f757",
+    "factory": "0xDAe77a4f1c6B1B25e640C30463d05E3139928B6b",
+    "router": "0xEe164c82878AE80F2BE88B10771FAB2c4E29b24B",
+    "kernel": "0xA751dAFFD61C2d259414573EfCD743cfB24ed10b",
+    "vault": "0x8526b816eEc17F00D9c63A584dE421dB4a97dDE0",
+    "vaultExtcodehash": "0xfc681a05939534bd22e1d3df4fafb79d2a3c12b6aee22c75aaa051d170c27b94",
+    "sethProgramId": "0x01a52b4c4b0ff5cf872da9a8f8d2adc198896d515555cc1eb4a0ebf4d4ae8c7c",
+    "sethCodeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
+  },
+  "atomicExercise": {
+    "finalSETHSupplyWei": "0",
+    "finalLockedEthWei": "0",
+    "finalVaultBalanceWei": "0",
+    "finalBackingSurplusWei": "0",
+    "finalSolvent": true
+  },
+  "transactions": {
+    "deploySETHProgram": {"hash": "0xe8791a5011214f546849420f208293ac0e8bd7489a0ba3a045a5624f747ed112", "blockNumber": 46246508, "gasUsed": 420981, "status": 1},
+    "deployVault": {"hash": "0xf7f9a82d74b1d6b39ae4c9752816492add1d253ce32a07fb9885c14ed07c5319", "blockNumber": 46246510, "gasUsed": 1397061, "status": 1},
+    "deposit": {"hash": "0x3fc68ad2c1007b0df19eab4df367e86ae68e08a78d68e05edb0456a1119d56a2", "blockNumber": 46246511, "gasUsed": 687135, "status": 1},
+    "redeem": {"hash": "0x104adbf45a119d877ee3efa7ed89d0e3273d875a166e5e7d48d206404913a97e", "blockNumber": 46246512, "gasUsed": 562129, "status": 1}
+  }
+}

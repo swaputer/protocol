@@ -1,0 +1,46 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+auto_detect_remappings = false
+fuzz.runs = 512
+fuzz.seed = "0x7b2026"
+invariant.runs = 64
+invariant.depth = 32
+fs_permissions = [
+    { access = "read", path = "./reference" },
+    { access = "read-write", path = "./tooling/receipt-codec/fixtures" },
+    { access = "read", path = "./tooling/tinysol/fixtures" },
+    { access = "read", path = "./tooling/tinysol/programs" }
+]
+
+remappings = [
+    "@ensdomains/=lib/v4-core/node_modules/@ensdomains/",
+    "@openzeppelin/=lib/v4-core/lib/openzeppelin-contracts/",
+    "@uniswap/v4-core/=lib/v4-core/",
+    "@uniswap/v4-periphery/=lib/v4-periphery/",
+    "ds-test/=lib/v4-core/lib/forge-std/lib/ds-test/src/",
+    "erc4626-tests/=lib/v4-core/lib/openzeppelin-contracts/lib/erc4626-tests/",
+    "forge-std/=lib/forge-std/src/",
+    "hardhat/=lib/v4-core/node_modules/hardhat/",
+    "openzeppelin-contracts/=lib/v4-core/lib/openzeppelin-contracts/",
+    "solmate/=lib/v4-core/lib/solmate/",
+    "v4-core/=lib/v4-core/src/",
+    "v4-periphery/=lib/v4-periphery/src/"
+]
+
+[profile.security.fuzz]
+runs = 4096
+seed = "0x7b2026"
+
+[profile.security.invariant]
+runs = 256
+depth = 64
+fail_on_revert = false
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "swaputer-market-deprecation/1",
+  "chainId": 84532,
+  "status": "deprecated",
+  "unaudited": true,
+  "zeroValueOnly": true,
+  "deprecatedMarkets": [
+    "0x7770ad52dfde0f9cf37d5894ec9235cd6b3667cb",
+    "0x30235afdbf7d9f6fa2ffa775f4ad730691ff484b",
+    "0xcEAEeA735412E893608a5b24a1d79B24856e11ba",
+    "0xa3a7AeE97552B0546EC00401C8b795eA0BdfcBa1"
+  ],
+  "replacementProtocolVersion": "1.2",
+  "replacementMarket": "0x94CF8c8Ca7c0dBc8663fC66FfAD153B42d2cCc8e",
+  "reason": "The v1.1 experiments and the superseded v1.2 1:1-price market are not selected by the frontend. The replacement binds the fully collateralized market to a new SVMG World initialized at 0.00001 ETH per SVMG with the entire fixed supply supplied one-sided through the official PositionManager."
+}

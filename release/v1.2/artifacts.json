@@ -1,0 +1,139 @@
+{
+  "compilerProfile": "solc-0.8.26-via-ir-optimizer-200-cancun",
+  "contracts": {
+    "SwapVMCreationCodeStore": {
+      "creationCodeHash": "0xe9f9c6bfc2cf53d5d77e5836110da4dc3291b8a1edf18124fc63920cd0e5dedc",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 24519,
+      "eip3860MarginBytes": 48873,
+      "initcodeBytes": 279,
+      "runtimeBytes": 57,
+      "templateRuntimeCodeHash": "0x9ce0ac77f02b828d5a7450fc73ad6e3fce4a1d898321b40ec0cef1d0993003f5"
+    },
+    "SwapVMGasToken": {
+      "creationCodeHash": "0x53622fbaf03c56d6b8e0bfa617f020731842ca1e2fc78acf7946208bf0c5dfbd",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 23226,
+      "eip3860MarginBytes": 47598,
+      "initcodeBytes": 1554,
+      "runtimeBytes": 1350,
+      "templateRuntimeCodeHash": "0xb646f2826039460ed6b4b55df058a5021ef0a4633bec50fc3a6b2e270a91e06f"
+    },
+    "SwapVMHook": {
+      "creationCodeHash": "0xa2b1a6fc39aed06ca3000b30b29000cca79adee54b93306a16b82ba03197e844",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 15041,
+      "eip3860MarginBytes": 38097,
+      "initcodeBytes": 11055,
+      "runtimeBytes": 9535,
+      "templateRuntimeCodeHash": "0x7bdebbd21b2f0d1c24754ef5380e9091d56c23ab037bcdd8d1b9268b7dea3a30"
+    },
+    "SwapVMKernel": {
+      "creationCodeHash": "0x39325bff0318571ddcd4d4d9c7abe2d04b4577abb7629fe6118861ad099809af",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 3150,
+      "eip3860MarginBytes": 27416,
+      "initcodeBytes": 21736,
+      "runtimeBytes": 21426,
+      "templateRuntimeCodeHash": "0x4c800a1a7593a989fa0561830dff338853ff6b02bcdbdfc87a65565c93d7059a"
+    },
+    "SwapVMReferenceRegistry": {
+      "creationCodeHash": "0x3090168fc5f2df35ce54eacd298d150c6238ebe8617eaf1dae07b1b14387c68f",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 22970,
+      "eip3860MarginBytes": 47520,
+      "initcodeBytes": 1632,
+      "runtimeBytes": 1606,
+      "templateRuntimeCodeHash": "0xf84facbe49e423eee47d77d418c081589f93f2eeebe8ddec8e68f21b1dd9631b"
+    },
+    "SwapVMRouter": {
+      "creationCodeHash": "0xa4458200300dc7742bacc652528414754286495a3ed3df836db22a0b42c42070",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 17543,
+      "eip3860MarginBytes": 41773,
+      "initcodeBytes": 7379,
+      "runtimeBytes": 7033,
+      "templateRuntimeCodeHash": "0x6c32f85fc93905aec0ffc156963e63dff7c4560726de9331bd3144c8cccf8d58"
+    },
+    "SwapVMSETHVault": {
+      "creationCodeHash": "0x8c0bd63bcdb66122a96b5c2789ca786743494bc69a40e25058abc98e1239ac53",
+      "disposition": "evidence-only-excluded-mainnet-application",
+      "eip170MarginBytes": 20354,
+      "eip3860MarginBytes": 43130,
+      "initcodeBytes": 6022,
+      "runtimeBytes": 4222,
+      "templateRuntimeCodeHash": "0x8627d8a4174aecc420b4f45a6d9219e3ec27e2297f4037559faa4a298bf7bf00"
+    },
+    "SwapVMSRC20AuctionHouse": {
+      "creationCodeHash": "0x76b7e45169a16542bf8d004b55b0e5eebf2ae3aaa88037b40181b95ac94f6c12",
+      "disposition": "evidence-only-excluded-mainnet-application",
+      "eip170MarginBytes": 16642,
+      "eip3860MarginBytes": 39787,
+      "initcodeBytes": 9365,
+      "runtimeBytes": 7934,
+      "templateRuntimeCodeHash": "0xbe8d249040cbecd4f69ab4d546a08206b55000cae7b833d02e2a720b3d26da08"
+    },
+    "SwapVMSRC20Market": {
+      "creationCodeHash": "0x779c9e408ed6afa0e441e5888a4db7b280b8be4c8e58f21aa4dd998572413bf4",
+      "disposition": "evidence-only-excluded-mainnet-application",
+      "eip170MarginBytes": 14979,
+      "eip3860MarginBytes": 37729,
+      "initcodeBytes": 11423,
+      "runtimeBytes": 9597,
+      "templateRuntimeCodeHash": "0x22b01dea5d20d34816263eb048ee49d33610a57dc4be4055e48e2d186f2fa0e9"
+    },
+    "SwapVMWorldDeployer": {
+      "creationCodeHash": "0xc290aef47e1a6300fa6c8e810139acc3991d88d095dd7b0f42245bf622a1833f",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 21612,
+      "eip3860MarginBytes": 45924,
+      "initcodeBytes": 3228,
+      "runtimeBytes": 2964,
+      "templateRuntimeCodeHash": "0x5b981eba7ac28c8087e170f5fdad573bc0af43b9c938410e9fdce32da117a5a5"
+    },
+    "SwapVMWorldFactory": {
+      "creationCodeHash": "0xbb3ef860524700d6f99225e57dbf0b8e8bc086f060aa6bb1cdaa275a2e710c01",
+      "disposition": "official-launch",
+      "eip170MarginBytes": 10685,
+      "eip3860MarginBytes": 25005,
+      "initcodeBytes": 24147,
+      "runtimeBytes": 13891,
+      "templateRuntimeCodeHash": "0x9d8563306cb20371357723b3c37a21fa11f69a102c4b98dd4116809eff8ad6f4"
+    },
+    "SwaputerSRC20AuctionFactory": {
+      "creationCodeHash": "0xe7ffcd1dff801a5e062dbfe97a26d759b4624744f72e6bba8aea29e269e01905",
+      "disposition": "evidence-only-excluded-mainnet-application",
+      "eip170MarginBytes": 12497,
+      "eip3860MarginBytes": 35963,
+      "initcodeBytes": 13189,
+      "runtimeBytes": 12079,
+      "templateRuntimeCodeHash": "0x1c1deb93e5eafb71e12499d28803a859c3150cbb2d7b70a4d4b029a129477411"
+    },
+    "SwaputerSRC20MarketFactory": {
+      "creationCodeHash": "0x3689ecfbe4f932a6cb4fb64c37524f2a5d3450698711cbe435d893c7e5773670",
+      "disposition": "evidence-only-excluded-mainnet-application",
+      "eip170MarginBytes": 10447,
+      "eip3860MarginBytes": 33912,
+      "initcodeBytes": 15240,
+      "runtimeBytes": 14129,
+      "templateRuntimeCodeHash": "0x8d11990d1c62ec41401f999139f26a1bf7bce63189bb9ea6e5a33b25b6d29ec8"
+    }
+  },
+  "creationCodeStoreCommitments": {
+    "hook": "0xa2b1a6fc39aed06ca3000b30b29000cca79adee54b93306a16b82ba03197e844",
+    "kernel": "0x39325bff0318571ddcd4d4d9c7abe2d04b4577abb7629fe6118861ad099809af"
+  },
+  "integratedComponents": {
+    "SwapVMMiniVM": {
+      "ownedByArtifact": "SwapVMKernel",
+      "source": "src/SwapVMMiniVM.sol",
+      "sourceSha256": "a20a7ae76c280d51ef1aeaac96fdb5873d31af651db9bc6ee7812246930f5ed1",
+      "standaloneDeployment": false
+    }
+  },
+  "limits": {
+    "eip170RuntimeBytes": 24576,
+    "eip3860InitcodeBytes": 49152
+  },
+  "schemaVersion": "swaputer-artifact-inventory/1"
+}

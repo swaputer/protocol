@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "environment": "local deterministic Foundry + real Uniswap v4 PoolManager",
+  "byteGasPrice": "1000000000000",
+  "lpFee": 3000,
+  "scenarios": [
+    {"id": "attacker-buy-victim-buy-attacker-sell", "victimGrossOutput": "996989065991182791", "victimNetOutput": "996988065991182791", "victimEvmGasUsed": 128833, "priceImpactPpmVersusIsolated": 9, "actualBurn": "1000000000000", "attackerEthPnl": "-29946012474575323", "victimResult": "success-at-or-above-min-or-atomic-revert", "attackerProfitable": false, "victimBoundHeld": true},
+    {"id": "max-exposure-boundary", "executedBytes": 1, "evmGasUsed": 175273, "actualBurn": "1000000000000", "byteGasLimit": 1000, "maximumExposure": "1000000000000000", "grossOutput": "996997017979937173", "netOutput": "996996017979937173", "victimBoundHeld": true},
+    {"id": "gross-one-unit-short", "result": "atomic-revert", "supplyChange": "0", "nonceChange": "0", "heightChange": "0"},
+    {"id": "lp-add-victim-buy-lp-remove", "addedLiquidity": "10000000000000000000000", "victimMinBasisPointsOfIsolated": 9000, "victimBoundHeld": true, "poolManagerTransientDeltaCount": 0}
+  ],
+  "conclusion": "no successful victim execution below minNet or above maximum exposure"
+}

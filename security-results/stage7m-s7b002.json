@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "swaputer-stage7m-s7b002/1",
+  "generatedAt": "2026-09-06T03:58:54.217Z",
+  "status": "passed",
+  "finding": {
+    "id": "S7B-002",
+    "severity": "Medium",
+    "class": "availability",
+    "disposition": "accepted-open"
+  },
+  "strategy": "salt-recovery",
+  "source": {
+    "commit": "bb08340ebb4f4a1bfbcd46617e1cd0f5c4951abf",
+    "treeState": "clean",
+    "formalCandidateEligible": true,
+    "files": [
+      {
+        "path": "src/SwapVMWorldFactory.sol",
+        "sha256": "0xce871f7470b3c56d84d25264361ea490b502a781ad1a9e312a74374a09ebd3c4"
+      },
+      {
+        "path": "test/Stage7MSaltRecovery.t.sol",
+        "sha256": "0x3dc48ddc8c4a6dd3fe7895623b8ca84e1d03c38f11c2b0e5009d986dd1889990"
+      },
+      {
+        "path": "script/accept-s7b002.sh",
+        "sha256": "0x423520fb473b8982caeef1eb3efecf72a02046fc444248e904462c67cede1992"
+      },
+      {
+        "path": "script/s7b002-evidence.mjs",
+        "sha256": "0x0b3f40da2b0b6625639d92b4118ee9cdd0c9e172146fb76b7595f1764ed3c4f5"
+      },
+      {
+        "path": "script/s7b002-evidence.test.mjs",
+        "sha256": "0xdcab237c3b72b145b2400511c0d7e8fa567ec9059045f3b1643ace4177fec07f"
+      },
+      {
+        "path": "docs/security/STAGE7B-FINDINGS.md",
+        "sha256": "0x7f8a74b9f898b8efe84847e89ee35628c5b9b9fe71ea84b5ed8e8d1279f55d6a"
+      },
+      {
+        "path": "docs/security/DEPLOYMENT-FAILURE-RUNBOOK.md",
+        "sha256": "0x730de79c2c150d031843b534cc01f5058d6838b579d56387f137980a3fbd212c"
+      }
+    ]
+  },
+  "execution": {
+    "command": "forge test --match-path test/Stage7MSaltRecovery.t.sol --json",
+    "runner": "forge-test",
+    "chainId": 31337,
+    "isolation": "in-process-foundry-evm",
+    "broadcastTransactions": false,
+    "transactionReceipts": false,
+    "externalRpcUsed": false,
+    "durationMs": 14204,
+    "outputSha256": "0x6bac8759031a3c48e5b9d9b345814aabc1e4532aa9d24debf37166dd320652bf",
+    "tests": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "cases": [
+        "test_bootstrapSaltCollisionRollsBackAndRecoversWithRecomputedAddresses()",
+        "test_exactCopyFrontRunCannotRedirectSupplyOrMutateConfig()",
+        "test_tokenSaltCollisionRollsBackAndRecoversWithRecomputedAddresses()"
+      ]
+    }
+  },
+  "proofs": {
+    "exactCopy": {
+      "distinctCallers": true,
+      "byteIdenticalParams": true,
+      "copiedCallCreatesSealedWorld": true,
+      "publisherRetryRevert": "empty-create2-collision",
+      "declaredHolderReceivesFullSupply": true,
+      "grieferReceivesSupply": false,
+      "existingWorldUnchanged": true
+    },
+    "bootstrapCollision": {
+      "errorSelector": "0x69a0b302",
+      "failedCandidateAtomic": true,
+      "collidingWorldComplete": true,
+      "reusedTokenSalt": true,
+      "changedBootstrapSalt": true,
+      "deployerKernelHookWorldRecomputed": true,
+      "recoveredWorldSealed": true,
+      "oldDraftHashReused": false
+    },
+    "tokenCollision": {
+      "publisherRetryRevert": "empty-create2-collision",
+      "failedCandidateAtomic": true,
+      "collidingWorldComplete": true,
+      "changedTokenSalt": true,
+      "reusedBootstrapSalt": true,
+      "tokenHookWorldRecomputed": true,
+      "declaredHolderReceivesFullSupply": true,
+      "grieferReceivesSupply": false,
+      "recoveredWorldSealed": true,
+      "oldDraftHashReused": false
+    },
+    "common": {
+      "worldConfigHashRecomputed": true,
+      "addressPredictionsRecomputed": true,
+      "hookPermissionBitsVerified": true,
+      "runtimeCodeHashesVerified": true,
+      "bidirectionalBindingsVerified": true,
+      "poolInitializationVerified": true,
+      "worldSealedEventRecorded": true
+    }
+  },
+  "limitations": {
+    "topLevelTransactionReceiptsObserved": false,
+    "mempoolOrderingObserved": false,
+    "operatorRecoveryTargetSeconds": 900,
+    "operatorRecoveryTargetMeasured": false,
+    "description": "This evidence records isolated in-process Foundry EVM calls and committed event/state assertions; it does not claim public-mempool ordering, broadcast transactions, transaction receipts, or a measured operator response time."
+  },
+  "riskAcceptance": {
+    "projectAccepted": true,
+    "acceptedStrategy": "salt-recovery",
+    "ownerAllowlistAdded": false,
+    "protectedSubmissionRequired": false,
+    "externalAuditClaimed": false,
+    "residualRisk": [
+      "publisher transaction gas can be lost",
+      "official publication can be delayed",
+      "the old release draft must be invalidated",
+      "an unendorsed immutable World can remain deployed"
+    ],
+    "findingClosed": false,
+    "mainnetAuthorized": false
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "reportHash": "0x41020e21b5b204f50ecf87aa124174d57f0bdcbc497c0d01fabbc98e5835900b"
+  }
+}

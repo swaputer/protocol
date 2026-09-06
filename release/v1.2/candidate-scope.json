@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "swaputer-release-scope/1",
+  "release": {
+    "name": "swaputer-v1.2-stage7m-rc3",
+    "protocolVersion": "1.2",
+    "status": "unaudited experimental",
+    "candidateKind": "local-candidate-freeze",
+    "mainnetAuthorized": false,
+    "signatureStatus": "not-required-for-local-candidate-freeze"
+  },
+  "launch": {
+    "profile": "core+explorer+studio+open-mint",
+    "contracts": [
+      "SwapVMCreationCodeStore",
+      "SwapVMGasToken",
+      "SwapVMHook",
+      "SwapVMKernel",
+      "SwapVMReferenceRegistry",
+      "SwapVMRouter",
+      "SwapVMWorldDeployer",
+      "SwapVMWorldFactory"
+    ],
+    "integratedComponents": [
+      "SwapVMMiniVM"
+    ],
+    "officialInterfaces": [
+      "explorer",
+      "studio",
+      "open-mint-minter"
+    ],
+    "routing": [
+      "canonical-swaputer-router",
+      "official-uniswap-universal-router-v4-swap"
+    ],
+    "observability": [
+      "receipt-codec",
+      "production-indexer",
+      "active-release-verifier",
+      "ten-minute-testnet-monitoring"
+    ]
+  },
+  "excludedMainnetApplications": [
+    {
+      "id": "src20-market",
+      "contractArtifacts": [
+        "SwapVMSRC20Market",
+        "SwaputerSRC20MarketFactory"
+      ],
+      "officialRoutes": [
+        "/market",
+        "/market/:program"
+      ],
+      "sourceDisposition": "evidence-only",
+      "deployedByOfficialLaunch": false,
+      "officialInterfaceEnabled": false
+    },
+    {
+      "id": "seth",
+      "contractArtifacts": [
+        "SwapVMSETHVault"
+      ],
+      "officialRoutes": [
+        "/bridge"
+      ],
+      "sourceDisposition": "evidence-only",
+      "deployedByOfficialLaunch": false,
+      "officialInterfaceEnabled": false
+    },
+    {
+      "id": "auction",
+      "contractArtifacts": [
+        "SwapVMSRC20AuctionHouse",
+        "SwaputerSRC20AuctionFactory"
+      ],
+      "officialRoutes": [],
+      "sourceDisposition": "evidence-only",
+      "deployedByOfficialLaunch": false,
+      "officialInterfaceEnabled": false
+    }
+  ],
+  "testnetCompatibility": {
+    "environments": [
+      "local",
+      "testnet"
+    ],
+    "preserveMarket": true,
+    "preserveSETH": true,
+    "preserveAuctionEvidence": true
+  }
+}

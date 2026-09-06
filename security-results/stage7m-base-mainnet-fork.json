@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "swaputer-base-mainnet-fork-rehearsal/1",
+  "generatedAt": "2026-09-06T04:10:31Z",
+  "status": "verified",
+  "source": {
+    "commit": "bb08340ebb4f4a1bfbcd46617e1cd0f5c4951abf",
+    "treeState": "clean"
+  },
+  "toolchain": {
+    "forgeVersion": "1.5.1-stable",
+    "forgeCommit": "b0a9dd9ceda36f63e2326ce530c10e6916f4b8a2"
+  },
+  "fork": {
+    "network": "Base Mainnet",
+    "chainId": 8453,
+    "blockTag": "finalized",
+    "blockNumber": 50938709,
+    "blockHash": "0xe55ba33072379d0166fd022db539f7620c6d54c577a64c9c3109adbd553a56db",
+    "providerSource": "official-public-fallback",
+    "rpcCredentialsPersisted": false,
+    "upstreamTransactionsBroadcast": false,
+    "externalPrivateKeyLoaded": false,
+    "walletTxtUsed": false,
+    "deterministicTestKeyUsed": true
+  },
+  "upstream": {
+    "poolManager": {
+      "address": "0x498581ff718922c3f8e6a244956af099b2652b2b",
+      "codeHash": "0x83b2af6e9f3158defc2811cbcb0db71ecf8b2ba2abea39c39e370ac5c6f43eb6"
+    },
+    "positionManager": {
+      "address": "0x7c5f5a4bbd8fd63184577525326123b519429bdc",
+      "codeHash": "0x243f9e091ddf11c7c04e28059fdbbf1bab82b72d414fafb8e096c097aaeb622a"
+    },
+    "permit2": {
+      "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+      "codeHash": "0xa67739abc3ede9dbdc0491636c67d6a14ac07fab9030c3f509b1eb7b11dff8ed"
+    },
+    "universalRouter": {
+      "address": "0xfdf682f51fe81aa4898f0ae2163d8a55c127fbc7",
+      "codeHash": "0x4436f45787722467059726381c27a999d0725a7a8b6ae2c4217223987275e3ef",
+      "version": "2.1.1"
+    },
+    "bindings": {
+      "universalRouterPoolManager": true,
+      "universalRouterPositionManager": true,
+      "positionManagerPoolManager": true,
+      "positionManagerPermit2": true
+    }
+  },
+  "rehearsal": {
+    "testPath": "test/fork/SwapVMBaseMainnetFork.t.sol",
+    "testCount": 3,
+    "testOutputSha256": "0x7bf789bb25cdc44a28f51724c5098c7db2762f3ab0e38593b38a0b8bfe5ef8a5",
+    "durationSeconds": 22,
+    "freshCore": true,
+    "liquidityProvider": "fork-local-test-router",
+    "officialPositionManagerLiquidityUsed": false,
+    "officialPositionManagerBindingsVerified": true,
+    "directOfficialUniversalRouter": true,
+    "v4Command": "0x10",
+    "v4Actions": "0x060c0f",
+    "deployExecuted": true,
+    "callExecuted": true,
+    "stateVerified": true,
+    "economicsVerified": true,
+    "adversarialCases": [
+      "mutated-envelope",
+      "replay",
+      "wrong-router-binding",
+      "out-of-byte-gas"
+    ],
+    "noBroadcast": true,
+    "deterministicTestSigningOnly": true,
+    "mainnetReleaseConfigCreated": false
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "reportHash": "0x524a57d63bfd23db771d4605154139adb081667af231b6110e9a580efc678171"
+  }
+}

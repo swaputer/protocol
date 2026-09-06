@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "swaputer-multiseed-security/1",
+  "generatedAt": "2026-09-06T04:09:25Z",
+  "status": "passed",
+  "source": {
+    "commit": "bb08340ebb4f4a1bfbcd46617e1cd0f5c4951abf",
+    "treeState": "clean"
+  },
+  "toolchain": {
+    "forgeVersion": "1.5.1-stable",
+    "forgeCommit": "b0a9dd9ceda36f63e2326ce530c10e6916f4b8a2"
+  },
+  "campaign": {
+    "profile": "security",
+    "releaseSeed": "0x7b2026",
+    "supplementalSeedDerivation": "keccak256(swaputer-v1.2-internal-assurance/seed/{0,1})",
+    "seedCount": 3,
+    "seeds": [
+      "0x7b2026",
+      "0x98955c53cc5e0520c37e8dca375bfe7fb029aab60034d35a92c2224bc8c45e69",
+      "0xdd1939302dff644f8ea811456724a65f06b6a7d31b1cfb1c7f0635772d33c7ad"
+    ],
+    "fuzz": {
+      "runsPerProperty": 4096,
+      "propertyCount": 11,
+      "contractPattern": "^SwapVM(Stage1|Stage2|Stage4|Stage5|Stage7BSecurity)Test$",
+      "testPattern": "^testFuzz_"
+    },
+    "invariants": {
+      "runsPerInvariant": 256,
+      "depth": 64,
+      "invariantCount": 22,
+      "callsPerInvariant": 16384,
+      "failOnRevert": true,
+      "seedPolicy": "all-required-seeds",
+      "contracts": [
+        {
+          "name": "SwapVMStage1InvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMStage2InvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMStage4InvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMStage5InvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMStage7BRouterInvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMStage7BFactoryInvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMSETHVaultInvariantTest",
+          "properties": 3
+        },
+        {
+          "name": "SwapVMSRC20MarketInvariantTest",
+          "properties": 3
+        },
+        {
+          "name": "SwapVMAuthorizationInvariantTest",
+          "properties": 2
+        },
+        {
+          "name": "SwapVMResourceInvariantTest",
+          "properties": 2
+        }
+      ],
+      "contractPattern": "^SwapVM(Stage1|Stage2|Stage4|Stage5|Stage7BRouter|Stage7BFactory|SETHVault|SRC20Market|Authorization|Resource)InvariantTest$",
+      "testPattern": "^invariant_"
+    }
+  },
+  "results": [
+    {
+      "seed": "0x7b2026",
+      "status": "passed",
+      "fuzz": {
+        "passed": 11,
+        "runsPerProperty": 4096,
+        "durationSeconds": 113,
+        "outputSha256": "0x9d87bb4cde78541920769a9418d18af8f7062f38bce9bbe55ab60af600c8730b"
+      },
+      "invariants": {
+        "passed": 22,
+        "runsPerInvariant": 256,
+        "depth": 64,
+        "callsPerInvariant": 16384,
+        "unexpectedReverts": 0,
+        "durationSeconds": 220,
+        "outputSha256": "0x3cb9dadb0fb4377522c78f9281800c15a3cffe77e040bafd664fd6cc98be7a0e"
+      }
+    },
+    {
+      "seed": "0x98955c53cc5e0520c37e8dca375bfe7fb029aab60034d35a92c2224bc8c45e69",
+      "status": "passed",
+      "fuzz": {
+        "passed": 11,
+        "runsPerProperty": 4096,
+        "durationSeconds": 55,
+        "outputSha256": "0xd646480c614c70e8f0d5e6d68b95800ed11784fe4492c30a550397e7802914a5"
+      },
+      "invariants": {
+        "passed": 22,
+        "runsPerInvariant": 256,
+        "depth": 64,
+        "callsPerInvariant": 16384,
+        "unexpectedReverts": 0,
+        "durationSeconds": 92,
+        "outputSha256": "0x9d96034a2f48bdd7b1e60c170f3ea4f2b1dddb30289847d48d246c82e3880776"
+      }
+    },
+    {
+      "seed": "0xdd1939302dff644f8ea811456724a65f06b6a7d31b1cfb1c7f0635772d33c7ad",
+      "status": "passed",
+      "fuzz": {
+        "passed": 11,
+        "runsPerProperty": 4096,
+        "durationSeconds": 56,
+        "outputSha256": "0x315708de4e6c92e0ffa960ae3699ccaf3431f9861890ed12a410b4307537315f"
+      },
+      "invariants": {
+        "passed": 22,
+        "runsPerInvariant": 256,
+        "depth": 64,
+        "callsPerInvariant": 16384,
+        "unexpectedReverts": 0,
+        "durationSeconds": 95,
+        "outputSha256": "0x6a23f8647691621b4f4251165721b3b243be4efdc75c687052347b00a8e85c7d"
+      }
+    }
+  ],
+  "totals": {
+    "fuzzExecutions": 135168,
+    "invariantActionCalls": 1081344,
+    "failures": 0
+  },
+  "integrity": {
+    "algorithm": "sha256",
+    "reportHash": "0x5ddc1a3454f681cb990d345a9463a46ecf13d35e94f6818567fbc12fd11b4ee1"
+  }
+}

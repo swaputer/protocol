@@ -1,0 +1,487 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.26;
+
+import {Script, console2} from "forge-std/Script.sol";
+
+import {Actions} from "@uniswap/v4-periphery/src/libraries/Actions.sol";
+import {LiquidityAmounts} from "@uniswap/v4-periphery/src/libraries/LiquidityAmounts.sol";
+import {Plan, Planner} from "@uniswap/v4-periphery/test/shared/Planner.sol";
+import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
+import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
+import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
+import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
+import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
+
+import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
+import {SwapVMHook} from "../src/SwapVMHook.sol";
+import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
+import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+
+interface IPositionManagerSingleSided {
+    function poolManager() external view returns (address);
+    function permit2() external view returns (address);
+    function nextTokenId() external view returns (uint256);
+    function ownerOf(uint256 tokenId) external view returns (address);
+    function getPositionLiquidity(uint256 tokenId) external view returns (uint128);
+    function modifyLiquidities(bytes calldata unlockData, uint256 deadline) external payable;
+}
+
+interface IPermit2SingleSided {
+    function approve(address token, address spender, uint160 amount, uint48 expiration) external;
+
+    function allowance(address owner, address token, address spender)
+        external
+        view
+        returns (uint160 amount, uint48 expiration, uint48 nonce);
+}
+
+interface IStateViewSingleSided {
+    function getSlot0(PoolId poolId)
+        external
+        view
+        returns (uint160 sqrtPriceX96, int24 tick, uint24 protocolFee, uint24 lpFee);
+
+    function getPositionInfo(PoolId poolId, address owner, int24 tickLower, int24 tickUpper, bytes32 salt)
+        external
+        view
+        returns (uint128 liquidity, uint256 feeGrowthInside0LastX128, uint256 feeGrowthInside1LastX128);
+}
+
+/// @notice Base Sepolia-only migration to a new v1.2 World with all SVMG initially supplied one-sided.
+/// @dev Unauthenticated, zero-value testnet operation. There is deliberately no mainnet path.
+contract Stage7DU2V12SingleSidedMigrationScript is Script {
+    using Planner for Plan;
+    using PoolIdLibrary for PoolKey;
+
+    uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
+    uint256 private constant RELEASE_ETH_CAP = 0.5 ether;
+    address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
+
+    address private constant POOL_MANAGER = 0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408;
+    bytes32 private constant POOL_MANAGER_CODE_HASH =
+        0x03c45db6d09b14da7c1f7239a5a49697f976d395277e6d2acb6fbed3f9e0249f;
+    IPositionManagerSingleSided private constant POSITION_MANAGER =
+        IPositionManagerSingleSided(0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80);
+    bytes32 private constant POSITION_MANAGER_CODE_HASH =
+        0xe8329b35b8b34290b6cf03affc0836f7b23205229cc96ffdc66544b93112c076;
+    IPermit2SingleSided private constant PERMIT2 = IPermit2SingleSided(0x000000000022D473030F116dDEE9F6B43aC78BA3);
+    IStateViewSingleSided private constant STATE_VIEW =
+        IStateViewSingleSided(0x571291b572ed32ce6751a2Cb2486EbEe8DEfB9B4);
+
+    SwapVMWorldFactory private constant FACTORY = SwapVMWorldFactory(0x25be74e0FaB494D7cF0e7d681a3897f9d82908c1);
+    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0x6719Fa2876EBce93c32490905C53e05ac1Da0109));
+    SwapVMGasToken private constant OLD_TOKEN = SwapVMGasToken(0xC86ACee2A9fCf996cFaD1F31d6CC23Ee6ca0b27c);
+    uint256 private constant OLD_POSITION_TOKEN_ID = 27_216;
+    uint128 private constant OLD_POSITION_LIQUIDITY = 3 ether;
+
+    uint256 private constant INITIAL_SUPPLY = 1_000_000_000 ether;
+    uint128 private constant BYTE_GAS_PRICE = 1_000_000_000_000;
+    uint24 private constant POOL_FEE = 3_000;
+    int24 private constant TICK_SPACING = 60;
+    // sqrt(100_000 SVMG / ETH) * 2^96. Therefore 1 SVMG = 0.00001 ETH.
+    uint160 private constant INITIAL_SQRT_PRICE_X96 = 25_054_144_837_504_793_118_641_380_156_960;
+    int24 private constant TICK_LOWER = 110_040;
+    int24 private constant TICK_UPPER = 115_080;
+    bytes32 private constant TOKEN_SALT = keccak256("SwapVM.v1.2.BaseSepolia.single-sided-1e-5.token.2026-08-30");
+    bytes32 private constant BOOTSTRAP_SALT =
+        keccak256("SwapVM.v1.2.BaseSepolia.single-sided-1e-5.bootstrap.2026-08-30");
+    bytes32 private constant DISTRIBUTION_COMMITMENT =
+        keccak256("SwapVM.v1.2.BaseSepolia.unaudited-zero-value.all-supply-single-sided");
+
+    uint128 private constant VM_INPUT = 0.000001 ether;
+    uint128 private constant ORDER_AMOUNT = 100 ether;
+    uint128 private constant UNIT_PRICE = 0.00001 ether;
+    uint128 private constant ORDER_PRICE = 0.001 ether;
+    uint32 private constant DEPLOY_LIMIT = 500;
+    uint32 private constant TOKEN_LIMIT = 1_000;
+    uint32 private constant ESCROW_LIMIT = 8_000;
+    uint160 private constant SQRT_PRICE_LIMIT = TickMath.MIN_SQRT_PRICE + 1;
+
+    uint256 private actorKey;
+    uint256 private releaseStartBalance;
+    bytes32 private worldId;
+    SwapVMGasToken private gasToken;
+    SwapVMKernel private kernel;
+    SwapVMHook private hook;
+    bytes32 private token;
+    bytes32 private tokenCodeHash;
+    bytes32 private escrow;
+    bytes32 private escrowCodeHash;
+    SwapVMSRC20Market private market;
+    uint256 private positionTokenId;
+    uint128 private positionLiquidity;
+    uint256 private oneSidedTokenDeposited;
+
+    function run() external {
+        _validateEnvironment();
+        _withdrawOldPosition();
+        _deployWorld();
+        _bootstrapAllSupplyOneSided();
+        _proveTradableWithNopBuy();
+        _deployProgramsAndMarket();
+        _exerciseMarket();
+        _validateFinalState();
+        _enforceReleaseCap();
+        _logResult();
+    }
+
+    function _validateEnvironment() private {
+        require(block.chainid == BASE_SEPOLIA_CHAIN_ID, "BASE_SEPOLIA_ONLY");
+        require(POOL_MANAGER.codehash == POOL_MANAGER_CODE_HASH, "POOL_MANAGER_CODE_HASH");
+        require(address(POSITION_MANAGER).codehash == POSITION_MANAGER_CODE_HASH, "POSITION_MANAGER_CODE_HASH");
+        require(POSITION_MANAGER.poolManager() == POOL_MANAGER, "POSITION_MANAGER_POOL_MANAGER");
+        require(POSITION_MANAGER.permit2() == address(PERMIT2), "POSITION_MANAGER_PERMIT2");
+        require(address(FACTORY.poolManager()) == POOL_MANAGER, "FACTORY_POOL_MANAGER");
+        require(FACTORY.router() == address(ROUTER), "FACTORY_ROUTER");
+        require(POSITION_MANAGER.ownerOf(OLD_POSITION_TOKEN_ID) == ACTOR, "OLD_POSITION_OWNER");
+        require(
+            POSITION_MANAGER.getPositionLiquidity(OLD_POSITION_TOKEN_ID) == OLD_POSITION_LIQUIDITY,
+            "OLD_POSITION_LIQUIDITY"
+        );
+        actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
+        require(vm.addr(actorKey) == ACTOR, "ACTOR_MISMATCH");
+        releaseStartBalance = vm.envUint("V12_RELEASE_START_BALANCE");
+        require(ACTOR.balance <= releaseStartBalance, "START_BALANCE_TOO_LOW");
+        _enforceReleaseCap();
+    }
+
+    function _withdrawOldPosition() private {
+        vm.startBroadcast(actorKey);
+        POSITION_MANAGER.modifyLiquidities(_decreasePlan(), block.timestamp + 600);
+        vm.stopBroadcast();
+        require(POSITION_MANAGER.getPositionLiquidity(OLD_POSITION_TOKEN_ID) == 0, "OLD_LIQUIDITY_REMAINS");
+    }
+
+    function _deployWorld() private {
+        address predictedToken = FACTORY.predictGasToken(TOKEN_SALT, INITIAL_SUPPLY, ACTOR);
+        address predictedWorldDeployer = FACTORY.predictWorldDeployer(BOOTSTRAP_SALT);
+        address predictedKernel = FACTORY.predictKernel(predictedWorldDeployer);
+        bytes memory hookArgs = abi.encode(
+            IPoolManager(POOL_MANAGER),
+            SwapVMKernel(predictedKernel),
+            predictedToken,
+            FACTORY.initialProtocolFeeAdmin(),
+            FACTORY.feeController(),
+            FACTORY.initialProtocolFeeBps(),
+            BYTE_GAS_PRICE,
+            POOL_FEE,
+            TICK_SPACING
+        );
+        (address predictedHook, bytes32 hookSalt) = HookMiner.find(
+            predictedWorldDeployer,
+            Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
+                | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
+            type(SwapVMHook).creationCode,
+            hookArgs
+        );
+        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+            tokenSalt: TOKEN_SALT,
+            bootstrapSalt: BOOTSTRAP_SALT,
+            hookSalt: hookSalt,
+            predictedKernel: predictedKernel,
+            predictedHook: predictedHook,
+            initialSupply: INITIAL_SUPPLY,
+            initialHolder: ACTOR,
+            distributionCommitment: DISTRIBUTION_COMMITMENT,
+            byteGasPrice: BYTE_GAS_PRICE,
+            poolFee: POOL_FEE,
+            tickSpacing: TICK_SPACING,
+            initialSqrtPriceX96: INITIAL_SQRT_PRICE_X96
+        });
+
+        vm.startBroadcast(actorKey);
+        (worldId, gasToken, kernel, hook) = FACTORY.createWorld(params);
+        vm.stopBroadcast();
+        (PoolKey memory key, bool isSealed) = FACTORY.getPoolKey(worldId);
+        require(isSealed && PoolId.unwrap(key.toId()) == worldId, "WORLD_NOT_SEALED");
+        require(address(kernel.hook()) == address(hook), "KERNEL_HOOK");
+        require(address(hook.kernel()) == address(kernel), "HOOK_KERNEL");
+        require(address(hook.gasToken()) == address(gasToken), "HOOK_TOKEN");
+        require(uint160(address(hook)) & Hooks.ALL_HOOK_MASK == 0x20cc, "HOOK_PERMISSION_BITS");
+        (uint160 sqrtPriceX96, int24 tick,, uint24 lpFee) = STATE_VIEW.getSlot0(key.toId());
+        require(sqrtPriceX96 == INITIAL_SQRT_PRICE_X96, "INITIAL_PRICE");
+        require(tick > TICK_UPPER, "POSITION_NOT_ONE_SIDED");
+        require(lpFee == POOL_FEE, "LP_FEE");
+    }
+
+    function _bootstrapAllSupplyOneSided() private {
+        (PoolKey memory key,) = FACTORY.getPoolKey(worldId);
+        uint160 lowerSqrtPriceX96 = TickMath.getSqrtPriceAtTick(TICK_LOWER);
+        uint160 upperSqrtPriceX96 = TickMath.getSqrtPriceAtTick(TICK_UPPER);
+        positionLiquidity =
+            LiquidityAmounts.getLiquidityForAmount1(lowerSqrtPriceX96, upperSqrtPriceX96, INITIAL_SUPPLY);
+        require(positionLiquidity != 0, "ZERO_LIQUIDITY");
+        positionTokenId = POSITION_MANAGER.nextTokenId();
+        require(gasToken.balanceOf(ACTOR) == INITIAL_SUPPLY, "INITIAL_HOLDER_BALANCE");
+
+        vm.startBroadcast(actorKey);
+        gasToken.approve(address(PERMIT2), INITIAL_SUPPLY);
+        PERMIT2.approve(
+            address(gasToken), address(POSITION_MANAGER), uint160(INITIAL_SUPPLY), uint48(block.timestamp + 1 hours)
+        );
+        POSITION_MANAGER.modifyLiquidities(_mintPlan(key), block.timestamp + 600);
+        PERMIT2.approve(address(gasToken), address(POSITION_MANAGER), 0, 0);
+        gasToken.approve(address(PERMIT2), 0);
+        vm.stopBroadcast();
+
+        oneSidedTokenDeposited = INITIAL_SUPPLY - gasToken.balanceOf(ACTOR);
+        // One liquidity unit consumes about 70 token wei for this range. The maximal
+        // non-reverting liquidity therefore leaves 42 wei, which cannot be added.
+        require(INITIAL_SUPPLY - oneSidedTokenDeposited <= 100, "SUPPLY_DUST_TOO_LARGE");
+        require(POSITION_MANAGER.ownerOf(positionTokenId) == ACTOR, "NEW_POSITION_OWNER");
+        require(POSITION_MANAGER.getPositionLiquidity(positionTokenId) == positionLiquidity, "NEW_POSITION_LIQUIDITY");
+        (uint128 managerLiquidity,,) = STATE_VIEW.getPositionInfo(
+            key.toId(), address(POSITION_MANAGER), TICK_LOWER, TICK_UPPER, bytes32(positionTokenId)
+        );
+        require(managerLiquidity == positionLiquidity, "POOL_POSITION_LIQUIDITY");
+        require(gasToken.allowance(ACTOR, address(PERMIT2)) == 0, "ERC20_ALLOWANCE_REMAINS");
+        (uint160 permitAmount,,) = PERMIT2.allowance(ACTOR, address(gasToken), address(POSITION_MANAGER));
+        require(permitAmount == 0, "PERMIT2_ALLOWANCE_REMAINS");
+    }
+
+    function _proveTradableWithNopBuy() private {
+        uint256 supplyBefore = gasToken.totalSupply();
+        vm.startBroadcast(actorKey);
+        ROUTER.buyNOPExactInput{value: VM_INPUT}(worldId, 1, SQRT_PRICE_LIMIT, ACTOR);
+        vm.stopBroadcast();
+        require(kernel.executionHeight(worldId) == 1, "NOP_HEIGHT");
+        require(kernel.executedBytes(worldId) == 1, "NOP_BYTES");
+        require(gasToken.totalSupply() == supplyBefore - BYTE_GAS_PRICE, "NOP_BURN");
+    }
+
+    function _deployProgramsAndMarket() private {
+        bytes32 actorId = kernel.eoaAccountId(ACTOR);
+        bytes memory tokenPackage = vm.readFileBinary("tooling/tinysol/programs/mintable-src20/MintableSRC20.svm");
+        tokenCodeHash = keccak256(tokenPackage);
+        require(tokenCodeHash == 0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b, "MINTABLE_HASH");
+        token = kernel.contractAccountId(worldId, actorId, kernel.creatorNonce(worldId, actorId), tokenCodeHash);
+        _executeDeploy(tokenCodeHash, abi.encodePacked(bytes4(uint32(tokenPackage.length)), tokenPackage));
+        _executeCall(
+            token, abi.encodePacked(bytes4(keccak256("mint(bytes32)")), abi.encode(actorId)), TOKEN_LIMIT, ACTOR, ACTOR
+        );
+        require(_tokenBalance(actorId) == 1_000 ether, "MINT_BALANCE");
+
+        bytes memory escrowPackage = vm.readFileBinary("tooling/tinysol/programs/market-escrow/MarketEscrow.svm");
+        escrowCodeHash = keccak256(escrowPackage);
+        require(escrowCodeHash == 0x3b7416393025dec94fa6bebae4fad00142468be16dd62784027cb4a4d1eaddb6, "ESCROW_HASH");
+        escrow = kernel.contractAccountId(worldId, actorId, kernel.creatorNonce(worldId, actorId), escrowCodeHash);
+        address predictedMarket = vm.computeCreateAddress(ACTOR, vm.getNonce(ACTOR) + 1);
+        _executeDeploy(
+            escrowCodeHash,
+            abi.encodePacked(bytes4(uint32(escrowPackage.length)), escrowPackage, abi.encode(token, predictedMarket))
+        );
+
+        vm.startBroadcast(actorKey);
+        market = new SwapVMSRC20Market(ROUTER, worldId, token, tokenCodeHash, escrow, escrowCodeHash);
+        vm.stopBroadcast();
+        require(address(market) == predictedMarket, "MARKET_PREDICTION");
+    }
+
+    function _exerciseMarket() private {
+        uint64 expiry = uint64(block.timestamp + 1 days);
+        vm.startBroadcast(actorKey);
+        uint256 buyOrderId =
+            market.createBuyOrder{value: ORDER_PRICE + VM_INPUT}(ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry);
+        vm.stopBroadcast();
+        SwapVMKernel.VMEnvelope memory transfer = _signedCall(
+            token,
+            abi.encodePacked(
+                bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
+            ),
+            TOKEN_LIMIT,
+            ACTOR,
+            address(market)
+        );
+        vm.startBroadcast(actorKey);
+        market.fillBuyOrder(buyOrderId, transfer, SQRT_PRICE_LIMIT);
+        vm.stopBroadcast();
+
+        _executeCall(
+            token,
+            abi.encodePacked(bytes4(keccak256("approve(bytes32,uint256)")), abi.encode(escrow, ORDER_AMOUNT)),
+            TOKEN_LIMIT,
+            ACTOR,
+            ACTOR
+        );
+        SwapVMKernel.VMEnvelope memory deposit = _signedCall(
+            escrow,
+            abi.encodePacked(
+                bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
+            ),
+            ESCROW_LIMIT,
+            ACTOR,
+            address(market)
+        );
+        vm.startBroadcast(actorKey);
+        uint256 sellOrderId = market.createSellOrder{value: VM_INPUT}(
+            ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry, deposit, SQRT_PRICE_LIMIT
+        );
+        vm.stopBroadcast();
+        SwapVMKernel.VMEnvelope memory release = _signedCall(
+            escrow,
+            abi.encodePacked(
+                bytes4(keccak256("release(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
+            ),
+            ESCROW_LIMIT,
+            ACTOR,
+            address(market)
+        );
+        vm.startBroadcast(actorKey);
+        market.settleSellOrder{value: ORDER_PRICE + VM_INPUT}(sellOrderId, release, SQRT_PRICE_LIMIT);
+        vm.stopBroadcast();
+    }
+
+    function _executeDeploy(bytes32 codeHash, bytes memory payload) private {
+        SwapVMKernel.VMEnvelope memory envelope =
+            _signed(SwapVMKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, ACTOR, ACTOR);
+        vm.startBroadcast(actorKey);
+        ROUTER.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
+        vm.stopBroadcast();
+    }
+
+    function _executeCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
+        private
+    {
+        SwapVMKernel.VMEnvelope memory envelope =
+            _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+        vm.startBroadcast(actorKey);
+        ROUTER.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
+        vm.stopBroadcast();
+    }
+
+    function _signedCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
+        private
+        view
+        returns (SwapVMKernel.VMEnvelope memory envelope)
+    {
+        return _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+    }
+
+    function _signed(
+        SwapVMKernel.RootOp op,
+        bytes32 target,
+        bytes memory payload,
+        uint32 byteLimit,
+        address recipient,
+        address executor
+    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+        bytes32 actorId = kernel.eoaAccountId(ACTOR);
+        envelope = SwapVMKernel.VMEnvelope({
+            op: op,
+            worldId: worldId,
+            actor: ACTOR,
+            targetOrCodeHash: target,
+            payload: payload,
+            byteGasLimit: byteLimit,
+            minNetTokenOut: 1,
+            nonce: kernel.nonces(worldId, actorId),
+            deadline: uint64(block.timestamp + 1 days),
+            recipient: recipient,
+            authorizedExecutor: executor,
+            signature: bytes("")
+        });
+        bytes32 structHash = keccak256(
+            abi.encode(
+                kernel.VM_ACTION_TYPEHASH(),
+                uint8(envelope.op),
+                envelope.worldId,
+                envelope.actor,
+                envelope.targetOrCodeHash,
+                keccak256(envelope.payload),
+                envelope.byteGasLimit,
+                envelope.minNetTokenOut,
+                VM_INPUT,
+                SQRT_PRICE_LIMIT,
+                envelope.recipient,
+                address(ROUTER),
+                envelope.authorizedExecutor,
+                envelope.nonce,
+                envelope.deadline
+            )
+        );
+        bytes32 digest = keccak256(abi.encodePacked(hex"1901", kernel.domainSeparator(worldId), structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(actorKey, digest);
+        envelope.signature = abi.encodePacked(r, s, v);
+    }
+
+    function _mintPlan(PoolKey memory key) private view returns (bytes memory) {
+        Plan memory plan = Planner.init();
+        plan.add(
+            Actions.MINT_POSITION,
+            abi.encode(
+                key,
+                TICK_LOWER,
+                TICK_UPPER,
+                uint256(positionLiquidity),
+                uint128(0),
+                uint128(INITIAL_SUPPLY),
+                ACTOR,
+                bytes("")
+            )
+        );
+        plan.add(Actions.CLOSE_CURRENCY, abi.encode(key.currency0));
+        plan.add(Actions.CLOSE_CURRENCY, abi.encode(key.currency1));
+        plan.add(Actions.SWEEP, abi.encode(key.currency0, ACTOR));
+        return plan.encode();
+    }
+
+    function _decreasePlan() private pure returns (bytes memory) {
+        Plan memory plan = Planner.init();
+        plan.add(
+            Actions.DECREASE_LIQUIDITY,
+            abi.encode(OLD_POSITION_TOKEN_ID, uint256(OLD_POSITION_LIQUIDITY), uint128(0), uint128(0), bytes(""))
+        );
+        plan.add(Actions.TAKE_PAIR, abi.encode(address(0), address(OLD_TOKEN), ACTOR));
+        return plan.encode();
+    }
+
+    function _validateFinalState() private view {
+        require(POSITION_MANAGER.getPositionLiquidity(OLD_POSITION_TOKEN_ID) == 0, "OLD_POSITION_ACTIVE");
+        require(market.orderCount() == 2, "ORDER_COUNT");
+        require(market.lockedEth() == 0, "LOCKED_ETH");
+        require(market.escrowedTokenAmount() == 0, "ESCROW_LIABILITY");
+        require(market.activeSellAmount(ACTOR) == 0, "ACTIVE_SELL");
+        require(address(market).balance == 0, "MARKET_ETH");
+        require(_tokenBalance(escrow) == 0, "ESCROW_BALANCE");
+        require(_tokenBalance(kernel.eoaAccountId(ACTOR)) == 1_000 ether, "ACTOR_TOKEN_BALANCE");
+        require(kernel.executionHeight(worldId) == 8, "EXECUTION_HEIGHT");
+        require(gasToken.totalSupply() == INITIAL_SUPPLY - 2_369 * uint256(BYTE_GAS_PRICE), "TOTAL_BURN");
+    }
+
+    function _tokenBalance(bytes32 accountId) private view returns (uint256 amount) {
+        (bytes memory output,) = kernel.staticCall(
+            worldId, token, abi.encodePacked(bytes4(keccak256("balanceOf(bytes32)")), abi.encode(accountId)), 3_000
+        );
+        require(output.length == 32, "BALANCE_WIDTH");
+        amount = abi.decode(output, (uint256));
+    }
+
+    function _enforceReleaseCap() private view {
+        if (ACTOR.balance < releaseStartBalance) {
+            require(releaseStartBalance - ACTOR.balance <= RELEASE_ETH_CAP, "RELEASE_ETH_CAP_EXCEEDED");
+        }
+    }
+
+    function _logResult() private view {
+        console2.log("SINGLE_SIDED_UNAUDITED_EXPERIMENTAL", true);
+        console2.log("SINGLE_SIDED_WORLD_ID");
+        console2.logBytes32(worldId);
+        console2.log("SINGLE_SIDED_GAS_TOKEN", address(gasToken));
+        console2.log("SINGLE_SIDED_KERNEL", address(kernel));
+        console2.log("SINGLE_SIDED_HOOK", address(hook));
+        console2.log("SINGLE_SIDED_POSITION_TOKEN_ID", positionTokenId);
+        console2.log("SINGLE_SIDED_POSITION_LIQUIDITY", positionLiquidity);
+        console2.log("SINGLE_SIDED_TOKEN_DEPOSITED", oneSidedTokenDeposited);
+        console2.log("SINGLE_SIDED_INITIAL_SQRT_PRICE_X96", INITIAL_SQRT_PRICE_X96);
+        console2.log("SINGLE_SIDED_MARKET", address(market));
+        console2.log("SINGLE_SIDED_MINTABLE_SRC20_ID");
+        console2.logBytes32(token);
+        console2.log("SINGLE_SIDED_MARKET_ESCROW_ID");
+        console2.logBytes32(escrow);
+        console2.log("SINGLE_SIDED_EXECUTION_HEIGHT", kernel.executionHeight(worldId));
+        console2.log("SINGLE_SIDED_ACTOR_BALANCE_WEI", ACTOR.balance);
+    }
+}

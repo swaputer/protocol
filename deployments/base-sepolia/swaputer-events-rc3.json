@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "swaputer-testnet-release/1",
+  "release": "swaputer-v1.2-rc3",
+  "network": { "name": "Base Sepolia", "chainId": 84532 },
+  "sourceControlCommit": "3879da15bf6fb7edf1ff8c50abb95c1cf37b5345",
+  "deployedAt": "2026-09-05T05:36:00Z",
+  "promotedAt": "2026-09-05T05:45:00Z",
+  "acceptedAt": "2026-09-05T06:08:08Z",
+  "addresses": {
+    "factory": "0x2A1219A61D31e0E2D05E1CD124dce475EE634c29",
+    "router": "0xA8Ba8e0788Ec904F749EEc144e1F15f8a95244A5",
+    "registry": "0xa0aCF9355bAdc8A8e4F9568F4810E137266b9310",
+    "worldDeployer": "0x763E1ee785D5114a8f9329a328EcB73c974b6168",
+    "gasToken": "0x88898339896A9AdeA40894B15218A677C2Add09E",
+    "kernel": "0x31a59D9d9923AfEc67730afE54783eC4130551A4",
+    "hook": "0x573e10833b20c532bE4DA7177A797Eec87a4E0CC",
+    "marketFactory": "0x1ee15c8C16fb5C44DA090ede7dAD64860F5a5C8C",
+    "referenceMarket": "0xD7264aFA55C2150FC4a1861bcD0B19C6E6764Aa7",
+    "sethVault": "0xe18FB4343DE1bD599fc434eA41fE982f696423A2",
+    "auctionFactory": "0x463824fb851E4f181C5305B5e9c4fa91773a7cdA"
+  },
+  "worldId": "0xe8f2c911549238112347b47a3710d916e51612eea3baa2f0676198d5c5afd973",
+  "worldConfigHash": "0x4ad6f0cf4808c2e8442ea6480096590722eadcb50c42f7db88d7e3796b6b69e2",
+  "startBlock": 46409154,
+  "programs": {
+    "defaultSrc20Id": "0x0167aa7246975a468acd1ee47708b5eb09c41f62d7844b6ef0808f9614204a69",
+    "defaultSrc20CodeHash": "0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b",
+    "openMintSrc20CodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869",
+    "marketEscrowId": "0x01c56bf181fc538c17dcabb924c119f4e7a897eee09156e5d87ec82459723547",
+    "marketEscrowCodeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b",
+    "sethId": "0x0102a197f57324690e669e396d50eaa99d91f3f8c83f451516467e50ce883905",
+    "sethCodeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
+  },
+  "protocolFee": {
+    "feeBps": 300,
+    "configurable": true,
+    "claimedFromHook": true,
+    "adminTransferRoundTrip": true,
+    "acceptanceSnapshotAccruedWei": "450000000000"
+  },
+  "acceptance": {
+    "coreReceipts": "4/4",
+    "bootstrapReceipts": "15/15",
+    "marketFactoryReceipts": "1/1",
+    "sethReceipts": "4/4",
+    "auctionFactoryReceipts": "1/1",
+    "protocolFeeTransactions": "11/11",
+    "allStatuses": 1,
+    "sethFinalSolvent": true,
+    "referenceMarketOrdersSettled": 2,
+    "onchainSimulationReceipts": 17,
+    "onchainSimulationIndexed": 15,
+    "indexerExecutions": 27,
+    "indexerEvents": 50,
+    "indexerDeployments": 6,
+    "indexerErrors": 0,
+    "indexerLagBlocks": 0,
+    "indexerWebSocketConnected": true,
+    "freshDatabaseWorldIsolation": true,
+    "continuousAcceptance": "passed",
+    "sethContinuousSolvency": true
+  }
+}
