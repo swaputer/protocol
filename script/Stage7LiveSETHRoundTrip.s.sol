@@ -12,7 +12,7 @@ import {SwapVMSETHVault} from "../src/SwapVMSETHVault.sol";
 /// @notice Exercises the active Base Sepolia sETH vault without leaving a test liability behind.
 contract Stage7LiveSETHRoundTripScript is Script {
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
-    address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
+    address private constant DEFAULT_ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
 
     uint128 private constant VM_INPUT = 0.000001 ether;
     uint128 private constant BRIDGE_AMOUNT = 0.00001 ether;
@@ -21,6 +21,7 @@ contract Stage7LiveSETHRoundTripScript is Script {
     uint256 private constant MAX_NET_OUTFLOW = 0.01 ether;
 
     uint256 private actorKey;
+    address private actor;
     uint256 private actorEthBefore;
     uint256 private actorSethBefore;
     uint256 private lockedBefore;
@@ -47,7 +48,8 @@ contract Stage7LiveSETHRoundTripScript is Script {
     function _loadAndValidateEnvironment() private {
         require(block.chainid == BASE_SEPOLIA_CHAIN_ID, "BASE_SEPOLIA_ONLY");
         actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
-        require(vm.addr(actorKey) == ACTOR, "ACTOR_MISMATCH");
+        actor = vm.envOr("STAGE7A2_ACTOR", DEFAULT_ACTOR);
+        require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
 
         router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
         kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
@@ -67,8 +69,8 @@ contract Stage7LiveSETHRoundTripScript is Script {
         require(kernel.programCodeHash(worldId, seth) == sethCodeHash, "PROGRAM_CODE_HASH");
         require(_queryAddress("vault()") == address(vault), "PROGRAM_VAULT");
 
-        actorId = kernel.eoaAccountId(ACTOR);
-        actorEthBefore = ACTOR.balance;
+        actorId = kernel.eoaAccountId(actor);
+        actorEthBefore = actor.balance;
         require(actorEthBefore >= MAX_NET_OUTFLOW, "INSUFFICIENT_TEST_ETH");
     }
 
@@ -87,7 +89,7 @@ contract Stage7LiveSETHRoundTripScript is Script {
         uint64 nonce = kernel.nonces(worldId, actorId);
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(actorId, BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, ACTOR, nonce);
+        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
 
         vm.startBroadcast(actorKey);
         vault.deposit{value: BRIDGE_AMOUNT + VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, envelope, SQRT_PRICE_LIMIT);
@@ -105,10 +107,10 @@ contract Stage7LiveSETHRoundTripScript is Script {
     function _redeem() private {
         uint64 nonce = kernel.nonces(worldId, actorId);
         bytes memory payload = abi.encodePacked(bytes4(keccak256("bridgeBurn(uint256)")), abi.encode(BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, ACTOR, nonce);
+        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
 
         vm.startBroadcast(actorKey);
-        vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, ACTOR, envelope, SQRT_PRICE_LIMIT);
+        vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, actor, envelope, SQRT_PRICE_LIMIT);
         vm.stopBroadcast();
         require(kernel.nonces(worldId, actorId) == nonce + 1, "REDEEM_NONCE");
     }
@@ -121,7 +123,7 @@ contract Stage7LiveSETHRoundTripScript is Script {
         envelope = SwapVMKernel.VMEnvelope({
             op: SwapVMKernel.RootOp.CALL,
             worldId: worldId,
-            actor: ACTOR,
+            actor: actor,
             targetOrCodeHash: seth,
             payload: payload,
             byteGasLimit: SETH_LIMIT,
@@ -178,8 +180,8 @@ contract Stage7LiveSETHRoundTripScript is Script {
         require(address(vault).balance == vaultBalanceBefore, "FINAL_BACKING");
         require(vault.backingSurplus() == surplusBefore, "FINAL_SURPLUS");
         require(vault.isSolvent(), "FINAL_INSOLVENCY");
-        if (ACTOR.balance < actorEthBefore) {
-            require(actorEthBefore - ACTOR.balance <= MAX_NET_OUTFLOW, "OUTFLOW_CAP");
+        if (actor.balance < actorEthBefore) {
+            require(actorEthBefore - actor.balance <= MAX_NET_OUTFLOW, "OUTFLOW_CAP");
         }
     }
 

@@ -16,8 +16,8 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
     uint256 private constant RELEASE_ETH_CAP = 0.5 ether;
 
-    address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
-    address private constant BUYER = 0x23bAB887727e86b8FbD74a09d7EdAC80a3A62090;
+    address private constant DEFAULT_ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
+    address private constant DEFAULT_BUYER = 0x23bAB887727e86b8FbD74a09d7EdAC80a3A62090;
 
     bytes32 private constant OPEN_MINT_CODE_HASH = 0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869;
     bytes32 private constant ESCROW_CODE_HASH = 0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b;
@@ -45,9 +45,11 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         require(block.chainid == BASE_SEPOLIA_CHAIN_ID, "BASE_SEPOLIA_ONLY");
         uint256 actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         uint256 buyerKey = vm.envUint("STAGE7A2_SECOND_KEY");
+        address actor = vm.envOr("STAGE7A2_ACTOR", DEFAULT_ACTOR);
+        address buyer = vm.envOr("STAGE7A2_BUYER", DEFAULT_BUYER);
 
-        require(vm.addr(actorKey) == ACTOR, "ACTOR_MISMATCH");
-        require(vm.addr(buyerKey) == BUYER, "BUYER_MISMATCH");
+        require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
+        require(vm.addr(buyerKey) == buyer, "BUYER_MISMATCH");
         router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
         kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
@@ -61,28 +63,28 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         bytes32 codeHash = keccak256(packageBytes);
         require(codeHash == OPEN_MINT_CODE_HASH, "OPEN_MINT_HASH");
 
-        bytes32 actorId = kernel.eoaAccountId(ACTOR);
-        bytes32 buyerId = kernel.eoaAccountId(BUYER);
+        bytes32 actorId = kernel.eoaAccountId(actor);
+        bytes32 buyerId = kernel.eoaAccountId(buyer);
         bytes32 contractId = kernel.contractAccountId(worldId, actorId, kernel.creatorNonce(worldId, actorId), codeHash);
         uint64 actorActionNonce = kernel.nonces(worldId, actorId);
         uint64 buyerActionNonce = kernel.nonces(worldId, buyerId);
         uint64 heightBefore = kernel.executionHeight(worldId);
-        uint256 ethBalanceBefore = ACTOR.balance;
+        uint256 ethBalanceBefore = actor.balance;
 
         bytes memory constructorArgs = abi.encode(NAME, SYMBOL, SUPPLY_CAP, MINT_AMOUNT);
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorArgs);
         SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
             actorKey,
-            ACTOR,
+            actor,
             SwapVMKernel.RootOp.DEPLOY,
             codeHash,
             deployPayload,
             DEPLOY_LIMIT,
             actorActionNonce++,
             VM_ETH_IN,
-            ACTOR,
-            ACTOR
+            actor,
+            actor
         );
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, deployAction);
@@ -91,15 +93,15 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         bytes memory mintPayload = abi.encodePacked(bytes4(keccak256("mint(bytes32)")), abi.encode(actorId));
         SwapVMKernel.VMEnvelope memory mintAction = _signedAction(
             actorKey,
-            ACTOR,
+            actor,
             SwapVMKernel.RootOp.CALL,
             contractId,
             mintPayload,
             ACTION_LIMIT,
             actorActionNonce++,
             VM_ETH_IN,
-            ACTOR,
-            ACTOR
+            actor,
+            actor
         );
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, mintAction);
@@ -113,15 +115,15 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(buyerId, MINT_AMOUNT / 100));
         SwapVMKernel.VMEnvelope memory transferToBuyer = _signedAction(
             actorKey,
-            ACTOR,
+            actor,
             SwapVMKernel.RootOp.CALL,
             contractId,
             transferToBuyerPayload,
             ACTION_LIMIT,
             actorActionNonce++,
             VM_ETH_IN,
-            ACTOR,
-            ACTOR
+            actor,
+            actor
         );
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, transferToBuyer);
@@ -141,15 +143,15 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         );
         SwapVMKernel.VMEnvelope memory escrowDeploy = _signedAction(
             actorKey,
-            ACTOR,
+            actor,
             SwapVMKernel.RootOp.DEPLOY,
             ESCROW_CODE_HASH,
             deployEscrowPayload,
             DEPLOY_LIMIT,
             actorActionNonce++,
             VM_ETH_IN,
-            ACTOR,
-            ACTOR
+            actor,
+            actor
         );
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, escrowDeploy);
@@ -177,15 +179,15 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         uint128 sellPrice = market.quotePrice(sellAmount, SELL_UNIT_PRICE_WEI);
         SwapVMKernel.VMEnvelope memory approveSell = _signedAction(
             buyerKey,
-            BUYER,
+            buyer,
             SwapVMKernel.RootOp.CALL,
             contractId,
             abi.encodePacked(bytes4(keccak256("approve(bytes32,uint256)")), abi.encode(escrowId, sellAmount)),
             ACTION_LIMIT,
             buyerActionNonce++,
             VM_ETH_IN,
-            BUYER,
-            BUYER
+            buyer,
+            buyer
         );
         vm.startBroadcast(buyerKey);
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, approveSell);
@@ -193,14 +195,14 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
 
         SwapVMKernel.VMEnvelope memory deposit = _signedAction(
             buyerKey,
-            BUYER,
+            buyer,
             SwapVMKernel.RootOp.CALL,
             escrowId,
             abi.encodePacked(bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(buyerId, sellAmount)),
             ESCROW_LIMIT,
             buyerActionNonce++,
             VM_ETH_IN,
-            BUYER,
+            buyer,
             marketAddress
         );
 
@@ -234,10 +236,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         console2.log("LIVE_CHAIN_FLOW_SELL_ORDER_STATUS", _queryOrderStatus(market, sellOrderId));
         console2.log("LIVE_CHAIN_FLOW_ACTOR_TOKEN_AFTER", actorTokenAfter);
         console2.log("LIVE_CHAIN_FLOW_BUYER_TOKEN_AFTER", buyerTokenAfter);
-        console2.log("LIVE_CHAIN_FLOW_ETH_SPENT", ethBalanceBefore - ACTOR.balance);
+        console2.log("LIVE_CHAIN_FLOW_ETH_SPENT", ethBalanceBefore - actor.balance);
         console2.log("LIVE_CHAIN_FLOW_HEIGHT", kernel.executionHeight(worldId));
-        if (ACTOR.balance < ethBalanceBefore) {
-            require(ethBalanceBefore - ACTOR.balance <= RELEASE_ETH_CAP, "RELEASE_ETH_CAP_EXCEEDED");
+        if (actor.balance < ethBalanceBefore) {
+            require(ethBalanceBefore - actor.balance <= RELEASE_ETH_CAP, "RELEASE_ETH_CAP_EXCEEDED");
         }
     }
 
