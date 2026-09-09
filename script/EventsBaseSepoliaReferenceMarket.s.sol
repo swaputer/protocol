@@ -15,7 +15,6 @@ import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
 ///      accounting without leaving application liabilities behind.
 contract EventsBaseSepoliaReferenceMarketScript is Script {
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
-    bytes32 private constant TOKEN_CODE_HASH = 0xaf15e40fe9fc1181a7143abb413562d69e1ab49a655209ac966204646c85c14b;
     bytes32 private constant ESCROW_CODE_HASH = 0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b;
 
     uint128 private constant VM_INPUT = 0.000001 ether;
@@ -31,6 +30,7 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
     bytes32 private actorId;
     bytes32 private escrow;
     bytes32 private token;
+    bytes32 private tokenCodeHash;
     bytes32 private worldId;
     SwapVMWorldFactory private factory;
     SwapVMRouter private router;
@@ -54,13 +54,15 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         token = vm.envBytes32("SVM_DEFAULT_SRC20_ID");
+        tokenCodeHash = vm.envBytes32("SVM_DEFAULT_SRC20_CODE_HASH");
         require(address(factory).code.length != 0, "FACTORY_NOT_DEPLOYED");
         require(address(router).code.length != 0, "ROUTER_NOT_DEPLOYED");
         require(address(kernel).code.length != 0, "KERNEL_NOT_DEPLOYED");
         require(factory.router() == address(router), "FACTORY_ROUTER");
         SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         require(config.isSealed && config.kernel == address(kernel), "WORLD_BINDING");
-        require(kernel.programCodeHash(worldId, token) == TOKEN_CODE_HASH, "TOKEN_CODE_HASH");
+        require(tokenCodeHash != bytes32(0), "TOKEN_CODE_HASH_ZERO");
+        require(kernel.programCodeHash(worldId, token) == tokenCodeHash, "TOKEN_CODE_HASH");
         actorId = kernel.eoaAccountId(actor);
     }
 
@@ -90,7 +92,7 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         require(kernel.programCodeHash(worldId, escrow) == ESCROW_CODE_HASH, "ESCROW_DEPLOYMENT");
 
         vm.startBroadcast(actorKey);
-        market = new SwapVMSRC20Market(router, worldId, token, TOKEN_CODE_HASH, escrow, ESCROW_CODE_HASH);
+        market = new SwapVMSRC20Market(router, worldId, token, tokenCodeHash, escrow, ESCROW_CODE_HASH);
         vm.stopBroadcast();
         require(address(market) == predictedMarket, "MARKET_PREDICTION");
         require(market.tokenScale() == 1 ether, "TOKEN_SCALE");
