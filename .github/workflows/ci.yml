@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: protocol-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Contracts and release tooling
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out protocol
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve pinned Tooling commit
+        id: tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          tooling_ref="$(git ls-tree HEAD .deps/tooling | awk '{print $3}')"
+          test "$tooling_ref" != ""
+          printf 'sha=%s\n' "$tooling_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Check out pinned private Tooling dependency
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: swaputer/tooling
+          ref: ${{ steps.tooling.outputs.sha }}
+          path: .deps/tooling
+          ssh-key: ${{ secrets.TOOLING_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - name: Check out public Solidity dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule update --init --recursive --jobs 4 \
+            lib/forge-std \
+            lib/v4-core \
+            lib/v4-periphery
+
+      - name: Install Foundry 1.5.1
+        uses: foundry-rs/foundry-toolchain@908c540300062bd5a7e473851cdb4282204cee09
+        with:
+          version: v1.5.1
+
+      - name: Set up Node.js 22.21.0
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.21.0
+          cache: npm
+          cache-dependency-path: tooling/deployment-manifest/package-lock.json
+
+      - name: Install release-tooling dependencies
+        run: npm ci --prefix tooling/deployment-manifest
+
+      - name: Audit release-tooling dependencies
+        run: npm audit --prefix tooling/deployment-manifest --audit-level=high
+
+      - name: Build release tooling
+        run: npm run build --prefix tooling/deployment-manifest
+
+      - name: Check Solidity formatting
+        run: forge fmt --check
+
+      - name: Run protocol tests
+        run: forge test
+
+      - name: Run release-evidence tests
+        run: node --test script/*.test.mjs

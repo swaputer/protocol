@@ -31,7 +31,7 @@ Stage 6D1 adds the `tooling/tinysol` source workspace on Node.js 22. Its only ru
 
 Stage 6D2 adds no dependency. The lexer, parser, semantic analysis, deterministic compiler, fixture generator and CLI extensions use the same exact Node.js/TypeScript/hash-library lock. The Stage 6C compiler-event E2E reuses the existing indexer, local Anvil and Foundry tooling; it does not add an RPC SDK, parser generator, ABI framework, simulator or wallet library.
 
-Stage 6D3 adds exact runtime dependency `@noble/curves` `1.8.1` (MIT) to the TinySol workspace solely for local secp256k1 public-key recovery required by ISA `ECRECOVER`. The interpreter, journal, package/state model, byte estimator and differential corpus otherwise use project code and Node built-ins; they do not use RPC, an EVM emulator, a Solidity subprocess or wallet software. The Stage 6D3 workspace package was `0.3.0`; the current package-only distribution is prepared as `@swaputer-labs/tinysol@0.3.1`. Compiler package bytes are unchanged, while deterministic compiler sidecars were refreshed because the package manifest and exact workspace lock hash are part of compiler identity.
+Stage 6D3 adds exact runtime dependency `@noble/curves` `1.8.1` (MIT) to the TinySol workspace solely for local secp256k1 public-key recovery required by ISA `ECRECOVER`. The interpreter, journal, package/state model, byte estimator and differential corpus otherwise use project code and Node built-ins; they do not use RPC, an EVM emulator, a Solidity subprocess or wallet software. The Stage 6D3 workspace package was `0.3.0`, and the first replacement candidate used `@swaputer-labs/tinysol@0.3.1`. The current public package is `@swaputer-labs/tinysol@0.3.2`. Compiler package bytes are unchanged, while deterministic compiler sidecars were refreshed because the package manifest and exact workspace lock hash are part of compiler identity.
 
 Stage 6E adds no runtime or development dependency and no fourth npm workspace. Its orchestration script uses Node.js built-ins plus the already built codec, indexer and TinySol packages, and invokes the pinned local Foundry/Anvil/cast toolchain. All state is isolated to an ephemeral local Anvil chain and temporary SQLite database; no public RPC or deployment dependency is introduced.
 
@@ -51,13 +51,14 @@ contracts or TypeScript runtime code. `script/run-slither.sh` invokes the Foundr
 adapter with `--skip-clean`, filters dependency/test/script paths, and compares the
 machine result to the explicit triage in `security-results/slither-summary.json`.
 
-The current npm package boundary prepares exactly three MIT packages and does
-not publish them automatically: `@swaputer-labs/receipt-codec@0.1.1`,
-`@swaputer-labs/tinysol@0.3.1`, and `@swaputer-labs/cli@0.1.1`. Every source
-manifest remains `private: true`; only the Tooling repository's allowlisted
-temporary staging output may become public after an explicit release decision.
-The withdrawn `@swaputer/*` names remain historical publication evidence and
-are not reused or rewritten.
+The npm package boundary publishes exactly three MIT packages:
+`@swaputer-labs/receipt-codec@0.1.2`, `@swaputer-labs/tinysol@0.3.2`, and
+`@swaputer-labs/cli@0.1.2`. Every source manifest remains `private: true`;
+public archives are generated only from the Tooling repository's allowlisted
+temporary staging output. Package preparation and CI never publish
+automatically. The published CLI is a Node.js command-line package and exposes
+no browser subpath. The withdrawn `@swaputer/*` names remain historical
+publication evidence and are not reused or rewritten.
 
 Stage 7D-U1 adds no package. The release rehearsal uses Node built-ins, the four
 existing locked workspaces, and pinned Foundry/Anvil. Indexer health, backup and
