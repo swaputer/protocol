@@ -79,7 +79,13 @@ The August 30, 2026 final local replay used two independent Anvil accounts and e
 
 ## Frontend release configuration
 
-`apps/mint-ui` has no fallback to the obsolete v1.1 markets. The current bindings are defaults and can be overridden as one complete set:
+The standalone `swaputer/computer` frontend exposes Mint and Market as
+applications inside its desktop/mobile shell. It consumes one checked-in,
+fully verified Base Sepolia release manifest at `config/base-sepolia.json`; it
+does not fall back to v1.1 markets or combine bindings from different releases.
+
+The following build variables are optional integrity assertions. When supplied,
+each value must match the checked-in manifest or the build fails:
 
 ```text
 VITE_SWAPVM_PROTOCOL_VERSION=1.2
@@ -87,13 +93,18 @@ VITE_SWAPVM_WORLD_ID=0x...
 VITE_SWAPVM_KERNEL_ADDRESS=0x...
 VITE_SWAPVM_ROUTER_ADDRESS=0x...
 VITE_SWAPVM_SRC20_ID=0x...
-VITE_SWAPVM_MARKET_ADDRESS=0x...
-VITE_SWAPVM_MARKET_ESCROW_ID=0x...
+VITE_SWAPVM_MARKET_FACTORY_ADDRESS=0x...
 VITE_SWAPVM_MARKET_ESCROW_CODE_HASH=0x...
 ```
 
-The active Base Sepolia release uses market `0xE183C4d7Ad2F5D882B4c6025DBf4f47cD0669446`, MintableSRC20 AccountId `0x01ddc42fa71a13cc1ac4fad55e5adf116d9f6a299c18b467b3b90a8b722f946e`, and MarketEscrow AccountId `0x0182fbdf03d5b496c634e0eab2c603bea4297d738e5e1bb6083d98a4ccba2e3c`. The machine-readable source of truth is `deployments/active/base-sepolia.json`.
+The machine-readable protocol source of truth is
+`deployments/active/base-sepolia.json`. A frontend release copies and verifies
+that manifest as one unit rather than maintaining address documentation by
+hand.
 
 Its SVMG World was initialized at exactly `1 SVMG = 0.00001 ETH`. Official PositionManager position `#27258` supplied zero ETH and the maximum representable portion of the complete one-billion-SVMG fixed supply: `999,999,999.999999999999999958 SVMG`. The remaining `42` token wei are unavoidable liquidity-unit rounding dust. The range `[110040, 115080]` lies entirely below initial tick `115135`, proving the position was token1-only when minted.
 
-The sell-order UI validates the v1.2 version, exact immutable EVM market bindings and escrow AccountId before any write. Full current evidence is in `deployments/base-sepolia/swaputer-events-latest.json`; earlier deployment files remain historical evidence only.
+The Market application validates the v1.2 version, exact immutable EVM market
+bindings, and escrow code hash before any write. Full current evidence is in
+`deployments/base-sepolia/swaputer-events-latest.json`; earlier deployment files
+remain historical evidence only.

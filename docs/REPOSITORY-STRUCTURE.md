@@ -1,12 +1,14 @@
 # Swaputer repository structure
 
-Swaputer is split across five private repositories under the `swaputer`
+Swaputer is split across seven private repositories under the `swaputer`
 GitHub account.
 
 | Repository | Responsibility |
 | --- | --- |
 | `protocol` | Contracts, Foundry tests, protocol specifications, release manifests, and security evidence. |
-| `explorer` | Explorer product UI, Studio, Minter, Bridge, Market, Go indexer, REST API, and WebSocket feed. |
+| `explorer` | Read-only protocol explorer, Go indexer, REST API, and WebSocket feed. |
+| `computer` | Wallet-connected Mint, Market, Bridge, and Terminal applications in the Swaputer desktop/mobile shell. |
+| `studio` | Desktop-only TinySol editor, compiler, simulator, and deployment interface. |
 | `docs` | VitePress developer documentation site. |
 | `tooling` | TinySol, receipt codec, read-only CLI, Inspector, and internal development tools. |
 | `operations` | Docker testnet stack, monitoring, backups, recovery drills, continuous on-chain tests, and integration gates. |

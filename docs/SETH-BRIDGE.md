@@ -73,8 +73,10 @@ failed ETH payout rollback, forced-ETH isolation, and the real TinySol internal
 
 ## Frontend
 
-`apps/mint-ui` includes a Bridge page pinned to the current Base Sepolia
-deployment. All three application bindings can be overridden together:
+The standalone `swaputer/computer` frontend exposes Bridge as an application
+inside its desktop/mobile shell. Its `config/base-sepolia.json` file pins the
+complete current release. These optional build variables act only as integrity
+assertions and must match that manifest:
 
 ```text
 VITE_SWAPVM_SETH_VAULT_ADDRESS=0x...
@@ -82,5 +84,6 @@ VITE_SWAPVM_SETH_ID=0x...
 VITE_SWAPVM_SETH_CODE_HASH=0x...
 ```
 
-The page displays wallet sETH balance, locked ETH, total supply, forced surplus
-and solvency, and constructs the exact signed deposit/redeem envelopes.
+The application displays wallet sETH balance, locked ETH, total supply, forced
+surplus, and solvency, and constructs the exact signed deposit/redeem
+envelopes. It does not combine bindings from different releases.
