@@ -32,12 +32,11 @@ liquidity.
 
 ## v1.2 rc3 launch-scope decision
 
-Before mainnet authorization, the project must freeze one clean, reproducible
-v1.2 candidate commit and annotated immutable tag. The candidate must identify
-the exact launch scope. Contracts and applications not named in that scope are
-excluded from official mainnet interfaces. Remote publication and the owner's
-signed mainnet authorization are separate later actions; neither is implied by
-the local candidate freeze.
+The project froze one clean, reproducible v1.2 candidate commit and annotated
+immutable tag before mainnet authorization. That candidate records the scope
+that was accepted at freeze time. Remote publication and the owner's signed
+mainnet authorization are separate later actions; neither is implied by the
+local candidate freeze.
 
 The Stage 7M v1.2 rc3 candidate freezes the following first-release scope:
 
@@ -48,15 +47,17 @@ The Stage 7M v1.2 rc3 candidate freezes the following first-release scope:
 - the receipt codec, release verifier, production indexer, explorer and
   monitoring required to build and observe those components.
 
-The SRC20 market and MarketFactory and the sETH bridge are explicitly excluded
-from the first mainnet deployment and official transaction-bearing interface.
-Adding either later is a scope expansion that requires a new candidate,
-component-specific internal assurance, economic approval and explicit human
-authorization. Auction and AuctionFactory were retired after the rc3 freeze and
-are no longer part of the current source, tooling, active release manifest or
-official interfaces. The immutable rc3 candidate and historical Base Sepolia
-deployment records still contain Auction evidence solely to preserve an honest
-record of what was previously frozen and deployed.
+On 2026-09-10, the project owner approved the SRC20 market, MarketFactory and
+sETH bridge for the first mainnet launch. The owner explicitly accepted using
+their already-frozen source and assurance evidence without expanding or
+re-freezing the rc3 candidate and without repeating candidate acceptance. One
+complete Base Sepolia release-gate run is required after this decision and must
+exercise both Market settlement and the sETH deposit/redemption solvency path.
+This is an explicit scope-governance exception and does not authorize mainnet
+deployment or replace the still-required mainnet parameters and owner
+authorization. Auction and AuctionFactory remain retired from current source,
+tooling, active manifests and official interfaces. The immutable rc3 candidate
+and historical Base Sepolia records retain Auction evidence only as history.
 
 The machine-readable scope and source/artifact commitments live under
 `release/v1.2/`. The local candidate tag is
