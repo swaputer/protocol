@@ -4,7 +4,7 @@
     "name": "swaputer-v1.2-rc4",
     "protocolVersion": "1.2",
     "environment": "testnet",
-    "deploymentSourceCommit": "834816651c50026ee408438ee3b60fde3c3f4c04"
+    "deploymentSourceCommit": "668d70fbf90283b3e945a9bce51cbbd9948a6401"
   },
   "network": {
     "chainId": 84532,
@@ -28,43 +28,43 @@
     }
   },
   "core": {
-    "worldId": "0x6b0a7beb43df6641970b1f1878025f9bb629a379f73c64a83d4269a2a80996fd",
-    "factory": "0x5f3362c12Fe33c0845000B42Dff07edCf56126B7",
-    "router": "0xa70C0C74F2Dc2c0538730CA3687e078b3d0c2E56",
-    "kernel": "0xCc0f598e82E14035213ef470f19f3149005b5191",
-    "hook": "0xaEeAfe42295f59939Dc8E96cE8A3FDcAF6d820cC",
-    "gasToken": "0xf726D73FfACD5972E4529A01136AB840866CCBee",
-    "startBlock": 46411247
+    "worldId": "0xadad93d8673361d6d0a43fc18bd5cba066bd49b70ea9cee159f11e7cd1118c7a",
+    "factory": "0x99129082e6328D1b8f956C96E37c73ecc1EfEb9F",
+    "router": "0x88238527ECd804722605E5378F8D232F2A043EcA",
+    "kernel": "0x6AeB52Ba8eA951C2EA9f1e4B8cCD662FE76c1431",
+    "hook": "0x73818F19414441e1579a7Ad1663C2714B91F60CC",
+    "gasToken": "0xF7918e6e1C74261F0dadcCdDBD59067324BEc441",
+    "startBlock": 46624366
   },
   "programs": {
     "defaultSrc20": {
-      "programId": "0x011ad549e6b674fec0ec39ec30c14e88ff9ff8324953fa1360b95f9ff3df7fa1",
+      "programId": "0x016640c5279933b08bedf6f7156d5ecb111ed4c5f47d8a4eb7eedc43c9fde79f",
       "codeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869"
     },
     "openMintSrc20CodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869",
     "marketEscrow": {
-      "referenceProgramId": "0x015221702fc31228c6feecb8a90080cbee0f5fd12bf3170d80fcc65e1fc296ec",
+      "referenceProgramId": "0x01db46c506c6c2859e1f2ccb213b179c8819067f7ffe7b92c19d69eb0e0a9f7a",
       "codeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b"
     },
     "seth": {
-      "programId": "0x01e450e40015a7c4f2ec72a48d09dfb4b645a962fc0273ce80b00b49a136c7b2",
+      "programId": "0x016dfebbf3a0b0d13626745a0df591be8b31ad98414d89555c15b4ba0fe82694",
       "codeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
     }
   },
   "applications": {
-    "marketFactory": "0xDA8926d26461285Dab8fe79326624EaEc39CD757",
-    "referenceMarket": "0xc77f77d19aB6f02A55f7097e98bC987FA787aC61",
-    "sethVault": "0xC1F8fD09742167af52c81f4FA0C04E0EEb3908cb"
+    "marketFactory": "0x18CBAb00caa35d6b2CeEDB0b8aE009CF51E4279d",
+    "referenceMarket": "0x32C3459bDC301d46505a35A619E37Eda2d9720b4",
+    "sethVault": "0xE75A70168335d208288f723A797F49Ad1Af14303"
   },
   "runtimeCodeHashes": {
-    "factory": "0xf82281f18223a93de86820f90be864f0963c9af8c02403c302c0513ad8eeef16",
-    "router": "0xbd15437fae39c4e2ff1d604bee0352f7d24ff2b25b663281336f9f6161dd7ea1",
-    "kernel": "0xc72a39b6c9ad76a31594d2eb4d366f1e4f6586e88721cd46af8f208e0630f736",
-    "hook": "0x278c9239b616e3035e37f8494488adee5a2738c9d4ac1790f80eae9b70faec7f",
+    "factory": "0xae861b506d5460ec73da808957219f6bd585e272f0a1dff5eb38c1a41b23611c",
+    "router": "0x8bcf933dc35e1990baf5d99d8e5bb3f03a8a3fff808ff51cdb0d973bd87fd61c",
+    "kernel": "0x2c9ce8be92262a3c212bb2f82fd56bea241088e0201412cbf4fb5187e33b8d80",
+    "hook": "0xde6d3a49c183e1050ee158b71932f7c5c9c96ecc2f3e7c29dacc8684d76771d1",
     "gasToken": "0xb646f2826039460ed6b4b55df058a5021ef0a4633bec50fc3a6b2e270a91e06f",
-    "marketFactory": "0xd4ef75dbec8f23eaa351017a9c6793d7321f66ccfb35ae2d1d1eeb8de09414f3",
-    "referenceMarket": "0xd2783fb58ba3609cedbf5889bb705ac1ed4329ff03b5b4138e320bd59a69718e",
-    "sethVault": "0xfa7ad1b5afb65c6911341a9a2c447f1bcb4e4b9ec4e3b113c5dc33f899f86d90"
+    "marketFactory": "0x1ef49c073eadc826ef861465bdd268d552b3074d3dee468781dc284e80110c79",
+    "referenceMarket": "0xbfc0338b703c6e05c37bdeedf314c8a58788e86ebb09f549c4a0f17d91f2195f",
+    "sethVault": "0x7ce7e7cfe0dd186a21b0592330a82ef506037a4e4b114c99108b5f77f9ab6ace"
   },
   "parameters": {
     "vmInputWei": "1000000000000",
@@ -82,6 +82,6 @@
   },
   "integrity": {
     "algorithm": "sha256",
-    "manifestHash": "0x90d38b606d7a787a44bb0caf7bdbe1cfc493e695d01194ff43e2f31edabb77ec"
+    "manifestHash": "0x786d0135a6a426f70e8def5e9c4b083a2798a60896953a581d8be5af8ce7fe03"
   }
 }
