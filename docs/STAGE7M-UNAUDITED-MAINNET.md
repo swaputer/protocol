@@ -48,14 +48,15 @@ The Stage 7M v1.2 rc3 candidate freezes the following first-release scope:
 - the receipt codec, release verifier, production indexer, explorer and
   monitoring required to build and observe those components.
 
-The SRC20 market and MarketFactory, sETH bridge, auction and AuctionFactory are
-explicitly excluded from the first mainnet deployment and official
-transaction-bearing interface. Their source and tests remain in the repository
-as observation-only assurance material. Adding any one of them later is a scope
-expansion that requires a new candidate, component-specific internal assurance,
-economic approval and explicit human authorization. The Base Sepolia interface
-continues to expose its already-deployed applications; that testnet behavior is
-not a statement about the mainnet launch scope.
+The SRC20 market and MarketFactory and the sETH bridge are explicitly excluded
+from the first mainnet deployment and official transaction-bearing interface.
+Adding either later is a scope expansion that requires a new candidate,
+component-specific internal assurance, economic approval and explicit human
+authorization. Auction and AuctionFactory were retired after the rc3 freeze and
+are no longer part of the current source, tooling, active release manifest or
+official interfaces. The immutable rc3 candidate and historical Base Sepolia
+deployment records still contain Auction evidence solely to preserve an honest
+record of what was previously frozen and deployed.
 
 The machine-readable scope and source/artifact commitments live under
 `release/v1.2/`. The local candidate tag is

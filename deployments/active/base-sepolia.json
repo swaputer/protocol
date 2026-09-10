@@ -54,12 +54,7 @@
   "applications": {
     "marketFactory": "0xDA8926d26461285Dab8fe79326624EaEc39CD757",
     "referenceMarket": "0xc77f77d19aB6f02A55f7097e98bC987FA787aC61",
-    "sethVault": "0xC1F8fD09742167af52c81f4FA0C04E0EEb3908cb",
-    "auctionExample": {
-      "factory": "0x4B05D802e138A64f58C3f914bF42b96A31bd7D87",
-      "escrowCodeHash": "0x0b68683f866e3e83789420824530612988d5e7bfa4f372c2f84c80b75c7cf53a",
-      "indexed": false
-    }
+    "sethVault": "0xC1F8fD09742167af52c81f4FA0C04E0EEb3908cb"
   },
   "runtimeCodeHashes": {
     "factory": "0xf82281f18223a93de86820f90be864f0963c9af8c02403c302c0513ad8eeef16",
@@ -87,6 +82,6 @@
   },
   "integrity": {
     "algorithm": "sha256",
-    "manifestHash": "0x94aa9b85420f8381d916583c6b9cc0c059c238f1d2526b14a43deb06d9baa388"
+    "manifestHash": "0x90d38b606d7a787a44bb0caf7bdbe1cfc493e695d01194ff43e2f31edabb77ec"
   }
 }
