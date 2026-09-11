@@ -7,7 +7,7 @@ GitHub account.
 | --- | --- |
 | `protocol` | Contracts, Foundry tests, protocol specifications, release manifests, and security evidence. |
 | `explorer` | Read-only protocol explorer, Go indexer, REST API, and WebSocket feed. |
-| `computer` | Wallet-connected Mint, Market, Bridge, and Terminal applications in the Swaputer desktop/mobile shell. |
+| `ecosystem` | Wallet-connected Mint, Market, Bridge, and Terminal applications in the Swaputer desktop/mobile shell. |
 | `studio` | Desktop-only TinySol editor, compiler, simulator, and deployment interface. |
 | `docs` | VitePress developer documentation site. |
 | `tooling` | TinySol, receipt codec, read-only CLI, Inspector, and internal development tools. |

@@ -41,47 +41,28 @@
       "programId": "0x01edd8c0fdafca6f7b66418a46e3a001573c0fd2e41287fe2b62ff800b388dc1",
       "codeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869"
     },
-    "openMintSrc20CodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869",
-    "marketEscrow": {
-      "referenceProgramId": "0x01d9723401a9c1c4f938c4e9215e84fdec20a910bbbec49dae0c01bb9cb02a1e",
-      "codeHash": "0x6da9921193ebfe79468ef74f5b94925b66bf8230e145234a77868f1e5a85614b"
-    },
-    "seth": {
-      "programId": "0x0111a69a1b9239159f880ea828ded31c0613ea21a294cb67b387675c2a13457a",
-      "codeHash": "0x0ba319925e010cc61d6af3c0ef5dc9edb3bcfa1f6588e4ded86e744dbd3fc162"
-    }
-  },
-  "applications": {
-    "marketFactory": "0xa930Ccf5e3C5065D0A4Af2d262f2db360249CD65",
-    "referenceMarket": "0xe69000396109E98C92225f875bc3a44459Ba7891",
-    "sethVault": "0xd11F8479a780dfE226748BdC31c9F6D8Fc05d0Ce"
+    "openMintSrc20CodeHash": "0xaedd7bd1543d57afaeb94f6b46e28ba4c1ef7cdd2ad4affca011b17056036869"
   },
   "runtimeCodeHashes": {
     "factory": "0xe7f41da6f9f055496b1b91006a6282d4474c7509623ec5d67b0e0edb54af24ea",
     "router": "0x91a736a16200d08c78bbe0603ff7875be09788387287a9677a6362bf7a17514e",
     "kernel": "0x64eb6365baef44e341a93c2c898b21f92586eeb98449db40a22d85de41f7dfd6",
     "hook": "0x80f29707925e32742502d713def7c009d1fe32bfaf91d7fb43370955650410b8",
-    "gasToken": "0xb646f2826039460ed6b4b55df058a5021ef0a4633bec50fc3a6b2e270a91e06f",
-    "marketFactory": "0x5c0b386c02bd493a884ddd31bf0cf1cbb78a7f54ea75d7b1a4784e2435aec200",
-    "referenceMarket": "0x575e21bf37e8318bbd767f7b7cae7d25b38c6f5db69d19a1332dd3c12b2693cc",
-    "sethVault": "0xcb5f510d5507889e107782dfae9ce78d8bdfcf0085b8ee297ce601cf732a195d"
+    "gasToken": "0xb646f2826039460ed6b4b55df058a5021ef0a4633bec50fc3a6b2e270a91e06f"
   },
   "parameters": {
     "vmInputWei": "1000000000000",
     "sqrtPriceLimitX96": "4295128740",
-    "minNetTokenOut": "1",
-    "marketExpirySeconds": 86400,
-    "marketEscrowByteGasLimit": 8000,
-    "sethByteGasLimit": 8000
+    "minNetTokenOut": "1"
   },
   "indexer": {
-    "confirmations": 12,
+    "confirmations": 1,
     "reorgDepth": 64,
     "backfillBatch": 1000,
     "reconcileInterval": "20s"
   },
   "integrity": {
     "algorithm": "sha256",
-    "manifestHash": "0x4731d05e4ec58573fc3d883b23748ed3d5424982f813388a733eac306c4abb42"
+    "manifestHash": "0x9bebb69fb18f82484b9a035791d5bdec582f271f1ba27c0e7441ca9d80669fdf"
   }
 }

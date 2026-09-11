@@ -79,7 +79,7 @@ The August 30, 2026 final local replay used two independent Anvil accounts and e
 
 ## Frontend release configuration
 
-The standalone `swaputer/computer` frontend exposes Mint and Market as
+The standalone `swaputer/ecosystem` frontend exposes Mint and Market as
 applications inside its desktop/mobile shell. It consumes one checked-in,
 fully verified Base Sepolia release manifest at `config/base-sepolia.json`; it
 does not fall back to v1.1 markets or combine bindings from different releases.
