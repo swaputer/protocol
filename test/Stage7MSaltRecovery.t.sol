@@ -68,8 +68,7 @@ contract Stage7MSaltRecoveryTest is Test {
             address(kernelCodeStore),
             address(hookCodeStore),
             FEE_ADMIN,
-            FEE_CONTROLLER,
-            300
+            FEE_CONTROLLER
         );
         router = SwapVMRouter(payable(factory.router()));
 

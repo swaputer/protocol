@@ -24,6 +24,8 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
 
     uint160 private constant REQUIRED_HOOK_FLAGS = Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG
         | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
+    /// @notice Bidirectional protocol fee applied when every new World Hook is deployed.
+    uint16 public constant DEFAULT_PROTOCOL_FEE_BPS = 300;
     uint16 public constant MAX_PROTOCOL_FEE_BPS = 1_000;
     bytes32 public constant EXPECTED_KERNEL_CREATION_CODE_HASH =
         0x39325bff0318571ddcd4d4d9c7abe2d04b4577abb7629fe6118861ad099809af;
@@ -38,7 +40,6 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
     address public immutable override router;
     address public immutable initialProtocolFeeAdmin;
     address public immutable feeController;
-    uint16 public immutable initialProtocolFeeBps;
     SwapVMReferenceRegistry public immutable referenceRegistry;
     address public immutable kernelCreationCodeStore;
     address public immutable hookCreationCodeStore;
@@ -99,7 +100,6 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
     error InvalidPoolManager(address manager);
     error InvalidProtocolFeeAdmin(address admin);
     error InvalidFeeController(address controller);
-    error InvalidInitialProtocolFee(uint256 supplied, uint256 maximum);
     error PoolManagerCodeHashMismatch(bytes32 expected, bytes32 actual);
     error InvalidInitialSupply();
     error InvalidInitialHolder();
@@ -120,8 +120,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         address kernelCreationCodeStore_,
         address hookCreationCodeStore_,
         address protocolFeeAdmin_,
-        address feeController_,
-        uint16 initialProtocolFeeBps_
+        address feeController_
     ) {
         if (address(manager) == address(0) || address(manager).code.length == 0) {
             revert InvalidPoolManager(address(manager));
@@ -134,12 +133,8 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         poolManagerCodeHash = expectedPoolManagerCodeHash;
         if (protocolFeeAdmin_ == address(0)) revert InvalidProtocolFeeAdmin(protocolFeeAdmin_);
         if (feeController_ == address(0)) revert InvalidFeeController(feeController_);
-        if (initialProtocolFeeBps_ > MAX_PROTOCOL_FEE_BPS) {
-            revert InvalidInitialProtocolFee(initialProtocolFeeBps_, MAX_PROTOCOL_FEE_BPS);
-        }
         initialProtocolFeeAdmin = protocolFeeAdmin_;
         feeController = feeController_;
-        initialProtocolFeeBps = initialProtocolFeeBps_;
 
         bytes32 actualKernelCreationCodeHash = keccak256(kernelCreationCodeStore_.read());
         bytes32 actualHookCreationCodeHash = keccak256(hookCreationCodeStore_.read());
@@ -208,7 +203,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
             gasToken,
             initialProtocolFeeAdmin,
             feeController,
-            initialProtocolFeeBps,
+            DEFAULT_PROTOCOL_FEE_BPS,
             params.byteGasPrice,
             params.poolFee,
             params.tickSpacing,
@@ -313,6 +308,11 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         return address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", worldDeployer, hex"01")))));
     }
 
+    /// @notice Compatibility getter for the protocol-wide default used by deployment tooling.
+    function initialProtocolFeeBps() public pure returns (uint16) {
+        return DEFAULT_PROTOCOL_FEE_BPS;
+    }
+
     function predictHook(
         address worldDeployer,
         bytes32 hookSalt,
@@ -332,7 +332,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
                     gasToken,
                     initialProtocolFeeAdmin,
                     feeController,
-                    initialProtocolFeeBps,
+                    DEFAULT_PROTOCOL_FEE_BPS,
                     byteGasPrice,
                     fee,
                     tickSpacing
@@ -358,7 +358,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
                 || address(hook.kernel()) != address(kernel) || address(hook.poolManager()) != address(poolManager)
                 || address(hook.gasToken()) != address(gasToken) || kernel.byteGasPrice() != params.byteGasPrice
                 || hook.feeAdmin() != initialProtocolFeeAdmin || hook.feeController() != feeController
-                || hook.protocolFeeBps() != initialProtocolFeeBps || hook.byteGasPrice() != params.byteGasPrice
+                || hook.protocolFeeBps() != DEFAULT_PROTOCOL_FEE_BPS || hook.byteGasPrice() != params.byteGasPrice
                 || hook.poolFee() != params.poolFee || hook.poolTickSpacing() != params.tickSpacing
                 || gasToken.totalSupply() != params.initialSupply
                 || gasToken.balanceOf(params.initialHolder) != params.initialSupply

@@ -39,8 +39,6 @@ contract Stage7A2DeployScript is Script {
         address initialHolder = vm.envAddress("STAGE7A2_INITIAL_HOLDER");
         address protocolFeeAdmin = vm.envAddress("SVM_PROTOCOL_FEE_ADMIN");
         address feeController = vm.envAddress("SVM_FEE_CONTROLLER");
-        uint16 initialProtocolFeeBps =
-            _asUint16(vm.envUint("SVM_INITIAL_PROTOCOL_FEE_BPS"), "SVM_INITIAL_PROTOCOL_FEE_BPS");
         bytes32 distributionCommitment = vm.envBytes32("STAGE7A2_DISTRIBUTION_COMMITMENT");
         uint128 byteGasPrice = _asUint128(vm.envUint("STAGE7A2_BYTE_GAS_PRICE"), "STAGE7A2_BYTE_GAS_PRICE");
         uint24 poolFee = _asUint24(vm.envUint("STAGE7A2_POOL_FEE"), "STAGE7A2_POOL_FEE");
@@ -52,13 +50,7 @@ contract Stage7A2DeployScript is Script {
         SwapVMCreationCodeStore kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
         SwapVMCreationCodeStore hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
         SwapVMWorldFactory factory = new SwapVMWorldFactory(
-            manager,
-            managerCodeHash,
-            address(kernelStore),
-            address(hookStore),
-            protocolFeeAdmin,
-            feeController,
-            initialProtocolFeeBps
+            manager, managerCodeHash, address(kernelStore), address(hookStore), protocolFeeAdmin, feeController
         );
         vm.stopBroadcast();
 
@@ -108,7 +100,7 @@ contract Stage7A2DeployScript is Script {
         console2.log("STAGE7A2_ROUTER", factory.router());
         console2.log("STAGE7A2_PROTOCOL_FEE_ADMIN", protocolFeeAdmin);
         console2.log("STAGE7A2_FEE_CONTROLLER", feeController);
-        console2.log("STAGE7A2_INITIAL_PROTOCOL_FEE_BPS", initialProtocolFeeBps);
+        console2.log("STAGE7A2_INITIAL_PROTOCOL_FEE_BPS", factory.initialProtocolFeeBps());
         console2.log("STAGE7A2_REGISTRY", address(factory.referenceRegistry()));
         console2.log("STAGE7A2_WORLD_DEPLOYER", config.worldDeployer);
         console2.log("STAGE7A2_TOKEN", address(token));

@@ -229,8 +229,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
             address(kernelCodeStore),
             address(hookCodeStore),
             address(this),
-            address(this),
-            300
+            address(this)
         );
 
         bytes32 tokenSalt = keccak256("swaputer-ethereum-mainnet-fork-token");

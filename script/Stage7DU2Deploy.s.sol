@@ -86,8 +86,7 @@ contract Stage7DU2FactoryWorldScript is Stage7DU2BaseSepoliaScript {
             KERNEL_STORE,
             HOOK_STORE,
             vm.envAddress("SVM_PROTOCOL_FEE_ADMIN"),
-            vm.envAddress("SVM_FEE_CONTROLLER"),
-            uint16(vm.envUint("SVM_INITIAL_PROTOCOL_FEE_BPS"))
+            vm.envAddress("SVM_FEE_CONTROLLER")
         );
         vm.stopBroadcast();
 

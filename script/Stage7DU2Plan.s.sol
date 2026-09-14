@@ -26,18 +26,12 @@ contract Stage7DU2PlanScript is Script {
     uint128 internal constant BYTE_GAS_PRICE = 1_000_000_000_000;
     uint24 internal constant POOL_FEE = 3_000;
     int24 internal constant TICK_SPACING = 60;
+    uint16 internal constant DEFAULT_PROTOCOL_FEE_BPS = 300;
 
-    function run(
-        address deployer,
-        uint256 nextNonce,
-        address protocolFeeAdmin,
-        address feeController,
-        uint16 initialProtocolFeeBps
-    ) external view {
+    function run(address deployer, uint256 nextNonce, address protocolFeeAdmin, address feeController) external view {
         require(deployer != address(0), "DEPLOYER_REQUIRED");
         require(protocolFeeAdmin != address(0), "FEE_ADMIN_REQUIRED");
         require(feeController != address(0), "FEE_CONTROLLER_REQUIRED");
-        require(initialProtocolFeeBps <= 1_000, "FEE_BPS_TOO_HIGH");
 
         address kernelStore = vm.computeCreateAddress(deployer, nextNonce);
         address hookStore = vm.computeCreateAddress(deployer, nextNonce + 1);
@@ -69,7 +63,7 @@ contract Stage7DU2PlanScript is Script {
             token,
             protocolFeeAdmin,
             feeController,
-            initialProtocolFeeBps,
+            DEFAULT_PROTOCOL_FEE_BPS,
             BYTE_GAS_PRICE,
             POOL_FEE,
             TICK_SPACING
@@ -92,8 +86,7 @@ contract Stage7DU2PlanScript is Script {
                     kernelStore,
                     hookStore,
                     protocolFeeAdmin,
-                    feeController,
-                    initialProtocolFeeBps
+                    feeController
                 )
             )
         );

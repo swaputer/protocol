@@ -82,8 +82,7 @@ contract LocalV12EscrowMarketScript is Script {
             address(kernelStore),
             address(hookStore),
             vm.envAddress("SVM_PROTOCOL_FEE_ADMIN"),
-            vm.envAddress("SVM_FEE_CONTROLLER"),
-            uint16(vm.envUint("SVM_INITIAL_PROTOCOL_FEE_BPS"))
+            vm.envAddress("SVM_FEE_CONTROLLER")
         );
         vm.stopBroadcast();
         router = SwapVMRouter(payable(factory.router()));

@@ -77,8 +77,7 @@ contract SwapVMSRC20MarketTest is Test {
             address(kernelCodeStore),
             address(hookCodeStore),
             address(0xFEE),
-            address(0xC0FFEE),
-            300
+            address(0xC0FFEE)
         );
         router = SwapVMRouter(payable(factory.router()));
 

@@ -66,8 +66,7 @@ contract SwapVMStage7A2Test is Test {
             address(kernelCodeStore),
             address(hookCodeStore),
             FEE_ADMIN,
-            FEE_CONTROLLER,
-            300
+            FEE_CONTROLLER
         );
         router = SwapVMRouter(payable(factory.router()));
 
@@ -92,6 +91,8 @@ contract SwapVMStage7A2Test is Test {
         assertEq(address(router.poolManager()), address(manager));
         assertEq(address(router.factory()), address(factory));
         assertEq(factory.initialProtocolFeeAdmin(), FEE_ADMIN);
+        assertEq(factory.DEFAULT_PROTOCOL_FEE_BPS(), 300);
+        assertEq(factory.initialProtocolFeeBps(), factory.DEFAULT_PROTOCOL_FEE_BPS());
         assertEq(hook.feeController(), FEE_CONTROLLER);
         assertEq(hook.protocolFeeBps(), 300);
         assertEq(hook.feeAdmin(), FEE_ADMIN);
@@ -311,8 +312,7 @@ contract SwapVMStage7A2Test is Test {
             address(kernelCodeStore),
             address(hookCodeStore),
             address(0xFEE),
-            address(0xC0FFEE),
-            300
+            address(0xC0FFEE)
         );
 
         SwapVMCreationCodeStore badStore = new SwapVMCreationCodeStore(hex"00");
@@ -323,8 +323,7 @@ contract SwapVMStage7A2Test is Test {
             address(badStore),
             address(hookCodeStore),
             address(0xFEE),
-            address(0xC0FFEE),
-            300
+            address(0xC0FFEE)
         );
     }
 
