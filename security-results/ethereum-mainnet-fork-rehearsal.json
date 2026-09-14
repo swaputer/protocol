@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "swaputer-ethereum-mainnet-fork-rehearsal/1",
+  "generatedAt": "2026-09-13T04:49:11Z",
+  "status": "verified",
+  "source": {
+    "commit": "ec835b13578d116deedf8310c05356b8ef2b8780",
+    "testPath": "test/fork/SwapVMEthereumMainnetFork.t.sol"
+  },
+  "fork": {
+    "network": "Ethereum Mainnet",
+    "chainId": 1,
+    "blockTag": "finalized",
+    "blockNumber": 25966137,
+    "blockHash": "0xc6ae70a37536e7eeb33457e13b4ff18fddf94fc57dcdee542210967818aa23c1",
+    "provider": "https://ethereum-rpc.publicnode.com",
+    "upstreamTransactionsBroadcast": false,
+    "externalPrivateKeyLoaded": false,
+    "deterministicForgeTestKeyOnly": true
+  },
+  "upstream": {
+    "poolManager": {
+      "address": "0x000000000004444c5dc75cb358380d2e3de08a90",
+      "codeHash": "0x785f1014552b7ce7d5fb7d0c970ca60edee94fd00425d7ca21609acac7ce1293"
+    },
+    "positionManager": {
+      "address": "0xbd216513d74c8cf14cf4747e6aaa6420ff64ee9e",
+      "codeHash": "0x77e36c08b19959a30dde46dec9abe6208e371ff2f56884a56fe1e1a53615528b"
+    },
+    "permit2": {
+      "address": "0x000000000022d473030f116ddee9f6b43ac78ba3",
+      "codeHash": "0xc67d1657868aa5146eaf24fb879fb1fdec3d2d493b3683a61c9c2f4fb2851131"
+    },
+    "universalRouter": {
+      "address": "0x0542093271a31f6fc1dadb232bd59eeb27de780f",
+      "codeHash": "0x1b37035dac8ecda2e578a0047748e495aa397ee4bc7640468a5b60c1c55d824c",
+      "version": "2.2"
+    },
+    "bindings": {
+      "universalRouterPoolManager": true,
+      "universalRouterPositionManager": true,
+      "positionManagerPoolManager": true,
+      "positionManagerPermit2": true
+    }
+  },
+  "rehearsal": {
+    "testCount": 3,
+    "passed": 3,
+    "failed": 0,
+    "freshCoreDeployedOnFork": true,
+    "directOfficialUniversalRouter": true,
+    "officialPositionManagerBindingsVerified": true,
+    "officialPositionManagerLiquidityUsed": false,
+    "liquidityProvider": "fork-local-test-router",
+    "deployExecuted": true,
+    "callExecuted": true,
+    "stateVerified": true,
+    "byteGasAccountingVerified": true,
+    "protocolFeeAccountingVerified": true,
+    "poolManagerDeltasSettled": true,
+    "adversarialCases": [
+      "mutated-envelope",
+      "replay",
+      "wrong-router-binding",
+      "out-of-byte-gas"
+    ],
+    "noBroadcast": true,
+    "mainnetReleaseConfigCreated": false,
+    "mainnetEconomicParametersFinalized": false
+  }
+}
