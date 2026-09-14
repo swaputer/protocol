@@ -40,9 +40,8 @@ contract TinySolNewCapabilitiesLiveScript is Script {
         require(kernel.programCodeHash(worldId, programId) == codeHash, "DEPLOY_HASH_MISMATCH");
 
         _broadcast(SwapVMKernel.RootOp.CALL, programId, abi.encodePacked(bytes4(keccak256("write()"))));
-        (bytes memory output,) = kernel.staticCall(
-            worldId, programId, abi.encodePacked(bytes4(keccak256("read()"))), ACTION_LIMIT
-        );
+        (bytes memory output,) =
+            kernel.staticCall(worldId, programId, abi.encodePacked(bytes4(keccak256("read()"))), ACTION_LIMIT);
         bytes memory expected = bytes.concat(
             abi.encode(uint256(6), uint256(228), uint256(189), uint256(160), uint256(229), uint256(165), uint256(189)),
             abi.encode(uint256(3), uint256(97), uint256(98), uint256(99)),
