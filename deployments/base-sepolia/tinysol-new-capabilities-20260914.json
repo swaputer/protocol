@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "swaputer-tinysol-capability-proof/1",
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": 84532
+  },
+  "release": "swaputer-v1.2-rc4",
+  "worldId": "0x11a8453d7abbfbde6f024b226ddfbf6f9c4c9f5b4367b57b0decd074e1a7ed61",
+  "kernel": "0xDa06c2fEeC2c71368F79B1D5cb216935e1071833",
+  "router": "0x25858bB17Bc994e0B32fC1305E13B6295Cdf88Ef",
+  "compiler": {
+    "package": "@swaputer-labs/tinysol@0.4.0",
+    "sourceCommit": "b357805688b579cd19f65821019c6db902768574",
+    "sourceFingerprint": "0x5bb9b2da93466c77b3e7a845182b25c58144ffcad9ac806d24bec10008330d2e",
+    "tarballSha256": "3eafc4092702bbbd0cfedd7da2d82fe988be591dc4b7f0c6a8e5b87dee98985e"
+  },
+  "program": {
+    "sourceName": "CapabilityProbe.tiny.sol",
+    "programId": "0x01b4b5e9113e5b354846f725031907018a7d79cbe5e3e22797b814cb5976a0da",
+    "codeHash": "0x04c195f99e95dbcfdc77688981a9a38d8bbbb4549470c430916e9c3e755f3979",
+    "codeBytes": 1869,
+    "packageBytes": 1913
+  },
+  "transactions": [
+    {
+      "purpose": "deploy",
+      "hash": "0x26aa746aa37bbc4118a6b29198d6a803697055e89cda63060ee8ab84e8f40ba2",
+      "blockNumber": 46778020,
+      "status": 1,
+      "gasUsed": 3359687
+    },
+    {
+      "purpose": "write",
+      "hash": "0x259cd87bcef240001014cac0876bc2b514bb72a08439f70cde382f01183e5368",
+      "blockNumber": 46778022,
+      "status": 1,
+      "gasUsed": 2451975
+    }
+  ],
+  "readback": {
+    "selector": "0x57de26a4",
+    "outputBytes": 896,
+    "executedBytes": 801,
+    "outputKeccak256": "0x1ec09b76bd7fa9f3d5327d9beb79dfef0f45f590ae34d2160e5dcf6374d8810d",
+    "decoded": {
+      "greeting": "你好",
+      "payload": "abc",
+      "values": [7, 0, 11],
+      "record": {
+        "name": "tiny",
+        "tag": "xy",
+        "nums": [5],
+        "note": "ok"
+      }
+    }
+  },
+  "assertions": {
+    "receiptsSuccessful": true,
+    "programCodeHashMatched": true,
+    "boundedOutputMatched": true,
+    "runtimeCodeHashesMatchedActiveManifest": true
+  }
+}
