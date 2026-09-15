@@ -72,4 +72,4 @@ The completed Stage 6C verification run produced:
 - v1.1 spec/ISA and v1.0 historical spec/ISA manifest checks: passed;
 - npm production dependency audits for both TypeScript workspaces: 0 vulnerabilities.
 
-Runtime sizes remain unchanged because Stage 6C is offchain-only: `SwapVMKernel` 21,918 bytes, `SwapVMHook` 5,842 bytes, `SwapVMGasToken` 1,350 bytes, `SwapVMReferenceRegistry` 1,606 bytes and `SwapVMStage6BDriver` 2,311 bytes.
+Runtime sizes remain unchanged because Stage 6C is offchain-only: `SwaputerKernel` 21,918 bytes, `SwaputerHook` 5,842 bytes, `SwaputerToken` 1,350 bytes, `SwaputerProgramRegistry` 1,606 bytes and `SwapVMStage6BDriver` 2,311 bytes.

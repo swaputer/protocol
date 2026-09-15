@@ -5,10 +5,10 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSETHVault} from "../src/SwapVMSETHVault.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Deploys and atomically exercises the sETH bridge on the Base Sepolia Events World.
 contract EventsBaseSepoliaSETHBridgeScript is Script {
@@ -27,9 +27,9 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
     uint256 private actorKey;
     address private actor;
     uint256 private startBalance;
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
     bytes32 private actorId;
     bytes32 private seth;
@@ -48,15 +48,15 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
         actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         actor = vm.envOr("STAGE7A2_ACTOR", DEFAULT_ACTOR);
         require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
-        factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         require(address(factory).code.length != 0, "FACTORY_NOT_DEPLOYED");
         require(address(router).code.length != 0, "ROUTER_NOT_DEPLOYED");
         require(address(kernel).code.length != 0, "KERNEL_NOT_DEPLOYED");
         require(factory.router() == address(router), "FACTORY_ROUTER");
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         require(config.isSealed, "WORLD_NOT_SEALED");
         require(config.kernel == address(kernel), "WORLD_KERNEL");
         startBalance = actor.balance;
@@ -76,8 +76,8 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
         address predictedVault = vm.computeCreateAddress(actor, vm.getNonce(actor) + 1);
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(predictedVault));
-        SwapVMKernel.VMEnvelope memory deploy = _signedEnvelope(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory deploy = _signedEnvelope(
+            SwaputerKernel.RootOp.DEPLOY,
             SETH_CODE_HASH,
             deployPayload,
             DEPLOY_LIMIT,
@@ -102,8 +102,8 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
         uint64 nonce = kernel.nonces(worldId, actorId);
         bytes memory mintPayload =
             abi.encodePacked(bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(actorId, BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory mint =
-            _signedEnvelope(SwapVMKernel.RootOp.CALL, seth, mintPayload, SETH_LIMIT, actor, address(vault), nonce);
+        SwaputerKernel.VMEnvelope memory mint =
+            _signedEnvelope(SwaputerKernel.RootOp.CALL, seth, mintPayload, SETH_LIMIT, actor, address(vault), nonce);
 
         vm.startBroadcast(actorKey);
         vault.deposit{value: BRIDGE_AMOUNT + VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, mint, SQRT_PRICE_LIMIT);
@@ -116,8 +116,9 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
         require(vault.isSolvent(), "DEPOSIT_SOLVENCY");
 
         bytes memory burnPayload = abi.encodePacked(bytes4(keccak256("bridgeBurn(uint256)")), abi.encode(BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory burn =
-            _signedEnvelope(SwapVMKernel.RootOp.CALL, seth, burnPayload, SETH_LIMIT, actor, address(vault), nonce + 1);
+        SwaputerKernel.VMEnvelope memory burn = _signedEnvelope(
+            SwaputerKernel.RootOp.CALL, seth, burnPayload, SETH_LIMIT, actor, address(vault), nonce + 1
+        );
 
         vm.startBroadcast(actorKey);
         vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, actor, burn, SQRT_PRICE_LIMIT);
@@ -126,15 +127,15 @@ contract EventsBaseSepoliaSETHBridgeScript is Script {
     }
 
     function _signedEnvelope(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         address recipient,
         address executor,
         uint64 nonce
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
-        envelope = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

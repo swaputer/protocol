@@ -21,10 +21,10 @@ import {StateLibrary} from "@uniswap/v4-core/src/libraries/StateLibrary.sol";
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMReferenceRegistry} from "../src/SwapVMReferenceRegistry.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerProgramRegistry} from "../src/SwaputerProgramRegistry.sol";
 
 /// @dev Local-only canonical settlement route used by the Stage 6 release-candidate test.
 contract Stage6ERouter is IUnlockCallback {
@@ -57,7 +57,7 @@ contract Stage6ERouter is IUnlockCallback {
     {
         if (recipient == address(0)) revert InvalidRecipient();
         if (hookData.length != 0) {
-            SwapVMKernel.VMEnvelope memory action = abi.decode(hookData, (SwapVMKernel.VMEnvelope));
+            SwaputerKernel.VMEnvelope memory action = abi.decode(hookData, (SwaputerKernel.VMEnvelope));
             if (action.recipient != recipient) revert InvalidRecipient();
             if (action.authorizedExecutor != address(0) && action.authorizedExecutor != msg.sender) {
                 revert ExecutorNotAuthorized(action.authorizedExecutor, msg.sender);
@@ -143,9 +143,9 @@ contract Stage6EE2EScript is Script {
     uint256 private actorKey;
     address private actor;
     PoolManager private manager;
-    SwapVMGasToken private token;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerToken private token;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     Stage6ERouter private router;
     Stage6EFailureExecutor private failureExecutor;
     PoolKey private key;
@@ -159,10 +159,10 @@ contract Stage6EE2EScript is Script {
 
         vm.startBroadcast(actorKey);
         manager = new PoolManager(actor);
-        token = new SwapVMGasToken(INITIAL_SUPPLY, actor);
+        token = new SwaputerToken(INITIAL_SUPPLY, actor);
         PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
         router = new Stage6ERouter(manager);
-        SwapVMReferenceRegistry registry = new SwapVMReferenceRegistry();
+        SwaputerProgramRegistry registry = new SwaputerProgramRegistry();
         vm.stopBroadcast();
 
         uint64 nextNonce = vm.getNonce(actor);
@@ -171,7 +171,7 @@ contract Stage6EE2EScript is Script {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -181,11 +181,11 @@ contract Stage6EE2EScript is Script {
             TICK_SPACING
         );
         (address expectedHook, bytes32 salt) =
-            HookMiner.find(FOUNDRY_CREATE2_DEPLOYER, flags, type(SwapVMHook).creationCode, hookArgs);
+            HookMiner.find(FOUNDRY_CREATE2_DEPLOYER, flags, type(SwaputerHook).creationCode, hookArgs);
 
         vm.startBroadcast(actorKey);
-        kernel = new SwapVMKernel(expectedHook, BYTE_GAS_PRICE);
-        hook = new SwapVMHook{salt: salt}(
+        kernel = new SwaputerKernel(expectedHook, BYTE_GAS_PRICE);
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
         key = PoolKey({
@@ -224,7 +224,7 @@ contract Stage6EE2EScript is Script {
             abi.encode(bytes32("Stage6E Token"), bytes32("S6E"), uint256(18), uint256(1_000), actorId);
         src20 = _nextContract(packageBytes);
         BalanceDelta delta = _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, constructorInput),
             ACTION_LIMIT,
@@ -252,7 +252,7 @@ contract Stage6EE2EScript is Script {
         bytes32 actorId = kernel.eoaAccountId(actor);
         miniToken = _nextContract(packageBytes);
         BalanceDelta delta = _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, abi.encode(uint256(1_000), actorId)),
             ACTION_LIMIT,
@@ -267,7 +267,7 @@ contract Stage6EE2EScript is Script {
         bytes32 recipient = kernel.eoaAccountId(address(0xcafe));
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(recipient, uint256(7)));
-        BalanceDelta delta = _executeBuy(SwapVMKernel.RootOp.CALL, miniToken, payload, ACTION_LIMIT, actor);
+        BalanceDelta delta = _executeBuy(SwaputerKernel.RootOp.CALL, miniToken, payload, ACTION_LIMIT, actor);
         _printLast("STAGE6E_CUSTOM_CALL", delta);
     }
 
@@ -327,14 +327,14 @@ contract Stage6EE2EScript is Script {
         bytes32 recipient = kernel.eoaAccountId(address(0xbeef));
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(recipient, uint256(125)));
-        delta = _executeBuy(SwapVMKernel.RootOp.CALL, src20, payload, ACTION_LIMIT, actor);
+        delta = _executeBuy(SwaputerKernel.RootOp.CALL, src20, payload, ACTION_LIMIT, actor);
     }
 
-    function _executeBuy(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
+    function _executeBuy(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
         private
         returns (BalanceDelta delta)
     {
-        SwapVMKernel.VMEnvelope memory action = _signed(op, target, payload, limit, executor);
+        SwaputerKernel.VMEnvelope memory action = _signed(op, target, payload, limit, executor);
         vm.startBroadcast(actorKey);
         delta = router.swap{value: 1 ether}(
             key,
@@ -348,20 +348,20 @@ contract Stage6EE2EScript is Script {
     }
 
     function _configureFailure(bytes memory payload, uint32 limit) private {
-        SwapVMKernel.VMEnvelope memory action =
-            _signed(SwapVMKernel.RootOp.CALL, src20, payload, limit, address(failureExecutor));
+        SwaputerKernel.VMEnvelope memory action =
+            _signed(SwaputerKernel.RootOp.CALL, src20, payload, limit, address(failureExecutor));
         vm.startBroadcast(actorKey);
         failureExecutor.configure(abi.encode(action));
         vm.stopBroadcast();
     }
 
-    function _signed(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
+    function _signed(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        action = SwapVMKernel.VMEnvelope({
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,
@@ -439,9 +439,9 @@ contract Stage6EE2EScript is Script {
         actorKey = vm.envUint("STAGE6E_PRIVATE_KEY");
         actor = vm.addr(actorKey);
         manager = PoolManager(vm.envAddress("STAGE6E_MANAGER"));
-        token = SwapVMGasToken(vm.envAddress("STAGE6E_TOKEN"));
-        kernel = SwapVMKernel(vm.envAddress("STAGE6E_KERNEL"));
-        hook = SwapVMHook(payable(vm.envAddress("STAGE6E_HOOK")));
+        token = SwaputerToken(vm.envAddress("STAGE6E_TOKEN"));
+        kernel = SwaputerKernel(vm.envAddress("STAGE6E_KERNEL"));
+        hook = SwaputerHook(payable(vm.envAddress("STAGE6E_HOOK")));
         router = Stage6ERouter(payable(vm.envAddress("STAGE6E_ROUTER")));
         failureExecutor = Stage6EFailureExecutor(payable(vm.envAddress("STAGE6E_FAILURE_EXECUTOR")));
         key = PoolKey({

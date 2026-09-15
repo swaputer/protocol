@@ -13,8 +13,8 @@ Reports must identify whether they apply to immutable baseline
 `swaputer-v1.1-stage7c-rc2` / `afa54c2e02e7e91430b14b6884faff5e3f5867d9` or a later explicitly
 named experimental build. In scope:
 
-- `SwapVMHook`, `SwapVMKernel`, integrated `SwapVMMiniVM`, `SwapVMGasToken`;
-- `SwapVMRouter`, `SwapVMWorldFactory`, `SwapVMWorldDeployer`, creation-code stores and registry;
+- `SwaputerHook`, `SwaputerKernel`, integrated `SwapVMMiniVM`, `SwaputerToken`;
+- `SwaputerAppRouter`, `SwaputerWorldFactory`, `SwaputerWorldDeployer`, creation-code stores and registry;
 - immutable SRC-20/SRC-721/SRC-1155/CPAMM reference packages;
 - receipt codec, indexer/reorg logic, ABI/codeHash binding, TinySol compiler/assembler/simulator,
   fee estimator and deployment-manifest/preflight tooling.

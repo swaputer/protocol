@@ -19,14 +19,14 @@ import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientSta
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
 import {SwapVMMiniVM} from "../src/SwapVMMiniVM.sol";
 import {ReceiptFixture} from "./utils/ReceiptFixture.sol";
 
-contract SwapVMKernelStage2Harness is SwapVMKernel {
-    constructor(address boundHook, uint128 price) SwapVMKernel(boundHook, price) {}
+contract SwapVMKernelStage2Harness is SwaputerKernel {
+    constructor(address boundHook, uint128 price) SwaputerKernel(boundHook, price) {}
 
     function install(bytes32 worldId, bytes32 target, bytes calldata code) external {
         _registerProgram(worldId, target, code);
@@ -62,7 +62,7 @@ contract SwapVMStage2Router is IUnlockCallback {
     {
         if (recipient == address(0)) revert InvalidRecipient();
         if (hookData.length != 0) {
-            SwapVMKernel.VMEnvelope memory action = abi.decode(hookData, (SwapVMKernel.VMEnvelope));
+            SwaputerKernel.VMEnvelope memory action = abi.decode(hookData, (SwaputerKernel.VMEnvelope));
             if (action.recipient != recipient) revert InvalidRecipient();
             if (action.authorizedExecutor != address(0) && action.authorizedExecutor != msg.sender) {
                 revert ExecutorNotAuthorized(action.authorizedExecutor, msg.sender);
@@ -108,9 +108,9 @@ contract SwapVMStage2Test is Test {
     bytes32 internal constant EVENTS_TOPIC = keccak256("Events(bytes32,uint64,bytes)");
 
     PoolManager internal manager;
-    SwapVMGasToken internal token;
+    SwaputerToken internal token;
     SwapVMKernelStage2Harness internal kernel;
-    SwapVMHook internal hook;
+    SwaputerHook internal hook;
     SwapVMStage2Router internal router;
     PoolKey internal key;
     bytes32 internal worldId;
@@ -136,7 +136,7 @@ contract SwapVMStage2Test is Test {
         vm.deal(actor, 100 ether);
 
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(INITIAL_SUPPLY, address(this));
+        token = new SwaputerToken(INITIAL_SUPPLY, address(this));
         PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
         router = new SwapVMStage2Router(manager);
 
@@ -146,7 +146,7 @@ contract SwapVMStage2Test is Test {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -156,10 +156,10 @@ contract SwapVMStage2Test is Test {
             TICK_SPACING
         );
         (address expectedHook, bytes32 salt) =
-            HookMiner.find(address(this), flags, type(SwapVMHook).creationCode, hookArgs);
+            HookMiner.find(address(this), flags, type(SwaputerHook).creationCode, hookArgs);
 
         kernel = new SwapVMKernelStage2Harness(expectedHook, BYTE_GAS_PRICE);
-        hook = new SwapVMHook{salt: salt}(
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
 
@@ -179,6 +179,7 @@ contract SwapVMStage2Test is Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        hook.live();
         kernel.install(worldId, STATE_TARGET, STATE_PROGRAM);
         kernel.install(worldId, VIEW_TARGET, VIEW_PROGRAM);
         kernel.install(worldId, LOOP_TARGET, LOOP_PROGRAM);
@@ -188,7 +189,7 @@ contract SwapVMStage2Test is Test {
     function test_authenticatedCallExecutesMetersStoresBurnsAndAdvancesNonce() public {
         uint256 supplyBefore = token.totalSupply();
         uint256 actorBalanceBefore = token.balanceOf(actor);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -230,8 +231,8 @@ contract SwapVMStage2Test is Test {
         bytes memory constructorInput = abi.encode(uint256(42));
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorInput);
-        SwapVMKernel.VMEnvelope memory action = _signedActionForOp(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = _signedActionForOp(
+            SwaputerKernel.RootOp.DEPLOY,
             ACTOR_KEY,
             codeHash,
             deployPayload,
@@ -303,8 +304,8 @@ contract SwapVMStage2Test is Test {
         bytes memory packageBytes = _package(0, 3, keccak256("Stage3.RevertingConstructor"), code);
         bytes32 codeHash = keccak256(packageBytes);
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory action = _signedActionForOp(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = _signedActionForOp(
+            SwaputerKernel.RootOp.DEPLOY,
             ACTOR_KEY,
             codeHash,
             deployPayload,
@@ -346,7 +347,7 @@ contract SwapVMStage2Test is Test {
         kernel.install(worldId, callee, calleeCode);
         kernel.install(worldId, caller, callerCode);
 
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             caller,
             bytes(""),
@@ -381,7 +382,7 @@ contract SwapVMStage2Test is Test {
         kernel.install(
             worldId, caller, abi.encodePacked(hex"602a5f52", bytes1(0x7f), callee, hex"60205f60206020f1503d60206020f3")
         );
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             caller,
             bytes(""),
@@ -433,7 +434,7 @@ contract SwapVMStage2Test is Test {
         bytes32 factoryId = kernel.contractAccountId(worldId, actorId, 1, factoryHash);
         _executeDeploy(factoryPackage, factoryHash, bytes(""), 1, 1);
 
-        SwapVMKernel.VMEnvelope memory callAction = _signedAction(
+        SwaputerKernel.VMEnvelope memory callAction = _signedAction(
             ACTOR_KEY,
             factoryId,
             bytes(""),
@@ -500,7 +501,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function test_replayRevertsAndRollsBackSwapVmAndSupply() public {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -549,7 +550,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function test_buyOutOfByteGasRollsBackAllSwapVmEffects() public {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -587,7 +588,7 @@ contract SwapVMStage2Test is Test {
         bytes memory code = hex"602a6001555f5ffd";
         bytes32 target = _targetFor(code);
         kernel.install(worldId, target, code);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             target,
             bytes(""),
@@ -620,10 +621,10 @@ contract SwapVMStage2Test is Test {
     function test_mutatedFirstEnvelopeCannotRecoverFreshActor() public {
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
         uint64 deadline = uint64(block.timestamp + 1 days);
-        SwapVMKernel.VMEnvelope memory valid = _signedAction(
+        SwaputerKernel.VMEnvelope memory valid = _signedAction(
             ACTOR_KEY, STATE_TARGET, bytes(""), 100, 0, 0, deadline, actor, actor, 1 ether, priceLimit, address(router)
         );
-        SwapVMKernel.VMEnvelope memory changed = valid;
+        SwaputerKernel.VMEnvelope memory changed = valid;
         changed.targetOrCodeHash = VIEW_TARGET;
 
         _assertRejectedAction(changed, actor, 1 ether, priceLimit, router);
@@ -633,7 +634,7 @@ contract SwapVMStage2Test is Test {
 
     function test_explicitActorMustMatchRecoveredSigner() public {
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -670,7 +671,7 @@ contract SwapVMStage2Test is Test {
 
     function test_legacyVersionsAndSwapVMDomainNameAreRejectedByV12() public {
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -779,7 +780,7 @@ contract SwapVMStage2Test is Test {
         address recipient = address(0xCAFE);
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
         vm.deal(relayer, 2 ether);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             TX_CONTEXT_TARGET,
             bytes(""),
@@ -813,7 +814,7 @@ contract SwapVMStage2Test is Test {
     function test_permissionlessRelayPreservesRecoveredActor() public {
         address relayer = vm.addr(OTHER_KEY);
         vm.deal(relayer, 2 ether);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -841,7 +842,7 @@ contract SwapVMStage2Test is Test {
     function test_actorCanAuthorizeDifferentRecipient() public {
         address relayer = vm.addr(OTHER_KEY);
         vm.deal(relayer, 2 ether);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -868,7 +869,7 @@ contract SwapVMStage2Test is Test {
 
     function test_zeroActorIsRejected() public {
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -891,7 +892,7 @@ contract SwapVMStage2Test is Test {
 
     function test_rejectsExpiredHighSBadVAndWrongLengthSignatures() public {
         uint160 priceLimit = TickMath.MIN_SQRT_PRICE + 1;
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY, STATE_TARGET, bytes(""), 100, 0, 0, 0, actor, actor, 1 ether, priceLimit, address(router)
         );
         _assertRejectedAction(action, actor, 1 ether, priceLimit, router);
@@ -921,7 +922,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function test_signedNopAndMalformedDeployAreRejected() public {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -935,9 +936,9 @@ contract SwapVMStage2Test is Test {
             TickMath.MIN_SQRT_PRICE + 1,
             address(router)
         );
-        action.op = SwapVMKernel.RootOp.NOP;
+        action.op = SwaputerKernel.RootOp.NOP;
         _assertRejectedAction(action, actor, 1 ether, TickMath.MIN_SQRT_PRICE + 1, router);
-        action.op = SwapVMKernel.RootOp.DEPLOY;
+        action.op = SwaputerKernel.RootOp.DEPLOY;
         _assertRejectedAction(action, actor, 1 ether, TickMath.MIN_SQRT_PRICE + 1, router);
     }
 
@@ -959,7 +960,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function test_preflightMaximumExposureAndMinimumNetRollback() public {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -1153,7 +1154,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function _executeStateProgram() internal {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -1179,8 +1180,8 @@ contract SwapVMStage2Test is Test {
         uint64 nonce
     ) internal {
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorInput);
-        SwapVMKernel.VMEnvelope memory action = _signedActionForOp(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = _signedActionForOp(
+            SwaputerKernel.RootOp.DEPLOY,
             ACTOR_KEY,
             codeHash,
             payload,
@@ -1200,8 +1201,8 @@ contract SwapVMStage2Test is Test {
 
     function _assertMalformedDeploy(bytes memory packageBytes) internal {
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory action = _signedActionForOp(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = _signedActionForOp(
+            SwaputerKernel.RootOp.DEPLOY,
             ACTOR_KEY,
             keccak256(packageBytes),
             payload,
@@ -1219,7 +1220,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function _assertRejectedAction(
-        SwapVMKernel.VMEnvelope memory action,
+        SwaputerKernel.VMEnvelope memory action,
         address recipient,
         uint256 ethIn,
         uint160 priceLimit,
@@ -1262,9 +1263,9 @@ contract SwapVMStage2Test is Test {
         uint128 ethIn,
         uint160 priceLimit,
         address routerAddress
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
         return _signedActionForOp(
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             privateKey,
             target,
             payload,
@@ -1281,7 +1282,7 @@ contract SwapVMStage2Test is Test {
     }
 
     function _signedActionForOp(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         uint256 privateKey,
         bytes32 target,
         bytes memory payload,
@@ -1294,8 +1295,8 @@ contract SwapVMStage2Test is Test {
         uint128 ethIn,
         uint160 priceLimit,
         address routerAddress
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: vm.addr(privateKey),

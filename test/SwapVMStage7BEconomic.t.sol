@@ -8,7 +8,7 @@ import {BalanceDelta, BalanceDeltaLibrary} from "@uniswap/v4-core/src/types/Bala
 import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
 import {SwapVMStage7A2Test} from "./SwapVMStage7A2.t.sol";
 
 contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
@@ -80,7 +80,7 @@ contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
         uint256 maximumExposure = uint256(byteLimit) * BYTE_GAS_PRICE;
         uint256 gross = _probeGross(target, byteLimit, nonce);
         uint128 exactMin = uint128(gross - maximumExposure);
-        SwapVMKernel.VMEnvelope memory exact = _callAction(target, byteLimit, exactMin, nonce);
+        SwaputerKernel.VMEnvelope memory exact = _callAction(target, byteLimit, exactMin, nonce);
         uint256 supplyBefore = token.totalSupply();
         uint256 gasBefore = gasleft();
         vm.prank(actor);
@@ -110,7 +110,7 @@ contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
         uint32 byteLimit = 1_000;
         uint256 maximumExposure = uint256(byteLimit) * BYTE_GAS_PRICE;
         uint256 gross = _probeGross(target, byteLimit, nonce);
-        SwapVMKernel.VMEnvelope memory action =
+        SwaputerKernel.VMEnvelope memory action =
             _callAction(target, byteLimit, uint128(gross - maximumExposure + 1), nonce);
         uint256 supplyBefore = token.totalSupply();
         uint64 heightBefore = kernel.executionHeight(worldId);
@@ -157,8 +157,8 @@ contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
         bytes memory packageBytes = _package(0, 0, keccak256("Stage7B.Economic.Stop"), hex"00");
         bytes32 codeHash = keccak256(packageBytes);
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             deployPayload,
             10,
@@ -178,7 +178,7 @@ contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
 
     function _probeGross(bytes32 target, uint32 byteLimit, uint64 nonce) private returns (uint256 gross) {
         uint256 checkpoint = vm.snapshotState();
-        SwapVMKernel.VMEnvelope memory probe = _callAction(target, byteLimit, 0, nonce);
+        SwaputerKernel.VMEnvelope memory probe = _callAction(target, byteLimit, 0, nonce);
         vm.prank(actor);
         BalanceDelta probeDelta = router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, probe);
         gross = uint128(probeDelta.amount1()) + BYTE_GAS_PRICE;
@@ -188,10 +188,10 @@ contract SwapVMStage7BEconomicTest is SwapVMStage7A2Test {
     function _callAction(bytes32 target, uint32 byteLimit, uint128 minNet, uint64 nonce)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory)
+        returns (SwaputerKernel.VMEnvelope memory)
     {
         return _signedAction(
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             target,
             bytes(""),
             byteLimit,

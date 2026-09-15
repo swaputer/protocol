@@ -7,7 +7,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
 import {SwapVMSRC20Market} from "../../src/SwapVMSRC20Market.sol";
 import {SwapVMSRC20MarketTest} from "../SwapVMSRC20Market.t.sol";
 
@@ -62,7 +62,7 @@ contract SwapVMSRC20MarketInvariantTest is StdInvariant, SwapVMSRC20MarketTest {
                 || _balanceOf(actor) < order.amount || actor.balance < VM_INPUT
         ) return;
 
-        SwapVMKernel.VMEnvelope memory transfer =
+        SwaputerKernel.VMEnvelope memory transfer =
             _signedTransfer(ACTOR_KEY, actor, buyer, order.amount, _nonce(actor), order.vmEthAmount);
         vm.prank(actor);
         market.fillBuyOrder(orderId, transfer, TickMath.MIN_SQRT_PRICE + 1);
@@ -77,7 +77,8 @@ contract SwapVMSRC20MarketInvariantTest is StdInvariant, SwapVMSRC20MarketTest {
         uint128 unitPrice = uint128(bound(uint256(rawUnitPrice), 1 gwei, 0.001 ether));
         if (_allowance(kernel.eoaAccountId(actor), escrow) < amount) _approveEscrow(SRC_SUPPLY);
 
-        SwapVMKernel.VMEnvelope memory deposit = _signedEscrowDeposit(ACTOR_KEY, actor, amount, _nonce(actor), VM_INPUT);
+        SwaputerKernel.VMEnvelope memory deposit =
+            _signedEscrowDeposit(ACTOR_KEY, actor, amount, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         market.createSellOrder{value: VM_INPUT}(
             amount, unitPrice, VM_INPUT, uint64(block.timestamp + 1 days), deposit, TickMath.MIN_SQRT_PRICE + 1
@@ -94,7 +95,7 @@ contract SwapVMSRC20MarketInvariantTest is StdInvariant, SwapVMSRC20MarketTest {
                 || order.maker != actor
         ) return;
 
-        SwapVMKernel.VMEnvelope memory release =
+        SwaputerKernel.VMEnvelope memory release =
             _signedEscrowRelease(ACTOR_KEY, actor, actor, order.amount, _nonce(actor), order.vmEthAmount);
         vm.prank(actor);
         market.cancelSellOrder{value: order.vmEthAmount}(orderId, release, TickMath.MIN_SQRT_PRICE + 1);
@@ -111,7 +112,7 @@ contract SwapVMSRC20MarketInvariantTest is StdInvariant, SwapVMSRC20MarketTest {
                 || buyer.balance < value
         ) return;
 
-        SwapVMKernel.VMEnvelope memory release =
+        SwaputerKernel.VMEnvelope memory release =
             _signedEscrowRelease(BUYER_KEY, buyer, buyer, order.amount, _nonce(buyer), order.vmEthAmount);
         vm.prank(buyer);
         market.settleSellOrder{value: value}(orderId, release, TickMath.MIN_SQRT_PRICE + 1);

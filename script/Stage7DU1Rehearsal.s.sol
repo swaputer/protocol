@@ -14,26 +14,26 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @dev Local-Anvil-only helper. It catches deliberately failing buys so their rollback can be asserted on-chain.
 contract Stage7DU1FailureProbe {
-    SwapVMRouter public immutable router;
+    SwaputerAppRouter public immutable router;
     address public immutable operator;
 
     error OnlyOperator();
 
-    constructor(SwapVMRouter target, address initialOperator) payable {
+    constructor(SwaputerAppRouter target, address initialOperator) payable {
         router = target;
         operator = initialOperator;
     }
 
-    function execute(bytes32 worldId, uint160 priceLimit, SwapVMKernel.VMEnvelope calldata envelope)
+    function execute(bytes32 worldId, uint160 priceLimit, SwaputerKernel.VMEnvelope calldata envelope)
         external
         returns (bool success)
     {
@@ -64,13 +64,13 @@ contract Stage7DU1RehearsalScript is Script {
     uint24 private poolFee;
     int24 private tickSpacing;
     PoolManager private manager;
-    SwapVMWorldFactory private factory;
-    SwapVMCreationCodeStore private kernelStore;
-    SwapVMCreationCodeStore private hookStore;
-    SwapVMRouter private router;
-    SwapVMGasToken private token;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerWorldFactory private factory;
+    SwaputerCreationCodeStore private kernelStore;
+    SwaputerCreationCodeStore private hookStore;
+    SwaputerAppRouter private router;
+    SwaputerToken private token;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     PoolModifyLiquidityTest private liquidityRouter;
     Stage7DU1FailureProbe private failureProbe;
     PoolKey private key;
@@ -101,9 +101,9 @@ contract Stage7DU1RehearsalScript is Script {
     function _deployAndSeal() private {
         vm.startBroadcast(actorKey);
         manager = new PoolManager(actor);
-        kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        kernelStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        hookStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelStore),
@@ -111,7 +111,7 @@ contract Stage7DU1RehearsalScript is Script {
             vm.envAddress("SVM_PROTOCOL_FEE_ADMIN"),
             vm.envAddress("SVM_FEE_CONTROLLER")
         );
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
         liquidityRouter = new PoolModifyLiquidityTest(manager);
         failureProbe = new Stage7DU1FailureProbe{value: 3 ether}(router, actor);
         vm.stopBroadcast();
@@ -123,7 +123,7 @@ contract Stage7DU1RehearsalScript is Script {
         address predictedKernel = factory.predictKernel(predictedDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -136,10 +136,10 @@ contract Stage7DU1RehearsalScript is Script {
             predictedDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -187,7 +187,7 @@ contract Stage7DU1RehearsalScript is Script {
             abi.encode(bytes32("Stage7D Token"), bytes32("S7D"), uint256(18), uint256(1_000), actorId);
         bytes32 target = _nextContract(packageBytes);
         _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, constructorInput),
             ACTION_LIMIT,
@@ -196,7 +196,7 @@ contract Stage7DU1RehearsalScript is Script {
         bytes memory transfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(address(0xCAFE)), uint256(7))
         );
-        _executeBuy(SwapVMKernel.RootOp.CALL, target, transfer, ACTION_LIMIT, actor);
+        _executeBuy(SwaputerKernel.RootOp.CALL, target, transfer, ACTION_LIMIT, actor);
     }
 
     function _deployAndCallTinySol() private {
@@ -204,7 +204,7 @@ contract Stage7DU1RehearsalScript is Script {
         bytes32 actorId = kernel.eoaAccountId(actor);
         miniToken = _nextContract(packageBytes);
         _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, abi.encode(uint256(1_000), actorId)),
             ACTION_LIMIT,
@@ -213,7 +213,7 @@ contract Stage7DU1RehearsalScript is Script {
         bytes memory transfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(address(0xBEEF)), uint256(9))
         );
-        _executeBuy(SwapVMKernel.RootOp.CALL, miniToken, transfer, ACTION_LIMIT, actor);
+        _executeBuy(SwaputerKernel.RootOp.CALL, miniToken, transfer, ACTION_LIMIT, actor);
     }
 
     function _sell() private {
@@ -236,8 +236,8 @@ contract Stage7DU1RehearsalScript is Script {
             bytes4(keccak256("transfer(bytes32,uint256)")),
             abi.encode(kernel.eoaAccountId(address(0xDEAD)), type(uint256).max)
         );
-        SwapVMKernel.VMEnvelope memory reverting = _signedAction(
-            SwapVMKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce, address(failureProbe)
+        SwaputerKernel.VMEnvelope memory reverting = _signedAction(
+            SwaputerKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce, address(failureProbe)
         );
         vm.startBroadcast(actorKey);
         bool revertUnexpectedlySucceeded = failureProbe.execute(worldId, TickMath.MIN_SQRT_PRICE + 1, reverting);
@@ -250,8 +250,8 @@ contract Stage7DU1RehearsalScript is Script {
         bytes memory validTransfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(address(0xD00D)), uint256(1))
         );
-        SwapVMKernel.VMEnvelope memory outOfBytes =
-            _signedAction(SwapVMKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce, address(failureProbe));
+        SwaputerKernel.VMEnvelope memory outOfBytes =
+            _signedAction(SwaputerKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce, address(failureProbe));
         vm.startBroadcast(actorKey);
         bool oogUnexpectedlySucceeded = failureProbe.execute(worldId, TickMath.MIN_SQRT_PRICE + 1, outOfBytes);
         vm.stopBroadcast();
@@ -272,25 +272,25 @@ contract Stage7DU1RehearsalScript is Script {
         vm.stopBroadcast();
     }
 
-    function _executeBuy(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
+    function _executeBuy(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, address executor)
         private
     {
         uint64 nonce = kernel.nonces(worldId, kernel.eoaAccountId(actor));
-        SwapVMKernel.VMEnvelope memory action = _signedAction(op, target, payload, limit, nonce, executor);
+        SwaputerKernel.VMEnvelope memory action = _signedAction(op, target, payload, limit, nonce, executor);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, action);
         vm.stopBroadcast();
     }
 
     function _signedAction(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 limit,
         uint64 nonce,
         address executor
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,
@@ -347,7 +347,7 @@ contract Stage7DU1RehearsalScript is Script {
     }
 
     function _report() private view {
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         console2.log("STAGE7D_VECTOR", vector);
         console2.log("STAGE7D_MANAGER", address(manager));
         console2.log("STAGE7D_FACTORY", address(factory));

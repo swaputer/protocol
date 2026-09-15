@@ -5,8 +5,8 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
 import {SwaputerSRC20MarketFactory} from "../src/SwaputerSRC20MarketFactory.sol";
 
@@ -37,8 +37,8 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
     uint256 private constant MINT_AMOUNT = 1_000 ether;
 
     SwaputerSRC20MarketFactory private marketFactory;
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
 
     function run() external {
@@ -50,8 +50,8 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
 
         require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
         require(vm.addr(buyerKey) == buyer, "BUYER_MISMATCH");
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         marketFactory = SwaputerSRC20MarketFactory(vm.envAddress("SVM_MARKET_FACTORY_ADDRESS"));
         require(address(marketFactory.router()) == address(router), "MARKET_FACTORY_ROUTER");
@@ -74,10 +74,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         bytes memory constructorArgs = abi.encode(NAME, SYMBOL, SUPPLY_CAP, MINT_AMOUNT);
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorArgs);
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
             actorKey,
             actor,
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             deployPayload,
             DEPLOY_LIMIT,
@@ -91,10 +91,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         vm.stopBroadcast();
         // Mint once to actor.
         bytes memory mintPayload = abi.encodePacked(bytes4(keccak256("mint(bytes32)")), abi.encode(actorId));
-        SwapVMKernel.VMEnvelope memory mintAction = _signedAction(
+        SwaputerKernel.VMEnvelope memory mintAction = _signedAction(
             actorKey,
             actor,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             mintPayload,
             ACTION_LIMIT,
@@ -113,10 +113,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         // Transfer part to buyer account so buyer can participate in both sides.
         bytes memory transferToBuyerPayload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(buyerId, MINT_AMOUNT / 100));
-        SwapVMKernel.VMEnvelope memory transferToBuyer = _signedAction(
+        SwaputerKernel.VMEnvelope memory transferToBuyer = _signedAction(
             actorKey,
             actor,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             transferToBuyerPayload,
             ACTION_LIMIT,
@@ -141,10 +141,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         bytes memory deployEscrowPayload = abi.encodePacked(
             bytes4(uint32(escrowPackage.length)), escrowPackage, abi.encode(contractId, predictedMarket)
         );
-        SwapVMKernel.VMEnvelope memory escrowDeploy = _signedAction(
+        SwaputerKernel.VMEnvelope memory escrowDeploy = _signedAction(
             actorKey,
             actor,
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             ESCROW_CODE_HASH,
             deployEscrowPayload,
             DEPLOY_LIMIT,
@@ -177,10 +177,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         // Buyer creates sell order (挂单，不成交).
         uint128 sellAmount = ORDER_AMOUNT / 2;
         uint128 sellPrice = market.quotePrice(sellAmount, SELL_UNIT_PRICE_WEI);
-        SwapVMKernel.VMEnvelope memory approveSell = _signedAction(
+        SwaputerKernel.VMEnvelope memory approveSell = _signedAction(
             buyerKey,
             buyer,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             abi.encodePacked(bytes4(keccak256("approve(bytes32,uint256)")), abi.encode(escrowId, sellAmount)),
             ACTION_LIMIT,
@@ -193,10 +193,10 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         router.buyVMExactInput{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, approveSell);
         vm.stopBroadcast();
 
-        SwapVMKernel.VMEnvelope memory deposit = _signedAction(
+        SwaputerKernel.VMEnvelope memory deposit = _signedAction(
             buyerKey,
             buyer,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             escrowId,
             abi.encodePacked(bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(buyerId, sellAmount)),
             ESCROW_LIMIT,
@@ -246,7 +246,7 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
     function _signedAction(
         uint256 actorKey,
         address actor,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
@@ -254,8 +254,8 @@ contract Stage7LiveChainFlowNoMatchScript is Script {
         uint128 ethInput,
         address recipient,
         address executor
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

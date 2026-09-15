@@ -18,11 +18,11 @@ import {
 } from "@uniswap/v4-core/src/types/BeforeSwapDelta.sol";
 import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 
-import {SwapVMGasToken} from "./SwapVMGasToken.sol";
-import {SwapVMKernel} from "./SwapVMKernel.sol";
+import {SwaputerToken} from "./SwaputerToken.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
 
 /// @notice SVM execution and protocol-fee Hook permanently scoped to one native ETH / Gas Token v4 pool.
-contract SwapVMHook is IHooks, IUnlockCallback {
+contract SwaputerHook is IHooks, IUnlockCallback {
     using BalanceDeltaLibrary for BalanceDelta;
     using CurrencyLibrary for Currency;
     using PoolIdLibrary for PoolKey;
@@ -31,8 +31,9 @@ contract SwapVMHook is IHooks, IUnlockCallback {
     using StateLibrary for IPoolManager;
 
     IPoolManager public immutable poolManager;
-    SwapVMKernel public immutable kernel;
-    SwapVMGasToken public immutable gasToken;
+    SwaputerKernel public immutable kernel;
+    SwaputerToken public immutable gasToken;
+    address public immutable owner;
     address public immutable feeController;
     uint128 public immutable byteGasPrice;
     uint24 public immutable poolFee;
@@ -42,14 +43,16 @@ contract SwapVMHook is IHooks, IUnlockCallback {
     uint256 public accruedProtocolFees;
     bytes32 public boundPoolId;
     bool public poolBound;
+    bool public tradingLive;
     uint256 public constant BPS_DENOMINATOR = 10_000;
     uint16 public constant MAX_PROTOCOL_FEE_BPS = 1_000;
     uint32 public constant MAX_BYTE_GAS_LIMIT = 1_000_000;
-    bytes32 private constant VM_RESULT_CONSUMER_SLOT = keccak256("SwapVMHook.vmResult.consumer.v1");
-    bytes32 private constant VM_RESULT_WORD_SLOT = keccak256("SwapVMHook.vmResult.word.v1");
-    bytes32 private constant VM_RESULT_LENGTH_SLOT = keccak256("SwapVMHook.vmResult.length.v1");
+    bytes32 private constant VM_RESULT_CONSUMER_SLOT = keccak256("SwaputerHook.vmResult.consumer.v1");
+    bytes32 private constant VM_RESULT_WORD_SLOT = keccak256("SwaputerHook.vmResult.word.v1");
+    bytes32 private constant VM_RESULT_LENGTH_SLOT = keccak256("SwaputerHook.vmResult.length.v1");
 
     error OnlyPoolManager(address caller);
+    error OnlyOwner(address caller);
     error HookNotImplemented();
     error InvalidWorld();
     error ExactOutputUnsupported();
@@ -75,17 +78,20 @@ contract SwapVMHook is IHooks, IUnlockCallback {
     error HookAlreadyBound(bytes32 poolId);
     error HookNotBound();
     error NoProtocolFees();
+    error TradingNotLive();
+    error TradingAlreadyLive();
 
     event HookBound(bytes32 indexed poolId, address indexed gasToken);
     event ProtocolFeeAccrued(address indexed router, bool indexed isBuy, uint256 grossNativeAmount, uint256 feeAmount);
     event ProtocolFeeBpsUpdated(uint16 previousFeeBps, uint16 newFeeBps);
     event ProtocolFeesClaimed(address indexed admin, uint256 amount);
     event FeeAdminTransferred(address indexed previousAdmin, address indexed newAdmin);
+    event TradingLive(address indexed owner);
 
     constructor(
         IPoolManager manager,
-        SwapVMKernel boundKernel,
-        SwapVMGasToken token,
+        SwaputerKernel boundKernel,
+        SwaputerToken token,
         address initialFeeAdmin,
         address controller,
         uint16 initialFeeBps,
@@ -106,6 +112,7 @@ contract SwapVMHook is IHooks, IUnlockCallback {
         poolManager = manager;
         kernel = boundKernel;
         gasToken = token;
+        owner = initialFeeAdmin;
         feeAdmin = initialFeeAdmin;
         feeController = controller;
         protocolFeeBps = initialFeeBps;
@@ -123,6 +130,14 @@ contract SwapVMHook is IHooks, IUnlockCallback {
     modifier onlyFeeAdmin() {
         if (msg.sender != feeAdmin) revert OnlyFeeAdmin(msg.sender);
         _;
+    }
+
+    /// @notice Permanently enables swaps for this World. Trading cannot be disabled again.
+    function live() external {
+        if (msg.sender != owner) revert OnlyOwner(msg.sender);
+        if (tradingLive) revert TradingAlreadyLive();
+        tradingLive = true;
+        emit TradingLive(msg.sender);
     }
 
     function setProtocolFeeBps(uint16 newFeeBps) external {
@@ -214,9 +229,9 @@ contract SwapVMHook is IHooks, IUnlockCallback {
         uint128 liquidityAfter = poolManager.getLiquidity(world);
         bytes32 worldId = PoolId.unwrap(world);
         uint64 currentHeight = kernel.executionHeight(worldId);
-        if (currentHeight == type(uint64).max) revert SwapVMKernel.HeightOverflow();
+        if (currentHeight == type(uint64).max) revert SwaputerKernel.HeightOverflow();
 
-        SwapVMKernel.BuyReceipt memory receipt = SwapVMKernel.BuyReceipt({
+        SwaputerKernel.BuyReceipt memory receipt = SwaputerKernel.BuyReceipt({
             worldId: worldId,
             executionHeight: currentHeight + 1,
             actor: bytes32(0),
@@ -238,7 +253,7 @@ contract SwapVMHook is IHooks, IUnlockCallback {
             bytesUsed = kernel.executeNOP(receipt);
             if (bytesUsed != 1) revert KernelByteCountMismatch(bytesUsed);
         } else {
-            SwapVMKernel.VMEnvelope memory action = abi.decode(hookData, (SwapVMKernel.VMEnvelope));
+            SwaputerKernel.VMEnvelope memory action = abi.decode(hookData, (SwaputerKernel.VMEnvelope));
             if (action.worldId != worldId) revert InvalidEnvelopeWorld(worldId, action.worldId);
             if (action.byteGasLimit == 0 || action.byteGasLimit > MAX_BYTE_GAS_LIMIT) {
                 revert InvalidByteGasLimit(action.byteGasLimit);
@@ -253,7 +268,7 @@ contract SwapVMHook is IHooks, IUnlockCallback {
             (bytesUsed, kernelBurn, output,) = kernel.executeCall(
                 receipt,
                 action,
-                SwapVMKernel.ActionBinding({sqrtPriceLimitX96: params.sqrtPriceLimitX96, router: sender})
+                SwaputerKernel.ActionBinding({sqrtPriceLimitX96: params.sqrtPriceLimitX96, router: sender})
             );
             _storeVMResult(sender, output);
             uint256 expectedBurn = uint256(bytesUsed) * byteGasPrice;
@@ -401,6 +416,7 @@ contract SwapVMHook is IHooks, IUnlockCallback {
         returns (bytes4, BeforeSwapDelta, uint24)
     {
         _validateWorld(key);
+        if (!tradingLive) revert TradingNotLive();
         if (params.amountSpecified >= 0) revert ExactOutputUnsupported();
         if (!params.zeroForOne || protocolFeeBps == 0) {
             return (IHooks.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, 0);

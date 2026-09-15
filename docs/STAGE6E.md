@@ -1,10 +1,10 @@
 # Stage 6E: release-candidate total acceptance
 
-Stage 6E closes the Stage 6 release-candidate gate without changing the frozen v1.1 specification, ISA, manifests, reference packages or production `SwapVMKernel`, `SwapVMMiniVM` and `SwapVMHook`. The executable gate is `./script/accept-stage6.sh`; local development and CI run the same command after installing the three locked npm workspaces.
+Stage 6E closes the Stage 6 release-candidate gate without changing the frozen v1.1 specification, ISA, manifests, reference packages or production `SwaputerKernel`, `SwapVMMiniVM` and `SwaputerHook`. The executable gate is `./script/accept-stage6.sh`; local development and CI run the same command after installing the three locked npm workspaces.
 
 ## Production-path E2E
 
-`tooling/stage6e/stage6e-e2e.mjs` starts an isolated Anvil chain and uses `script/Stage6EE2E.s.sol` to deploy the real Uniswap v4 `PoolManager`, `SwapVMHook`, `SwapVMKernel`, `SwapVMGasToken`, `SwapVMReferenceRegistry`, settlement Router and ETH/TOKEN pool. It then submits, through `PoolManager.unlock`, a signed reference SRC-20 DEPLOY buy, a signed SRC-20 CALL buy, a compiled TinySol MiniToken DEPLOY/CALL pair, a TOKEN-to-ETH exact-input sell, an explicit VM revert and an OutOfByteGas buy. No Driver invokes the Kernel for this acceptance path.
+`tooling/stage6e/stage6e-e2e.mjs` starts an isolated Anvil chain and uses `script/Stage6EE2E.s.sol` to deploy the real Uniswap v4 `PoolManager`, `SwaputerHook`, `SwaputerKernel`, `SwaputerToken`, `SwaputerProgramRegistry`, settlement Router and ETH/TOKEN pool. It then submits, through `PoolManager.unlock`, a signed reference SRC-20 DEPLOY buy, a signed SRC-20 CALL buy, a compiled TinySol MiniToken DEPLOY/CALL pair, a TOKEN-to-ETH exact-input sell, an explicit VM revert and an OutOfByteGas buy. No Driver invokes the Kernel for this acceptance path.
 
 The successful SRC-20 CALL is quoted before submission. The TypeScript simulator executes the exact concrete action and the estimator approves its maximum-exposure condition. The E2E then compares the transaction trace, strict receipt, token balances, total supply and Kernel storage against the simulation. One recorded local run produced:
 
@@ -45,7 +45,7 @@ The unified command executes:
 - the real-v4 Stage 6E production-path and reorg E2E;
 - all three `npm audit` checks and `git diff --check`.
 
-Production runtime sizes remain `SwapVMKernel` 21,918 bytes, `SwapVMHook` 5,842 bytes, `SwapVMGasToken` 1,350 bytes and `SwapVMReferenceRegistry` 1,606 bytes. The Stage 6E-only Router and failure executor are 3,807 and 1,359 bytes and are not production protocol components.
+Production runtime sizes remain `SwaputerKernel` 21,918 bytes, `SwaputerHook` 5,842 bytes, `SwaputerToken` 1,350 bytes and `SwaputerProgramRegistry` 1,606 bytes. The Stage 6E-only Router and failure executor are 3,807 and 1,359 bytes and are not production protocol components.
 
 Frozen identities remain:
 

@@ -16,11 +16,11 @@ import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiqui
 import {IV4Router} from "@uniswap/v4-periphery/src/interfaces/IV4Router.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
-import {SwapVMWorldFactory} from "../../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../../src/SwaputerToken.sol";
+import {SwaputerHook} from "../../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
+import {SwaputerWorldFactory} from "../../src/SwaputerWorldFactory.sol";
 
 interface IEthereumMainnetUniversalRouter {
     function poolManager() external view returns (address);
@@ -69,10 +69,10 @@ contract SwapVMEthereumMainnetForkTest is Test {
     uint256 private constant DETERMINISTIC_TEST_KEY = 0xA11CE;
 
     IPoolManager private manager;
-    SwapVMWorldFactory private factory;
-    SwapVMGasToken private gasToken;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerWorldFactory private factory;
+    SwaputerToken private gasToken;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     PoolKey private poolKey;
     bytes32 private worldId;
     address private actor;
@@ -128,7 +128,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(uint256(5)));
         _executeOfficialRouter(
             _signedAction(
-                SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
+                SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
             )
         );
 
@@ -149,7 +149,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
             abi.encodePacked(bytes4(keccak256("controlFlow(uint256,bool)")), abi.encode(uint256(4), true));
         _executeOfficialRouter(
             _signedAction(
-                SwapVMKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, ACTION_LIMIT, UNIVERSAL_ROUTER
+                SwaputerKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, ACTION_LIMIT, UNIVERSAL_ROUTER
             )
         );
 
@@ -175,8 +175,8 @@ contract SwapVMEthereumMainnetForkTest is Test {
         bytes32 programId = kernel.contractAccountId(worldId, actorId, 0, codeHash);
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(uint256(5)));
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
         );
 
         StateSnapshot memory pristine = _snapshot(actorId);
@@ -186,7 +186,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
         _assertSnapshot(pristine, actorId, "mutated envelope");
 
         deployAction = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
+            SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore, ACTION_LIMIT, UNIVERSAL_ROUTER
         );
         _executeOfficialRouter(deployAction);
         StateSnapshot memory deployed = _snapshot(actorId);
@@ -197,15 +197,15 @@ contract SwapVMEthereumMainnetForkTest is Test {
 
         bytes memory callPayload =
             abi.encodePacked(bytes4(keccak256("controlFlow(uint256,bool)")), abi.encode(uint256(4), true));
-        SwapVMKernel.VMEnvelope memory wrongRouter = _signedAction(
-            SwapVMKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, ACTION_LIMIT, factory.router()
+        SwaputerKernel.VMEnvelope memory wrongRouter = _signedAction(
+            SwaputerKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, ACTION_LIMIT, factory.router()
         );
         vm.expectRevert();
         _executeOfficialRouter(wrongRouter);
         _assertSnapshot(deployed, actorId, "wrong router binding");
 
-        SwapVMKernel.VMEnvelope memory outOfByteGas =
-            _signedAction(SwapVMKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, 1, UNIVERSAL_ROUTER);
+        SwaputerKernel.VMEnvelope memory outOfByteGas =
+            _signedAction(SwaputerKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1, 1, UNIVERSAL_ROUTER);
         vm.expectRevert();
         _executeOfficialRouter(outOfByteGas);
         _assertSnapshot(deployed, actorId, "out of byte gas");
@@ -219,11 +219,11 @@ contract SwapVMEthereumMainnetForkTest is Test {
         vm.deal(address(this), 30_000 ether);
         vm.deal(actor, 100 ether);
 
-        bytes memory canonicalKernelCreationCode = vm.getCode("src/SwapVMKernel.sol:SwapVMKernel");
-        bytes memory canonicalHookCreationCode = vm.getCode("src/SwapVMHook.sol:SwapVMHook");
-        SwapVMCreationCodeStore kernelCodeStore = new SwapVMCreationCodeStore(canonicalKernelCreationCode);
-        SwapVMCreationCodeStore hookCodeStore = new SwapVMCreationCodeStore(canonicalHookCreationCode);
-        factory = new SwapVMWorldFactory(
+        bytes memory canonicalKernelCreationCode = vm.getCode("src/SwaputerKernel.sol:SwaputerKernel");
+        bytes memory canonicalHookCreationCode = vm.getCode("src/SwaputerHook.sol:SwaputerHook");
+        SwaputerCreationCodeStore kernelCodeStore = new SwaputerCreationCodeStore(canonicalKernelCreationCode);
+        SwaputerCreationCodeStore hookCodeStore = new SwaputerCreationCodeStore(canonicalHookCreationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             POOL_MANAGER_CODE_HASH,
             address(kernelCodeStore),
@@ -239,7 +239,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -255,7 +255,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
             canonicalHookCreationCode,
             hookArgs
         );
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -284,6 +284,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
             bytes("")
         );
         gasToken.approve(address(liquidityRouter), 0);
+        hook.live();
         assertEq(manager.getNonzeroDeltaCount(), 0, "liquidity deltas settled");
     }
 
@@ -294,7 +295,7 @@ contract SwapVMEthereumMainnetForkTest is Test {
         assertEq(keccak256(packageBytes), codeHash, "compiler fixture hash");
     }
 
-    function _executeOfficialRouter(SwapVMKernel.VMEnvelope memory envelope) private {
+    function _executeOfficialRouter(SwaputerKernel.VMEnvelope memory envelope) private {
         bytes[] memory actionParams = new bytes[](3);
         actionParams[0] = abi.encode(
             IV4Router.ExactInputSingleParams({
@@ -316,14 +317,14 @@ contract SwapVMEthereumMainnetForkTest is Test {
     }
 
     function _signedAction(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint64 nonce,
         uint32 byteGasLimit,
         address routerBinding
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
-        envelope = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

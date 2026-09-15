@@ -8,7 +8,7 @@ Stage 4 publishes three deterministic, immutable `ProgramPackageV1` reference pr
 - SRC-20 balances, allowances, transfer, approval, delegated transfer, fixed supply and conventional virtual `Transfer`/`Approval` records;
 - SRC-721 ownership, balances, token approval, operator approval, delegated transfer, URI hash and virtual `Transfer`/`Approval`/`ApprovalForAll` records;
 - SRC-1155 per-ID balances, operator approval, single transfer, URI hash and virtual `TransferSingle`/`ApprovalForAll` records;
-- an immutable, administrator-free `SwapVMReferenceRegistry` that recognizes a reference only when interface ID, exact ABI hash and exact whole-package code hash all match;
+- an immutable, administrator-free `SwaputerProgramRegistry` that recognizes a reference only when interface ID, exact ABI hash and exact whole-package code hash all match;
 - a deterministic reviewed assembler/generator and machine-readable artifacts containing exact ABI strings, selectors, event topics, package bytes and hashes.
 
 The reference programs use frozen tagged `bytes32 AccountId` values. Mini-contract AccountIds can own all three asset types. Minting is constructor-only in these minimal references; caps, later mint/burn, royalties, soulbound rules and other policies remain application logic as required by the frozen specification.
@@ -50,7 +50,7 @@ Final local verification used Foundry `1.5.1-stable`, Solidity `0.8.26`, Cancun 
 - conformance covers SRC-165, metadata, supply/balance/ownership, approvals, delegated calls, contract-owned assets, virtual topics/data/emitter, failed overdraw rollback and static mutation rejection;
 - adversarial receipt tests cover nested emitter order, oversized record data, record-count exhaustion and total-payload exhaustion.
 
-With optimizer runs `200`, production runtime sizes are 21,658 bytes for `SwapVMKernel`, 5,769 bytes for `SwapVMHook`, 1,350 bytes for `SwapVMGasToken` and 1,325 bytes for `SwapVMReferenceRegistry`. Kernel margin below EIP-170 is 2,918 bytes. The change from the Stage-3 checkpoint's 20,000 runs was necessary because the bounded virtual-record code otherwise exceeded EIP-170 by 936 bytes; no protocol or ISA semantics changed.
+With optimizer runs `200`, production runtime sizes are 21,658 bytes for `SwaputerKernel`, 5,769 bytes for `SwaputerHook`, 1,350 bytes for `SwaputerToken` and 1,325 bytes for `SwaputerProgramRegistry`. Kernel margin below EIP-170 is 2,918 bytes. The change from the Stage-3 checkpoint's 20,000 runs was necessary because the bounded virtual-record code otherwise exceeded EIP-170 by 936 bytes; no protocol or ISA semantics changed.
 
 Representative Foundry test-function costs are 342,225 gas for exact registry verification, 717,130 gas for a nested two-emitter receipt, 22,038,533 gas for the multi-transaction SRC-20 conformance/rollback scenario, 13,733,401 gas for SRC-721 and 10,079,358 gas for SRC-1155. These figures include fixture and multiple real-v4 swaps and are not single production Router-call estimates.
 

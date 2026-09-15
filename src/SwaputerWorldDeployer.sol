@@ -3,14 +3,14 @@ pragma solidity 0.8.26;
 
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 
-import {SwapVMCreationCodeReader} from "./SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "./SwapVMGasToken.sol";
-import {SwapVMHook} from "./SwapVMHook.sol";
-import {SwapVMKernel} from "./SwapVMKernel.sol";
+import {SwaputerCreationCodeReader} from "./SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "./SwaputerToken.sol";
+import {SwaputerHook} from "./SwaputerHook.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
 
 /// @notice One-shot per-World deployer that deterministically breaks the Hook/Kernel address cycle.
-contract SwapVMWorldDeployer {
-    using SwapVMCreationCodeReader for address;
+contract SwaputerWorldDeployer {
+    using SwaputerCreationCodeReader for address;
 
     address public immutable factory;
     address public immutable kernelCreationCodeStore;
@@ -45,7 +45,7 @@ contract SwapVMWorldDeployer {
         address predictedKernel,
         address predictedHook,
         IPoolManager manager,
-        SwapVMGasToken token,
+        SwaputerToken token,
         address feeAdmin,
         address feeController,
         uint16 protocolFeeBps,
@@ -53,7 +53,7 @@ contract SwapVMWorldDeployer {
         uint24 fee,
         int24 tickSpacing,
         bytes32 hookSalt
-    ) external returns (SwapVMKernel kernel, SwapVMHook hook) {
+    ) external returns (SwaputerKernel kernel, SwaputerHook hook) {
         if (msg.sender != factory) revert OnlyFactory(msg.sender);
         if (used) revert AlreadyUsed();
         used = true;
@@ -69,7 +69,7 @@ contract SwapVMWorldDeployer {
             kernelAddress := create(0, add(kernelInitCode, 0x20), mload(kernelInitCode))
         }
         if (kernelAddress != predictedKernel) revert KernelPredictionMismatch(predictedKernel, kernelAddress);
-        kernel = SwapVMKernel(kernelAddress);
+        kernel = SwaputerKernel(kernelAddress);
 
         bytes memory hookCreationCode = hookCreationCodeStore.read();
         bytes32 actualHookCreationCodeHash = keccak256(hookCreationCode);
@@ -85,15 +85,15 @@ contract SwapVMWorldDeployer {
             hookAddress := create2(0, add(hookInitCode, 0x20), mload(hookInitCode), hookSalt)
         }
         if (hookAddress != predictedHook) revert HookPredictionMismatch(predictedHook, hookAddress);
-        hook = SwapVMHook(payable(hookAddress));
+        hook = SwaputerHook(payable(hookAddress));
 
         if (
             kernel.hook() != hookAddress || address(hook.kernel()) != kernelAddress
                 || address(hook.poolManager()) != address(manager) || address(hook.gasToken()) != address(token)
-                || hook.feeAdmin() != feeAdmin || hook.feeController() != feeController
+                || hook.owner() != feeAdmin || hook.feeAdmin() != feeAdmin || hook.feeController() != feeController
                 || hook.protocolFeeBps() != protocolFeeBps || hook.byteGasPrice() != byteGasPrice
                 || kernel.byteGasPrice() != byteGasPrice || hook.poolFee() != fee
-                || hook.poolTickSpacing() != tickSpacing
+                || hook.poolTickSpacing() != tickSpacing || hook.tradingLive()
         ) revert BindingMismatch();
     }
 }

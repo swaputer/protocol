@@ -11,13 +11,13 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface IPositionManagerV12 {
     function poolManager() external view returns (address);
@@ -82,11 +82,11 @@ contract Stage7DU2V12FinalMarketScript is Script {
     uint256 private actorKey;
     uint256 private releaseStartBalance;
     address private actor;
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
-    SwapVMGasToken private gasToken;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
+    SwaputerToken private gasToken;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     bytes32 private worldId;
     bytes32 private token;
     bytes32 private tokenCodeHash;
@@ -122,9 +122,9 @@ contract Stage7DU2V12FinalMarketScript is Script {
 
     function _deployWorld() private {
         vm.startBroadcast(actorKey);
-        SwapVMCreationCodeStore kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        SwapVMCreationCodeStore hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        SwaputerCreationCodeStore kernelStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        SwaputerCreationCodeStore hookStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             IPoolManager(POOL_MANAGER),
             POOL_MANAGER_CODE_HASH,
             address(kernelStore),
@@ -133,14 +133,14 @@ contract Stage7DU2V12FinalMarketScript is Script {
             vm.envAddress("SVM_FEE_CONTROLLER")
         );
         vm.stopBroadcast();
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
         address predictedToken = factory.predictGasToken(TOKEN_SALT, INITIAL_GAS_TOKEN_SUPPLY, actor);
         address predictedWorldDeployer = factory.predictWorldDeployer(BOOTSTRAP_SALT);
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             IPoolManager(POOL_MANAGER),
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -153,10 +153,10 @@ contract Stage7DU2V12FinalMarketScript is Script {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: TOKEN_SALT,
             bootstrapSalt: BOOTSTRAP_SALT,
             hookSalt: hookSalt,
@@ -232,7 +232,7 @@ contract Stage7DU2V12FinalMarketScript is Script {
         uint256 buyOrderId =
             market.createBuyOrder{value: ORDER_PRICE + VM_INPUT}(ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry);
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory transfer = _signedCall(
+        SwaputerKernel.VMEnvelope memory transfer = _signedCall(
             token,
             abi.encodePacked(
                 bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(actor), ORDER_AMOUNT)
@@ -253,7 +253,7 @@ contract Stage7DU2V12FinalMarketScript is Script {
             actor,
             actor
         );
-        SwapVMKernel.VMEnvelope memory deposit = _signedCall(
+        SwaputerKernel.VMEnvelope memory deposit = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(actor), ORDER_AMOUNT)
@@ -268,7 +268,7 @@ contract Stage7DU2V12FinalMarketScript is Script {
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry, deposit, SQRT_PRICE_LIMIT
         );
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory release = _signedCall(
+        SwaputerKernel.VMEnvelope memory release = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("release(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(actor), ORDER_AMOUNT)
@@ -284,8 +284,8 @@ contract Stage7DU2V12FinalMarketScript is Script {
     }
 
     function _executeDeploy(bytes32 codeHash, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, actor, actor, VM_INPUT);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, actor, actor, VM_INPUT);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -294,8 +294,8 @@ contract Stage7DU2V12FinalMarketScript is Script {
     function _executeCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
     {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor, VM_INPUT);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor, VM_INPUT);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -308,21 +308,21 @@ contract Stage7DU2V12FinalMarketScript is Script {
         address recipient,
         address executor,
         uint128 ethInput
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
-        return _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor, ethInput);
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
+        return _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor, ethInput);
     }
 
     function _signed(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         address recipient,
         address executor,
         uint128 ethInput
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        envelope = SwapVMKernel.VMEnvelope({
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

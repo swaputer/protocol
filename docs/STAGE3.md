@@ -15,7 +15,7 @@ Stage 3 extends the Stage 1/2 real-Uniswap-v4 prototype without changing the fro
 
 The existing Hook settlement remains unchanged: only native ETH-to-TOKEN exact-input buys enter SwapVM. On success it takes the actual `executedBytes * byteGasPrice` from the unspecified output currency, burns those TOKEN immediately, returns the same positive Hook delta, and the buyer receives gross output minus the burn. TOKEN-to-ETH exact-input and exact-output sells still execute no VM, burn nothing and leave VM state unchanged.
 
-The production Kernel exposes no arbitrary program installer. `SwapVMKernelStage2Harness.install` remains a test-only facility for isolated ISA and nested-call fixtures; production packages enter through signed root `DEPLOY` and internal `CREATE` only. No external EVM call opcode or target is introduced.
+The production Kernel exposes no arbitrary program installer. `SwaputerKernelStage2Harness.install` remains a test-only facility for isolated ISA and nested-call fixtures; production packages enter through signed root `DEPLOY` and internal `CREATE` only. No external EVM call opcode or target is introduced.
 
 ## Package, deployment and call atomicity
 
@@ -33,7 +33,7 @@ The Stage 3 checkpoint verification used Foundry `1.5.1-stable`, Solidity `0.8.2
 - 52 tests passed and none failed across Stage 1-3;
 - eight fuzz properties ran 512 cases each, including arbitrary constructor calldata/value deployment and deterministic contract ID/storage/burn checks;
 - four stateful real-v4 invariants each ran 64 runs × 32 calls = 2,048 actions with zero handler reverts, continuously reconciling height, actor nonce, byte counts, TOKEN supply, Hook balance and PoolManager transient deltas;
-- production runtime sizes are 23,873 bytes for `SwapVMKernel`, 7,859 bytes for `SwapVMHook` and 2,010 bytes for `SwapVMGasToken`; the Kernel retains 703 bytes below EIP-170;
+- production runtime sizes are 23,873 bytes for `SwaputerKernel`, 7,859 bytes for `SwaputerHook` and 2,010 bytes for `SwaputerToken`; the Kernel retains 703 bytes below EIP-170;
 - representative snapshot costs are 684,846 gas for root package deployment and constructor execution, 944,693 gas for a nested call with storage/return-data propagation, and 1,528,136 gas for the multi-transaction package/factory/internal-creation scenario. The depth/memory rejection test costs 23,083,612 gas because it deliberately constructs deep recursive test executions. These are Foundry test-function figures, not production Router estimates.
 
 Stage 3 tests specifically decode the 438-byte root-deployment receipt, verify version/record count/selectors/contract/creator/code hash/summary fields, verify the internal deployment record plus final summary, exercise malformed magic/length/entry points, and prove successful/failed constructors, nested metering, static propagation, cross-contract storage isolation, return-data copying, call-depth limits, active-memory limits, creator nonces, exact supply burn and zero PoolManager transient deltas.

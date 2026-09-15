@@ -6,8 +6,8 @@ import {stdJson} from "forge-std/StdJson.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 
 /// @notice Compares the TypeScript MiniVM corpus with the active Base Sepolia SVM world.
 contract Stage7LiveTinySolDifferentialScript is Script {
@@ -37,8 +37,8 @@ contract Stage7LiveTinySolDifferentialScript is Script {
     address private constant RECIPIENT = 0x000000000000000000000000000000000000bEEF;
     bytes32 private constant NOTE = bytes32("TinySol ABI conformance");
 
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
     address private actor;
     uint256 private actorKey;
@@ -51,8 +51,8 @@ contract Stage7LiveTinySolDifferentialScript is Script {
         actor = vm.envOr("STAGE7A2_ACTOR", DEFAULT_ACTOR);
         require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
 
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         corpus = vm.readFile("tooling/tinysol/fixtures/simulator-solidity-differential.json");
         string memory compilerFixture = vm.readFile("tooling/tinysol/fixtures/compiler/Conformance.json");
@@ -70,7 +70,7 @@ contract Stage7LiveTinySolDifferentialScript is Script {
 
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(uint256(5)));
-        _execute(SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, DEPLOY_CASE);
+        _execute(SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, DEPLOY_CASE);
         require(kernel.programCodeHash(worldId, contractId) == codeHash, "DEPLOYED_CODE_HASH");
         require(kernel.creatorNonce(worldId, actorId) == creatorNonceBefore + 1, "CREATOR_NONCE");
         require(_queryUint(contractId, "getScalar()", bytes("")) == 5, "CONSTRUCTOR_SCALAR");
@@ -101,7 +101,7 @@ contract Stage7LiveTinySolDifferentialScript is Script {
         );
 
         _execute(
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             abi.encodePacked(bytes4(keccak256("controlFlow(uint256,bool)")), abi.encode(uint256(4), true)),
             CONTROL_FLOW_CASE
@@ -109,7 +109,7 @@ contract Stage7LiveTinySolDifferentialScript is Script {
         require(_queryUint(contractId, "getScalar()", bytes("")) == 14, "CONTROL_STORAGE");
 
         _execute(
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             abi.encodePacked(bytes4(keccak256("internalCall(uint256)")), abi.encode(uint256(12))),
             INTERNAL_CALL_CASE
@@ -118,7 +118,7 @@ contract Stage7LiveTinySolDifferentialScript is Script {
 
         bytes memory abiArguments = abi.encode(actorId, RECIPIENT, NOTE, true, uint256(73));
         _execute(
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             contractId,
             abi.encodePacked(bytes4(keccak256("abiRoundTrip(bytes32,address,bytes32,bool,uint256)")), abiArguments),
             ABI_EVENT_CASE
@@ -141,8 +141,8 @@ contract Stage7LiveTinySolDifferentialScript is Script {
         console2.log("TINYSOL_DIFFERENTIAL_CHAIN_EXECUTIONS", uint256(4));
     }
 
-    function _execute(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint256 caseIndex) private {
-        SwapVMKernel.VMEnvelope memory action = _signedAction(op, target, payload, actionNonce++);
+    function _execute(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint256 caseIndex) private {
+        SwaputerKernel.VMEnvelope memory action = _signedAction(op, target, payload, actionNonce++);
         vm.startBroadcast(actorKey);
         (, bytes32 outputWord, uint32 outputLength) =
             router.buyVMExactInputWithResult{value: VM_ETH_IN}(worldId, SQRT_PRICE_LIMIT, action);
@@ -217,12 +217,12 @@ contract Stage7LiveTinySolDifferentialScript is Script {
         require(!accepted, "INVALID_ABI_ACCEPTED");
     }
 
-    function _signedAction(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint64 nonce)
+    function _signedAction(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint64 nonce)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
-        action = SwapVMKernel.VMEnvelope({
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

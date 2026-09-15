@@ -11,9 +11,9 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Base Sepolia proof that protocol fees are enforced by the Hook for an unrelated router.
 contract Stage7HookFeeLiveScript is Script {
@@ -26,9 +26,9 @@ contract Stage7HookFeeLiveScript is Script {
         uint256 actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         address actor = vm.addr(actorKey);
         bytes32 worldId = vm.envBytes32("SVM_WORLD_ID");
-        SwapVMWorldFactory factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        SwapVMHook hook = SwapVMHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
-        SwapVMGasToken token = SwapVMGasToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
+        SwaputerWorldFactory factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        SwaputerHook hook = SwaputerHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
+        SwaputerToken token = SwaputerToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
         (PoolKey memory key, bool isSealed) = factory.getPoolKey(worldId);
 
         require(isSealed && PoolId.unwrap(key.toId()) == worldId, "WORLD");

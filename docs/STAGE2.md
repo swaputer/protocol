@@ -12,7 +12,7 @@ This tree extends the Stage 1 real-Uniswap-v4 prototype with the frozen Stage 2 
 - checked `actualBurn = executedBytes * byteGasPrice`, positive unspecified-currency Hook delta, immediate TOKEN burn and aggregate one-log receipt;
 - Stage 1 empty-data NOP buys and ordinary sells remain compatible.
 
-The production Kernel does not expose program installation. `SwapVMKernelStage2Harness.install` exists only under `test/` because canonical deployment, `ProgramPackageV1`, immutable code storage and `CREATE` begin in Stage 3.
+The production Kernel does not expose program installation. `SwaputerKernelStage2Harness.install` exists only under `test/` because canonical deployment, `ProgramPackageV1`, immutable code storage and `CREATE` begin in Stage 3.
 
 Stage 2 deliberately recognizes but does not execute `CREATE`, nested `CALL`/`STATICCALL`, or virtual `LOG0..LOG4`; those are Stage 3/6 work. The meter is shared across the complete active execution in this Stage 2 implementation, which currently has one frame. It becomes call-tree-shared when nested frames are added in Stage 3.
 
@@ -34,7 +34,7 @@ Final local verification used Foundry `1.5.1-stable`:
 - `forge test -vvv`: 44 tests passed, 0 failed (Stage 1 and Stage 2 together);
 - seven fuzz properties ran 512 cases each;
 - four stateful invariants each ran 64 runs × 32 calls = 2,048 real-v4 actions with zero handler reverts;
-- production runtime sizes are 15,670 bytes for `SwapVMKernel`, 7,859 bytes for `SwapVMHook`, and 2,010 bytes for `SwapVMGasToken`, all below EIP-170;
+- production runtime sizes are 15,670 bytes for `SwaputerKernel`, 7,859 bytes for `SwaputerHook`, and 2,010 bytes for `SwaputerToken`, all below EIP-170;
 - `forge snapshot` succeeded. The authenticated 20-byte state-changing buy test uses 425,554 gas, the 28-byte loop/static meter test 215,830 gas, the state-reading `staticCall` differential test 502,336 gas, and the Stage 1 end-to-end NOP buy 265,635 gas. These include test setup/call-path effects and are not production Router estimates.
 
 ## v1.1 authentication resolution

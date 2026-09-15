@@ -12,12 +12,12 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Read-only fork compatibility proof against the official Base Sepolia PoolManager.
 /// @dev Run with `forge script --fork-url`; no transaction is signed or broadcast upstream.
@@ -46,13 +46,13 @@ contract Stage7DU2ForkCheckScript is Script {
         vm.startPrank(PROBE_ACTOR);
 
         uint256 gasBefore = gasleft();
-        SwapVMCreationCodeStore kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
+        SwaputerCreationCodeStore kernelStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
         uint256 kernelStoreGas = gasBefore - gasleft();
         gasBefore = gasleft();
-        SwapVMCreationCodeStore hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
+        SwaputerCreationCodeStore hookStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
         uint256 hookStoreGas = gasBefore - gasleft();
         gasBefore = gasleft();
-        SwapVMWorldFactory factory = new SwapVMWorldFactory(
+        SwaputerWorldFactory factory = new SwaputerWorldFactory(
             MANAGER,
             MANAGER_CODE_HASH,
             address(kernelStore),
@@ -62,7 +62,7 @@ contract Stage7DU2ForkCheckScript is Script {
         );
         uint256 factoryGas = gasBefore - gasleft();
 
-        SwapVMWorldFactory.CreateWorldParams memory params;
+        SwaputerWorldFactory.CreateWorldParams memory params;
         params.tokenSalt = TOKEN_SALT;
         params.bootstrapSalt = BOOTSTRAP_SALT;
         params.initialSupply = INITIAL_SUPPLY;
@@ -77,8 +77,8 @@ contract Stage7DU2ForkCheckScript is Script {
         params.predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArguments = abi.encode(
             MANAGER,
-            SwapVMKernel(params.predictedKernel),
-            SwapVMGasToken(predictedToken),
+            SwaputerKernel(params.predictedKernel),
+            SwaputerToken(predictedToken),
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
             factory.initialProtocolFeeBps(),
@@ -90,12 +90,12 @@ contract Stage7DU2ForkCheckScript is Script {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArguments
         );
 
         gasBefore = gasleft();
-        (bytes32 worldId, SwapVMGasToken token, SwapVMKernel kernel, SwapVMHook hook) = factory.createWorld(params);
+        (bytes32 worldId, SwaputerToken token, SwaputerKernel kernel, SwaputerHook hook) = factory.createWorld(params);
         uint256 createWorldGas = gasBefore - gasleft();
         require(address(hook.poolManager()) == address(MANAGER), "POOL_MANAGER_BINDING_MISMATCH");
         require(uint160(address(hook)) & Hooks.ALL_HOOK_MASK == 0x20cc, "HOOK_PERMISSION_BITS_MISMATCH");
@@ -112,7 +112,7 @@ contract Stage7DU2ForkCheckScript is Script {
         );
         uint256 liquidityGas = gasBefore - gasleft();
 
-        SwapVMRouter router = SwapVMRouter(payable(factory.router()));
+        SwaputerAppRouter router = SwaputerAppRouter(payable(factory.router()));
         uint256 supplyBefore = token.totalSupply();
         uint256 balanceBefore = token.balanceOf(PROBE_ACTOR);
         gasBefore = gasleft();

@@ -13,12 +13,12 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface IPositionManagerSingleSided {
     function poolManager() external view returns (address);
@@ -58,12 +58,12 @@ contract EventsBaseSepoliaBootstrapScript is Script {
     IPermit2SingleSided private constant PERMIT2 = IPermit2SingleSided(0x000000000022D473030F116dDEE9F6B43aC78BA3);
     IPoolManager private constant MANAGER = IPoolManager(POOL_MANAGER);
 
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
     bytes32 private configuredWorldId;
-    SwapVMGasToken private configuredGasToken;
-    SwapVMKernel private configuredKernel;
-    SwapVMHook private configuredHook;
+    SwaputerToken private configuredGasToken;
+    SwaputerKernel private configuredKernel;
+    SwaputerHook private configuredHook;
 
     uint256 private constant INITIAL_SUPPLY = 1_000_000_000 ether;
     uint128 private constant BYTE_GAS_PRICE = 1_000_000_000_000;
@@ -85,9 +85,9 @@ contract EventsBaseSepoliaBootstrapScript is Script {
     uint256 private actorKey;
     uint256 private releaseStartBalance;
     bytes32 private worldId;
-    SwapVMGasToken private gasToken;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerToken private gasToken;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     bytes32 private token;
     bytes32 private tokenCodeHash;
     bytes32 private escrow;
@@ -111,12 +111,12 @@ contract EventsBaseSepoliaBootstrapScript is Script {
 
     function _validateEnvironment() private {
         require(block.chainid == BASE_SEPOLIA_CHAIN_ID, "BASE_SEPOLIA_ONLY");
-        factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
         configuredWorldId = vm.envBytes32("SVM_WORLD_ID");
-        configuredGasToken = SwapVMGasToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
-        configuredKernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
-        configuredHook = SwapVMHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
+        configuredGasToken = SwaputerToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
+        configuredKernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        configuredHook = SwaputerHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
         require(POOL_MANAGER.codehash == POOL_MANAGER_CODE_HASH, "POOL_MANAGER_CODE_HASH");
         require(address(POSITION_MANAGER).codehash == POSITION_MANAGER_CODE_HASH, "POSITION_MANAGER_CODE_HASH");
         require(POSITION_MANAGER.poolManager() == POOL_MANAGER, "POSITION_MANAGER_POOL_MANAGER");
@@ -226,7 +226,7 @@ contract EventsBaseSepoliaBootstrapScript is Script {
         uint256 buyOrderId =
             market.createBuyOrder{value: ORDER_PRICE + VM_INPUT}(ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry);
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory transfer = _signedCall(
+        SwaputerKernel.VMEnvelope memory transfer = _signedCall(
             token,
             abi.encodePacked(
                 bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -246,7 +246,7 @@ contract EventsBaseSepoliaBootstrapScript is Script {
             ACTOR,
             ACTOR
         );
-        SwapVMKernel.VMEnvelope memory deposit = _signedCall(
+        SwaputerKernel.VMEnvelope memory deposit = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -260,7 +260,7 @@ contract EventsBaseSepoliaBootstrapScript is Script {
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry, deposit, SQRT_PRICE_LIMIT
         );
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory release = _signedCall(
+        SwaputerKernel.VMEnvelope memory release = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("release(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -275,8 +275,8 @@ contract EventsBaseSepoliaBootstrapScript is Script {
     }
 
     function _executeDeploy(bytes32 codeHash, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, ACTOR, ACTOR);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, ACTOR, ACTOR);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -285,8 +285,8 @@ contract EventsBaseSepoliaBootstrapScript is Script {
     function _executeCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
     {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -295,21 +295,21 @@ contract EventsBaseSepoliaBootstrapScript is Script {
     function _signedCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
-        return _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+        return _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
     }
 
     function _signed(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         address recipient,
         address executor
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = kernel.eoaAccountId(ACTOR);
-        envelope = SwapVMKernel.VMEnvelope({
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: ACTOR,

@@ -5,9 +5,9 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 
 /// @notice Deploys and exercises the experimental MintableSRC20 package on the Base Sepolia U2 World.
 contract Stage7DU2MintableSRC20Script is Script {
@@ -17,9 +17,9 @@ contract Stage7DU2MintableSRC20Script is Script {
 
     address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
     address private constant RECIPIENT = 0x000000000000000000000000000000000000bEEF;
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
-    SwapVMGasToken private constant GAS_TOKEN = SwapVMGasToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
-    SwapVMKernel private constant KERNEL = SwapVMKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
+    SwaputerToken private constant GAS_TOKEN = SwaputerToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
+    SwaputerKernel private constant KERNEL = SwaputerKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
     bytes32 private constant WORLD_ID = 0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9;
     bytes32 private constant EXPECTED_CODE_HASH = 0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e;
 
@@ -50,8 +50,8 @@ contract Stage7DU2MintableSRC20Script is Script {
         uint256 gasSupplyBefore = GAS_TOKEN.totalSupply();
 
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
-            actorKey, SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, DEPLOY_BYTE_LIMIT, actionNonceBefore
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
+            actorKey, SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, DEPLOY_BYTE_LIMIT, actionNonceBefore
         );
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: BUY_INPUT}(WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, deployAction);
@@ -64,8 +64,8 @@ contract Stage7DU2MintableSRC20Script is Script {
         require(_queryUint(contractId, "totalSupply()", bytes("")) == 0, "INITIAL_SUPPLY");
 
         bytes memory mintPayload = abi.encodePacked(bytes4(keccak256("mint(bytes32)")), abi.encode(actorId));
-        SwapVMKernel.VMEnvelope memory mintAction = _signedAction(
-            actorKey, SwapVMKernel.RootOp.CALL, contractId, mintPayload, MINT_BYTE_LIMIT, actionNonceBefore + 1
+        SwaputerKernel.VMEnvelope memory mintAction = _signedAction(
+            actorKey, SwaputerKernel.RootOp.CALL, contractId, mintPayload, MINT_BYTE_LIMIT, actionNonceBefore + 1
         );
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: BUY_INPUT}(WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, mintAction);
@@ -80,8 +80,13 @@ contract Stage7DU2MintableSRC20Script is Script {
 
         bytes memory transferPayload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(recipientId, TRANSFER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory transferAction = _signedAction(
-            actorKey, SwapVMKernel.RootOp.CALL, contractId, transferPayload, TRANSFER_BYTE_LIMIT, actionNonceBefore + 2
+        SwaputerKernel.VMEnvelope memory transferAction = _signedAction(
+            actorKey,
+            SwaputerKernel.RootOp.CALL,
+            contractId,
+            transferPayload,
+            TRANSFER_BYTE_LIMIT,
+            actionNonceBefore + 2
         );
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: BUY_INPUT}(WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, transferAction);
@@ -114,13 +119,13 @@ contract Stage7DU2MintableSRC20Script is Script {
 
     function _signedAction(
         uint256 actorKey,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         uint64 nonce
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: WORLD_ID,
             actor: ACTOR,

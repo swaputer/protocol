@@ -5,8 +5,8 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSETHVault} from "../src/SwapVMSETHVault.sol";
 
 /// @notice Exercises the active Base Sepolia sETH vault without leaving a test liability behind.
@@ -28,8 +28,8 @@ contract Stage7LiveSETHRoundTripScript is Script {
     uint256 private supplyBefore;
     uint256 private vaultBalanceBefore;
     uint256 private surplusBefore;
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     SwapVMSETHVault private vault;
     bytes32 private worldId;
     bytes32 private actorId;
@@ -51,8 +51,8 @@ contract Stage7LiveSETHRoundTripScript is Script {
         actor = vm.envOr("STAGE7A2_ACTOR", DEFAULT_ACTOR);
         require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
 
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         vault = SwapVMSETHVault(payable(vm.envAddress("SVM_SETH_VAULT_ADDRESS")));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         seth = vm.envBytes32("SVM_SETH_PROGRAM_ID");
@@ -89,7 +89,7 @@ contract Stage7LiveSETHRoundTripScript is Script {
         uint64 nonce = kernel.nonces(worldId, actorId);
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(actorId, BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
+        SwaputerKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
 
         vm.startBroadcast(actorKey);
         vault.deposit{value: BRIDGE_AMOUNT + VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, envelope, SQRT_PRICE_LIMIT);
@@ -107,7 +107,7 @@ contract Stage7LiveSETHRoundTripScript is Script {
     function _redeem() private {
         uint64 nonce = kernel.nonces(worldId, actorId);
         bytes memory payload = abi.encodePacked(bytes4(keccak256("bridgeBurn(uint256)")), abi.encode(BRIDGE_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
+        SwaputerKernel.VMEnvelope memory envelope = _signedEnvelope(payload, actor, nonce);
 
         vm.startBroadcast(actorKey);
         vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, actor, envelope, SQRT_PRICE_LIMIT);
@@ -118,10 +118,10 @@ contract Stage7LiveSETHRoundTripScript is Script {
     function _signedEnvelope(bytes memory payload, address recipient, uint64 nonce)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: worldId,
             actor: actor,
             targetOrCodeHash: seth,

@@ -8,9 +8,9 @@ import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
 import {
     WorldDeployerProbe,
     WorldDeployerProbeFactory,
@@ -30,13 +30,13 @@ contract SwapVMStage7A1PTest is Test {
         | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
 
     PoolManager internal manager;
-    SwapVMGasToken internal token;
+    SwaputerToken internal token;
     WorldDeployerProbeFactory internal probeFactory;
 
     function setUp() public {
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(1e36, address(this));
-        probeFactory = new WorldDeployerProbeFactory(type(SwapVMKernel).creationCode, type(SwapVMHook).creationCode);
+        token = new SwaputerToken(1e36, address(this));
+        probeFactory = new WorldDeployerProbeFactory(type(SwaputerKernel).creationCode, type(SwaputerHook).creationCode);
     }
 
     function test_naiveHookKernelCreate2PredictionCannotResolveCycleInOnePass() public view {
@@ -69,20 +69,21 @@ contract SwapVMStage7A1PTest is Test {
         bytes32 kernelSalt = bytes32(uint256(0xC0FFEE));
 
         (address hookByFakeKernel, bytes32 hookSalt) =
-            HookMiner.find(address(this), V4_PERMISSION_BITS, type(SwapVMHook).creationCode, _hookArgs(fakeKernel));
+            HookMiner.find(address(this), V4_PERMISSION_BITS, type(SwaputerHook).creationCode, _hookArgs(fakeKernel));
         bytes32 kernelInitCodeHash = _kernelInitCodeHash(hookByFakeKernel);
         address kernelByFormula = vm.computeCreate2Address(kernelSalt, kernelInitCodeHash, address(this));
-        (address hookByDerivedKernel,) =
-            HookMiner.find(address(this), V4_PERMISSION_BITS, type(SwapVMHook).creationCode, _hookArgs(kernelByFormula));
+        (address hookByDerivedKernel,) = HookMiner.find(
+            address(this), V4_PERMISSION_BITS, type(SwaputerHook).creationCode, _hookArgs(kernelByFormula)
+        );
 
         assertTrue(
             hookByFakeKernel != hookByDerivedKernel,
             "kernel->hook->kernel loop must be solved jointly, not sequentially"
         );
 
-        SwapVMKernel kernel = new SwapVMKernel{salt: kernelSalt}(hookByFakeKernel, BYTE_GAS_PRICE);
-        vm.expectRevert(SwapVMHook.InvalidBinding.selector);
-        new SwapVMHook{salt: hookSalt}(
+        SwaputerKernel kernel = new SwaputerKernel{salt: kernelSalt}(hookByFakeKernel, BYTE_GAS_PRICE);
+        vm.expectRevert(SwaputerHook.InvalidBinding.selector);
+        new SwaputerHook{salt: hookSalt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
     }
@@ -107,11 +108,11 @@ contract SwapVMStage7A1PTest is Test {
         assertEq(kernel, bootstrap.predictedKernel, "kernel address deterministic");
         assertEq(hook, bootstrap.predictedHook, "hook address deterministic");
         assertEq(address(probe), bootstrap.predictedProbe, "probe canary");
-        assertEq(SwapVMKernel(kernel).hook(), hook);
-        assertEq(address(SwapVMHook(payable(hook)).kernel()), kernel);
-        assertEq(address(SwapVMHook(payable(hook)).poolManager()), address(manager));
-        assertEq(SwapVMHook(payable(hook)).byteGasPrice(), BYTE_GAS_PRICE);
-        assertEq(SwapVMKernel(kernel).byteGasPrice(), BYTE_GAS_PRICE);
+        assertEq(SwaputerKernel(kernel).hook(), hook);
+        assertEq(address(SwaputerHook(payable(hook)).kernel()), kernel);
+        assertEq(address(SwaputerHook(payable(hook)).poolManager()), address(manager));
+        assertEq(SwaputerHook(payable(hook)).byteGasPrice(), BYTE_GAS_PRICE);
+        assertEq(SwaputerKernel(kernel).byteGasPrice(), BYTE_GAS_PRICE);
         assertEq(
             uint160(hook) & Hooks.ALL_HOOK_MASK, V4_PERMISSION_BITS, "hook address bits must satisfy v4 permission mask"
         );
@@ -306,17 +307,17 @@ contract SwapVMStage7A1PTest is Test {
         (bootstrap.predictedHook, bootstrap.hookSalt) = HookMiner.find(
             bootstrap.predictedProbe,
             V4_PERMISSION_BITS,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             _hookArgs(bootstrap.predictedKernel, bootstrap.predictedProbe)
         );
     }
 
     function _kernelInitCodeHash(address hook) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(type(SwapVMKernel).creationCode, abi.encode(hook, BYTE_GAS_PRICE)));
+        return keccak256(abi.encodePacked(type(SwaputerKernel).creationCode, abi.encode(hook, BYTE_GAS_PRICE)));
     }
 
     function _hookInitCodeHash(address kernel) internal view returns (bytes32) {
-        return keccak256(abi.encodePacked(type(SwapVMHook).creationCode, _hookArgs(kernel)));
+        return keccak256(abi.encodePacked(type(SwaputerHook).creationCode, _hookArgs(kernel)));
     }
 
     function _hookArgs(address kernel) internal view returns (bytes memory) {

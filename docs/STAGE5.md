@@ -22,7 +22,7 @@ The exact reference identity is:
 | --- | --- | --- | --- |
 | CPAMM | `0x94baf55f` | `0x867173fe3dcbf09ae1202bb62b8ec3913ef83cef075906344821673ec239807b` | `0x2d5b233b9056011f5a1fbed8781b5c12963ba6bcbcf9a79cfcc0d1ebaf8a3e4b` |
 
-`SwapVMReferenceRegistry` recognizes it only when interface ID, exact canonical ABI hash and whole-package hash all match.
+`SwaputerProgramRegistry` recognizes it only when interface ID, exact canonical ABI hash and whole-package hash all match.
 
 ## Math, bounds and atomicity
 
@@ -59,7 +59,7 @@ Final local verification used Foundry `1.5.1-stable`, Solidity `0.8.26`, Cancun 
 - ten fuzz properties ran at least 512 cases each;
 - eight stateful invariants each ran 64 runs × 32 calls = 2,048 actions, with zero handler reverts;
 - representative Stage-5 test-function costs are 377,689 gas for exact registry verification, 52,300,167 gas for the nine-transaction deploy/create/approve/add/swap/remove conformance scenario, 37,451,561 gas for the setup plus two rollback cases, and 22,452,902 gas for setup plus static behavior. These include fixtures and multiple real-v4 swaps, so they are not single production Router-call estimates;
-- production runtime sizes are 21,918 bytes for `SwapVMKernel`, 5,842 bytes for `SwapVMHook`, 1,350 bytes for `SwapVMGasToken`, and 1,606 bytes for the four-package `SwapVMReferenceRegistry`. Kernel remains 2,658 bytes below EIP-170.
+- production runtime sizes are 21,918 bytes for `SwaputerKernel`, 5,842 bytes for `SwaputerHook`, 1,350 bytes for `SwaputerToken`, and 1,606 bytes for the four-package `SwaputerProgramRegistry`. Kernel remains 2,658 bytes below EIP-170.
 
 ## Authentication status and remaining scope
 

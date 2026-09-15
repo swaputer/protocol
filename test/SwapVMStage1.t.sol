@@ -18,9 +18,9 @@ import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiqui
 import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
 import {ReceiptFixture} from "./utils/ReceiptFixture.sol";
 
 contract SwapVMStage1Test is Test {
@@ -42,9 +42,9 @@ contract SwapVMStage1Test is Test {
     bytes32 internal constant TRANSFER_TOPIC = keccak256("Transfer(address,address,uint256)");
 
     PoolManager internal manager;
-    SwapVMGasToken internal token;
-    SwapVMKernel internal kernel;
-    SwapVMHook internal hook;
+    SwaputerToken internal token;
+    SwaputerKernel internal kernel;
+    SwaputerHook internal hook;
     PoolModifyLiquidityTest internal liquidityRouter;
     PoolSwapTest internal swapRouter;
     PoolKey internal key;
@@ -54,7 +54,7 @@ contract SwapVMStage1Test is Test {
         vm.deal(address(this), 1e30);
 
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(INITIAL_SUPPLY, address(this));
+        token = new SwaputerToken(INITIAL_SUPPLY, address(this));
         liquidityRouter = new PoolModifyLiquidityTest(manager);
         swapRouter = new PoolSwapTest(manager);
 
@@ -64,7 +64,7 @@ contract SwapVMStage1Test is Test {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory constructorArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -74,11 +74,11 @@ contract SwapVMStage1Test is Test {
             TICK_SPACING
         );
         (address expectedHook, bytes32 salt) =
-            HookMiner.find(address(this), flags, type(SwapVMHook).creationCode, constructorArgs);
+            HookMiner.find(address(this), flags, type(SwaputerHook).creationCode, constructorArgs);
 
-        kernel = new SwapVMKernel(expectedHook, BYTE_GAS_PRICE);
+        kernel = new SwaputerKernel(expectedHook, BYTE_GAS_PRICE);
         assertEq(address(kernel), predictedKernel, "kernel address prediction");
-        hook = new SwapVMHook{salt: salt}(
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
         assertEq(address(hook), expectedHook, "hook CREATE2 address");
@@ -102,6 +102,7 @@ contract SwapVMStage1Test is Test {
             }),
             bytes("")
         );
+        hook.live();
     }
 
     function test_hookAddressHasExactlyRequiredPermissionBits() public view {
@@ -265,7 +266,7 @@ contract SwapVMStage1Test is Test {
     }
 
     function test_nonPoolManagerCannotCallHook() public {
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.OnlyPoolManager.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.OnlyPoolManager.selector, address(this)));
         hook.afterSwap(
             address(this),
             key,
@@ -276,15 +277,15 @@ contract SwapVMStage1Test is Test {
     }
 
     function test_nonBoundHookCannotCallKernel() public {
-        SwapVMKernel.BuyReceipt memory receipt;
-        vm.expectRevert(abi.encodeWithSelector(SwapVMKernel.OnlyBoundHook.selector, address(this)));
+        SwaputerKernel.BuyReceipt memory receipt;
+        vm.expectRevert(abi.encodeWithSelector(SwaputerKernel.OnlyBoundHook.selector, address(this)));
         kernel.executeNOP(receipt);
     }
 
     function test_boundaryRejectsExactInputAboveUint128() public {
         uint256 tooLarge = uint256(type(uint128).max) + 1;
         vm.prank(address(manager));
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.ExactEthInputOutOfRange.selector, tooLarge));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.ExactEthInputOutOfRange.selector, tooLarge));
         hook.afterSwap(
             address(swapRouter),
             key,
@@ -299,7 +300,7 @@ contract SwapVMStage1Test is Test {
     function test_boundaryRejectsInt256MinimumExactInput() public {
         vm.prank(address(manager));
         vm.expectRevert(
-            abi.encodeWithSelector(SwapVMHook.ExactEthInputOutOfRange.selector, uint256(type(int256).max) + 1)
+            abi.encodeWithSelector(SwaputerHook.ExactEthInputOutOfRange.selector, uint256(type(int256).max) + 1)
         );
         hook.afterSwap(
             address(swapRouter),
@@ -316,7 +317,7 @@ contract SwapVMStage1Test is Test {
         uint256 amount = 17;
         uint256 supplyBefore = token.totalSupply();
         vm.expectEmit(true, true, false, true, address(token));
-        emit SwapVMGasToken.Transfer(address(this), address(0), amount);
+        emit SwaputerToken.Transfer(address(this), address(0), amount);
         token.burn(amount);
         assertEq(token.totalSupply(), supplyBefore - amount);
     }
@@ -368,7 +369,7 @@ contract SwapVMStage1Test is Test {
     function testFuzz_buyRejectsNonPositiveOutputDelta(int128 outputDelta) public {
         outputDelta = int128(bound(outputDelta, type(int128).min, 0));
         vm.prank(address(manager));
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.InvalidGrossTokenOut.selector, outputDelta));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.InvalidGrossTokenOut.selector, outputDelta));
         hook.afterSwap(
             address(swapRouter),
             key,
@@ -399,7 +400,7 @@ contract SwapVMStage1Test is Test {
     function testFuzz_boundaryRejectsInputPastUint128(uint256 raw) public {
         uint256 tooLarge = bound(raw, uint256(type(uint128).max) + 1, uint256(type(int256).max));
         vm.prank(address(manager));
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.ExactEthInputOutOfRange.selector, tooLarge));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.ExactEthInputOutOfRange.selector, tooLarge));
         hook.afterSwap(
             address(swapRouter),
             key,

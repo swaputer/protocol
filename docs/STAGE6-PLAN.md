@@ -116,7 +116,7 @@ Stage 7 remains the public-release gate: independent audit, expanded stateful fu
 Stage 7 is the production release gate and contains:
 
 1. 7A1: design, release-surface gap and threat model freeze — complete；
-2. 7A2: production `SwapVMRouter` 与 `WorldFactory`、部署 Manifest、sealing 与原子启动 — implementation complete / unaudited；
+2. 7A2: production `SwaputerAppRouter` 与 `WorldFactory`、部署 Manifest、sealing 与原子启动 — implementation complete / unaudited；
 3. 7B: internal hardening、adversarial fuzz、MEV/economic hardening；
 4. 7C: independent external audit；
 5. 7D: bug bounty and staged cap-limited rollout.

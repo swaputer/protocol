@@ -13,13 +13,13 @@ import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeReader, SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldDeployer} from "../src/SwapVMWorldDeployer.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeReader, SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldDeployer} from "../src/SwaputerWorldDeployer.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Isolated Foundry proof for the S7B-002 public-salt availability risk.
 /// @dev These are simulated calls, not broadcast transactions or receipt evidence.
@@ -40,17 +40,17 @@ contract Stage7MSaltRecoveryTest is Test {
     bytes32 private constant WORLD_SEALED_TOPIC = keccak256("WorldSealed(bytes32,bytes32)");
 
     PoolManager private manager;
-    SwapVMCreationCodeStore private kernelCodeStore;
-    SwapVMCreationCodeStore private hookCodeStore;
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
-    SwapVMGasToken private token;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerCreationCodeStore private kernelCodeStore;
+    SwaputerCreationCodeStore private hookCodeStore;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
+    SwaputerToken private token;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     bytes32 private worldId;
 
     struct WorldPlan {
-        SwapVMWorldFactory.CreateWorldParams params;
+        SwaputerWorldFactory.CreateWorldParams params;
         address gasToken;
         address worldDeployer;
         address kernel;
@@ -60,9 +60,9 @@ contract Stage7MSaltRecoveryTest is Test {
 
     function setUp() public {
         manager = new PoolManager(address(this));
-        kernelCodeStore = new SwapVMCreationCodeStore(vm.getCode("src/SwapVMKernel.sol:SwapVMKernel"));
-        hookCodeStore = new SwapVMCreationCodeStore(vm.getCode("src/SwapVMHook.sol:SwapVMHook"));
-        factory = new SwapVMWorldFactory(
+        kernelCodeStore = new SwaputerCreationCodeStore(vm.getCode("src/SwaputerKernel.sol:SwaputerKernel"));
+        hookCodeStore = new SwaputerCreationCodeStore(vm.getCode("src/SwaputerHook.sol:SwaputerHook"));
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelCodeStore),
@@ -70,7 +70,7 @@ contract Stage7MSaltRecoveryTest is Test {
             FEE_ADMIN,
             FEE_CONTROLLER
         );
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
         WorldPlan memory baseline = _plan(
             bytes32(uint256(1)),
@@ -107,11 +107,11 @@ contract Stage7MSaltRecoveryTest is Test {
         vm.prank(PUBLISHER);
         factory.createWorld(candidate.params);
 
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(candidate.worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(candidate.worldId);
         assertEq(config.initialHolder, PUBLISHER);
-        assertEq(SwapVMGasToken(candidate.gasToken).totalSupply(), INITIAL_SUPPLY);
-        assertEq(SwapVMGasToken(candidate.gasToken).balanceOf(PUBLISHER), INITIAL_SUPPLY);
-        assertEq(SwapVMGasToken(candidate.gasToken).balanceOf(GRIEFER), 0, "copier cannot redirect declared supply");
+        assertEq(SwaputerToken(candidate.gasToken).totalSupply(), INITIAL_SUPPLY);
+        assertEq(SwaputerToken(candidate.gasToken).balanceOf(PUBLISHER), INITIAL_SUPPLY);
+        assertEq(SwaputerToken(candidate.gasToken).balanceOf(GRIEFER), 0, "copier cannot redirect declared supply");
         assertEq(factory.getWorldConfig(worldId).configHash, originalConfigHash, "existing World changed");
     }
 
@@ -145,7 +145,7 @@ contract Stage7MSaltRecoveryTest is Test {
         _createAndAssert(griefer, GRIEFER, false);
 
         vm.expectRevert(
-            abi.encodeWithSelector(SwapVMWorldFactory.WorldDeployerCollision.selector, candidate.worldDeployer)
+            abi.encodeWithSelector(SwaputerWorldFactory.WorldDeployerCollision.selector, candidate.worldDeployer)
         );
         vm.prank(PUBLISHER);
         factory.createWorld(candidate.params);
@@ -202,9 +202,9 @@ contract Stage7MSaltRecoveryTest is Test {
         assertTrue(candidate.worldDeployer != griefer.worldDeployer);
 
         _createAndAssert(griefer, GRIEFER, false);
-        assertEq(SwapVMGasToken(griefer.gasToken).balanceOf(PUBLISHER), INITIAL_SUPPLY);
+        assertEq(SwaputerToken(griefer.gasToken).balanceOf(PUBLISHER), INITIAL_SUPPLY);
         assertEq(
-            SwapVMGasToken(griefer.gasToken).balanceOf(GRIEFER), 0, "griefer cannot redirect candidate Token supply"
+            SwaputerToken(griefer.gasToken).balanceOf(GRIEFER), 0, "griefer cannot redirect candidate Token supply"
         );
 
         vm.expectRevert(bytes(""));
@@ -251,7 +251,7 @@ contract Stage7MSaltRecoveryTest is Test {
         plan.kernel = factory.predictKernel(plan.worldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(plan.kernel),
+            SwaputerKernel(plan.kernel),
             plan.gasToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -263,10 +263,10 @@ contract Stage7MSaltRecoveryTest is Test {
         bytes32 hookSalt;
         vm.pauseGasMetering();
         (plan.hook, hookSalt) = HookMiner.find(
-            plan.worldDeployer, REQUIRED_HOOK_FLAGS, SwapVMCreationCodeReader.read(address(hookCodeStore)), hookArgs
+            plan.worldDeployer, REQUIRED_HOOK_FLAGS, SwaputerCreationCodeReader.read(address(hookCodeStore)), hookArgs
         );
         vm.resumeGasMetering();
-        plan.params = SwapVMWorldFactory.CreateWorldParams({
+        plan.params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -303,7 +303,7 @@ contract Stage7MSaltRecoveryTest is Test {
                 plan.worldDeployer,
                 plan.params.hookSalt,
                 plan.kernel,
-                SwapVMGasToken(plan.gasToken),
+                SwaputerToken(plan.gasToken),
                 plan.params.byteGasPrice,
                 plan.params.poolFee,
                 plan.params.tickSpacing
@@ -326,9 +326,9 @@ contract Stage7MSaltRecoveryTest is Test {
         assertGt(plan.worldDeployer.code.length, 0);
         assertGt(plan.kernel.code.length, 0);
         assertGt(plan.hook.code.length, 0);
-        assertTrue(SwapVMWorldDeployer(plan.worldDeployer).used());
+        assertTrue(SwaputerWorldDeployer(plan.worldDeployer).used());
 
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(plan.worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(plan.worldId);
         assertTrue(config.isSealed);
         assertEq(config.configHash, _worldConfigHash(plan.worldId, config));
         assertEq(config.worldDeployer, plan.worldDeployer);
@@ -340,11 +340,11 @@ contract Stage7MSaltRecoveryTest is Test {
         assertEq(config.gasTokenCodeHash, plan.gasToken.codehash);
         assertEq(config.kernelCodeHash, plan.kernel.codehash);
         assertEq(config.hookCodeHash, plan.hook.codehash);
-        assertEq(SwapVMKernel(plan.kernel).hook(), plan.hook);
-        assertEq(address(SwapVMHook(payable(plan.hook)).kernel()), plan.kernel);
-        assertEq(address(SwapVMHook(payable(plan.hook)).gasToken()), plan.gasToken);
-        assertEq(SwapVMGasToken(plan.gasToken).totalSupply(), plan.params.initialSupply);
-        assertEq(SwapVMGasToken(plan.gasToken).balanceOf(plan.params.initialHolder), plan.params.initialSupply);
+        assertEq(SwaputerKernel(plan.kernel).hook(), plan.hook);
+        assertEq(address(SwaputerHook(payable(plan.hook)).kernel()), plan.kernel);
+        assertEq(address(SwaputerHook(payable(plan.hook)).gasToken()), plan.gasToken);
+        assertEq(SwaputerToken(plan.gasToken).totalSupply(), plan.params.initialSupply);
+        assertEq(SwaputerToken(plan.gasToken).balanceOf(plan.params.initialHolder), plan.params.initialSupply);
 
         (PoolKey memory storedKey, bool isSealed) = factory.getPoolKey(plan.worldId);
         assertTrue(isSealed);
@@ -376,7 +376,11 @@ contract Stage7MSaltRecoveryTest is Test {
         return keccak256(abi.encode(plan.params));
     }
 
-    function _worldConfigHash(bytes32 id, SwapVMWorldFactory.WorldConfig memory config) private view returns (bytes32) {
+    function _worldConfigHash(bytes32 id, SwaputerWorldFactory.WorldConfig memory config)
+        private
+        view
+        returns (bytes32)
+    {
         return keccak256(
             abi.encode(
                 factory.WORLD_CONFIG_TYPEHASH(),

@@ -7,7 +7,7 @@ Stage 7A1-P resolves two pre-implementation questions without adding production 
 - `test/WorldDeployerProbe.sol`: test-only immutable Factory, one-shot per-world deployer and helper Factory.
 - `test/SwapVMStage7A1P.t.sol`: direct-cycle counterexamples plus deterministic deployment, binding, permissions, access control, collision and rollback tests.
 - `docs/security/WORLD-FACTORY-DESIGN.md`: corrected address equations and Stage 7A2 deployment algorithm.
-- `docs/security/ROUTER-INTERFACE.md`: exact minimal ABI using `SwapVMKernel.VMEnvelope` directly.
+- `docs/security/ROUTER-INTERFACE.md`: exact minimal ABI using `SwaputerKernel.VMEnvelope` directly.
 - updates to `docs/STAGE7-PLAN.md` and `docs/security/RELEASE-SURFACE-GAP.md`.
 
 No file under `src/` and no frozen specification, ISA, manifest or reference package is changed by this stage.
@@ -58,7 +58,7 @@ The Router has only four public operations:
 
 ```solidity
 buyNOPExactInput(worldId, minTokenOut, sqrtPriceLimitX96, recipient)
-buyVMExactInput(worldId, sqrtPriceLimitX96, SwapVMKernel.VMEnvelope envelope)
+buyVMExactInput(worldId, sqrtPriceLimitX96, SwaputerKernel.VMEnvelope envelope)
 sellExactInput(worldId, exactTokenAmountIn, minEthAmountOut, sqrtPriceLimitX96, recipient)
 unlockCallback(callbackData)
 ```
@@ -79,4 +79,4 @@ The architecture is executable without a frozen-protocol change. Stage 7A2 may b
 - `git diff --check`: passed.
 - `WorldDeployerProbe`: 1,784-byte runtime, 1,973-byte initcode.
 - `WorldDeployerProbeFactory`: 3,976-byte runtime, 4,956-byte initcode.
-- Production `SwapVMKernel` remains 21,918 bytes and `SwapVMHook` remains 5,842 bytes; no `src/` code was changed.
+- Production `SwaputerKernel` remains 21,918 bytes and `SwaputerHook` remains 5,842 bytes; no `src/` code was changed.

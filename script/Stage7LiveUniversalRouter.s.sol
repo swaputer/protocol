@@ -10,10 +10,10 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {IV4Router} from "@uniswap/v4-periphery/src/interfaces/IV4Router.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface ILiveOfficialUniversalRouter {
     function poolManager() external view returns (address);
@@ -38,10 +38,10 @@ contract Stage7LiveUniversalRouterScript is Script {
     uint32 private constant CALL_EXECUTED_BYTES = 191;
     uint160 private constant SQRT_PRICE_LIMIT = TickMath.MIN_SQRT_PRICE + 1;
 
-    SwapVMWorldFactory private factory;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
-    SwapVMGasToken private gasToken;
+    SwaputerWorldFactory private factory;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
+    SwaputerToken private gasToken;
     ILiveOfficialUniversalRouter private universalRouter;
     PoolKey private poolKey;
     bytes32 private worldId;
@@ -68,7 +68,7 @@ contract Stage7LiveUniversalRouterScript is Script {
 
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(uint256(5)));
-        _execute(_signedAction(SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore));
+        _execute(_signedAction(SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload, nonceBefore));
 
         require(kernel.executionHeight(worldId) == heightBefore + 1, "UNIVERSAL_ROUTER_DEPLOY_HEIGHT");
         require(kernel.nonces(worldId, actorId) == nonceBefore + 1, "UNIVERSAL_ROUTER_DEPLOY_NONCE");
@@ -84,7 +84,7 @@ contract Stage7LiveUniversalRouterScript is Script {
 
         bytes memory callPayload =
             abi.encodePacked(bytes4(keccak256("controlFlow(uint256,bool)")), abi.encode(uint256(4), true));
-        _execute(_signedAction(SwapVMKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1));
+        _execute(_signedAction(SwaputerKernel.RootOp.CALL, programId, callPayload, nonceBefore + 1));
 
         uint256 expectedBurn = uint256(DEPLOY_EXECUTED_BYTES + CALL_EXECUTED_BYTES) * kernel.byteGasPrice();
         require(kernel.executionHeight(worldId) == heightBefore + 2, "UNIVERSAL_ROUTER_CALL_HEIGHT");
@@ -153,10 +153,10 @@ contract Stage7LiveUniversalRouterScript is Script {
         require(ILiveOfficialPositionManager(positionManager).poolManager() == poolManager, "POSITION_POOL_MANAGER");
         require(ILiveOfficialPositionManager(positionManager).permit2() == permit2, "POSITION_PERMIT2");
 
-        factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
-        hook = SwapVMHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
-        gasToken = SwapVMGasToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
+        factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        hook = SwaputerHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
+        gasToken = SwaputerToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         bool isSealed;
         (poolKey, isSealed) = factory.getPoolKey(worldId);
@@ -173,7 +173,7 @@ contract Stage7LiveUniversalRouterScript is Script {
         require(address(hook.gasToken()) == address(gasToken), "HOOK_GAS_TOKEN");
     }
 
-    function _execute(SwapVMKernel.VMEnvelope memory envelope) private {
+    function _execute(SwaputerKernel.VMEnvelope memory envelope) private {
         bytes[] memory actionParams = new bytes[](3);
         actionParams[0] = abi.encode(
             IV4Router.ExactInputSingleParams({
@@ -195,12 +195,12 @@ contract Stage7LiveUniversalRouterScript is Script {
         vm.stopBroadcast();
     }
 
-    function _signedAction(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint64 nonce)
+    function _signedAction(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint64 nonce)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
-        envelope = SwapVMKernel.VMEnvelope({
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

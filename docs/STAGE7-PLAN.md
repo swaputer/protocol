@@ -23,7 +23,7 @@ separately records the project's accepted operational omissions.
 - **7A1-P — complete:** executable proof that direct Kernel/Hook CREATE2 is a
   real address cycle and that a per-world nonce-1 CREATE deployer breaks it.
 - **7A2 — implementation complete, unaudited:** production-shaped immutable
-  `SwapVMWorldFactory`, `SwapVMWorldDeployer`, `SwapVMRouter`, creation-code
+  `SwaputerWorldFactory`, `SwaputerWorldDeployer`, `SwaputerAppRouter`, creation-code
   stores, onchain one-write WorldConfig/sealing, local deployment script, and
   strict RPC-free deployment-manifest tooling are implemented and tested.
 

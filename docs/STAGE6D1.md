@@ -65,4 +65,4 @@ The completed acceptance run produced:
 
 Stage 6D1 differential gas snapshots are 37,379,434 for the full code corpus, 5,102,024 for the package corpus, 4,206,883 for reference package field/hash comparison, 13,506 for the JUMPDEST bitmap case and 414,977 for the static-permission set. These are test-harness costs, not production execution estimates.
 
-Production runtime sizes remain unchanged: `SwapVMKernel` 21,918 bytes, `SwapVMHook` 5,842 bytes, `SwapVMGasToken` 1,350 bytes and `SwapVMReferenceRegistry` 1,606 bytes. The test-only `SwapVMStage6D1Harness` is 13,164 bytes.
+Production runtime sizes remain unchanged: `SwaputerKernel` 21,918 bytes, `SwaputerHook` 5,842 bytes, `SwaputerToken` 1,350 bytes and `SwaputerProgramRegistry` 1,606 bytes. The test-only `SwapVMStage6D1Harness` is 13,164 bytes.

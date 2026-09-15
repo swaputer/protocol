@@ -8,16 +8,16 @@ deployment. Frozen v1.1 consensus contracts and artifacts are unchanged.
 
 ## Solidity surface
 
-- `SwapVMCreationCodeStore`: inert, write-once bytecode container. Runtime is a
+- `SwaputerCreationCodeStore`: inert, write-once bytecode container. Runtime is a
   leading STOP followed by exact release creation code.
-- `SwapVMWorldDeployer`: immutable Factory-only, one-shot per-world deployer.
+- `SwaputerWorldDeployer`: immutable Factory-only, one-shot per-world deployer.
   It hash-checks code read from both stores, CREATEs Kernel as nonce-1 child,
   CREATE2-deploys Hook, and verifies every bidirectional immutable binding.
-- `SwapVMWorldFactory`: binds one existing PoolManager and EXTCODEHASH, deploys
+- `SwaputerWorldFactory`: binds one existing PoolManager and EXTCODEHASH, deploys
   one canonical Router and immutable ReferenceRegistry, creates each Token/P/K/H
   graph, initializes the unique ETH/TOKEN PoolKey, writes WorldConfig once and
   seals it. It has no mutation, custody, admin or upgrade entry.
-- `SwapVMRouter`: the four-entry frozen 7A1-P interface. It resolves only sealed
+- `SwaputerAppRouter`: the four-entry frozen 7A1-P interface. It resolves only sealed
   Factory PoolKeys, uses a transient callback commitment, performs real v4
   unlock/swap/settlement, refunds only this call's unused ETH budget, transfers
   sell input only for actual debt, and leaves every transient delta at zero.
@@ -53,7 +53,7 @@ source drift fails before a release can create a World.
 ## Router behavior
 
 - `buyNOPExactInput`: payable exact-input ETH→TOKEN, empty hookData only.
-- `buyVMExactInput`: forwards one unchanged `SwapVMKernel.VMEnvelope` as
+- `buyVMExactInput`: forwards one unchanged `SwaputerKernel.VMEnvelope` as
   `abi.encode(envelope)`; CALL/DEPLOY only; signed NOP is rejected.
 - `sellExactInput`: TOKEN→ETH exact-input with empty hookData and therefore no
   VM execution or burn.
@@ -134,13 +134,13 @@ Relevant production runtime/initcode sizes are:
 
 | Contract | Runtime | Initcode |
 | --- | ---: | ---: |
-| `SwapVMKernel` | 21,918 B | 22,228 B |
-| `SwapVMHook` | 5,842 B | 7,078 B |
-| `SwapVMGasToken` | 1,350 B | 1,554 B |
-| `SwapVMReferenceRegistry` | 1,606 B | 1,632 B |
-| `SwapVMRouter` | 6,686 B | 7,032 B |
-| `SwapVMWorldDeployer` | 2,548 B | 2,812 B |
-| `SwapVMWorldFactory` | 12,362 B | 22,031 B |
+| `SwaputerKernel` | 21,918 B | 22,228 B |
+| `SwaputerHook` | 5,842 B | 7,078 B |
+| `SwaputerToken` | 1,350 B | 1,554 B |
+| `SwaputerProgramRegistry` | 1,606 B | 1,632 B |
+| `SwaputerAppRouter` | 6,686 B | 7,032 B |
+| `SwaputerWorldDeployer` | 2,548 B | 2,812 B |
+| `SwaputerWorldFactory` | 12,362 B | 22,031 B |
 
 The Stage 6E concrete reconciliation remained exact: 278 executed bytes,
 `278000000000000` estimated/actual burn, one matching Kernel VMLog, and exact

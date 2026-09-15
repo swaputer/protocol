@@ -13,13 +13,13 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 contract MarketContractRecipient {}
 
@@ -44,10 +44,10 @@ contract SwapVMSRC20MarketTest is Test {
     bytes32 internal constant MARKET_SALT = keccak256("SwapVMSRC20Market.complete-escrow.test");
 
     PoolManager internal manager;
-    SwapVMWorldFactory internal factory;
-    SwapVMRouter internal router;
-    SwapVMGasToken internal gasToken;
-    SwapVMKernel internal kernel;
+    SwaputerWorldFactory internal factory;
+    SwaputerAppRouter internal router;
+    SwaputerToken internal gasToken;
+    SwaputerKernel internal kernel;
     PoolKey internal key;
     bytes32 internal worldId;
     address internal actor;
@@ -69,9 +69,9 @@ contract SwapVMSRC20MarketTest is Test {
         vm.deal(buyer, 100 ether);
 
         manager = new PoolManager(address(this));
-        SwapVMCreationCodeStore kernelCodeStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        SwapVMCreationCodeStore hookCodeStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        SwaputerCreationCodeStore kernelCodeStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        SwaputerCreationCodeStore hookCodeStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelCodeStore),
@@ -79,10 +79,11 @@ contract SwapVMSRC20MarketTest is Test {
             address(0xFEE),
             address(0xC0FFEE)
         );
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
-        SwapVMWorldFactory.CreateWorldParams memory params = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
-        (worldId, gasToken, kernel,) = factory.createWorld(params);
+        SwaputerWorldFactory.CreateWorldParams memory params = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
+        SwaputerHook hook;
+        (worldId, gasToken, kernel, hook) = factory.createWorld(params);
         bool isSealed;
         (key, isSealed) = factory.getPoolKey(worldId);
         assertTrue(isSealed);
@@ -94,6 +95,8 @@ contract SwapVMSRC20MarketTest is Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        vm.prank(address(0xFEE));
+        hook.live();
 
         _deploySRC20AndEscrowMarket();
         _approveEscrow(2 * ORDER_AMOUNT);
@@ -111,7 +114,7 @@ contract SwapVMSRC20MarketTest is Test {
         assertEq(market.lockedEth(), ORDER_PRICE + VM_INPUT);
         assertEq(address(market).balance, ORDER_PRICE + VM_INPUT);
 
-        SwapVMKernel.VMEnvelope memory transfer =
+        SwaputerKernel.VMEnvelope memory transfer =
             _signedTransfer(ACTOR_KEY, actor, buyer, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         market.fillBuyOrder(orderId, transfer, TickMath.MIN_SQRT_PRICE + 1);
@@ -147,7 +150,7 @@ contract SwapVMSRC20MarketTest is Test {
     function test_sellOrderEscrowsSrc20AndBuyerFillsAtomically() public {
         uint256 sellerEthBefore = actor.balance;
 
-        SwapVMKernel.VMEnvelope memory deposit =
+        SwaputerKernel.VMEnvelope memory deposit =
             _signedEscrowDeposit(ACTOR_KEY, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         uint256 orderId = market.createSellOrder{value: VM_INPUT}(
@@ -164,7 +167,7 @@ contract SwapVMSRC20MarketTest is Test {
 
         uint256 buyerEthBefore = buyer.balance;
         uint256 sellerEthBeforeFill = actor.balance;
-        SwapVMKernel.VMEnvelope memory release =
+        SwaputerKernel.VMEnvelope memory release =
             _signedEscrowRelease(BUYER_KEY, buyer, buyer, ORDER_AMOUNT, _nonce(buyer), VM_INPUT);
 
         vm.prank(buyer);
@@ -187,14 +190,14 @@ contract SwapVMSRC20MarketTest is Test {
     }
 
     function test_sellOrderCancelReleasesEscrowToSeller() public {
-        SwapVMKernel.VMEnvelope memory deposit =
+        SwaputerKernel.VMEnvelope memory deposit =
             _signedEscrowDeposit(ACTOR_KEY, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         uint256 orderId = market.createSellOrder{value: VM_INPUT}(
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, uint64(block.timestamp + 1 days), deposit, TickMath.MIN_SQRT_PRICE + 1
         );
 
-        SwapVMKernel.VMEnvelope memory release =
+        SwaputerKernel.VMEnvelope memory release =
             _signedEscrowRelease(ACTOR_KEY, actor, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         market.cancelSellOrder{value: VM_INPUT}(orderId, release, TickMath.MIN_SQRT_PRICE + 1);
@@ -218,7 +221,7 @@ contract SwapVMSRC20MarketTest is Test {
             _signedEnvelopeWithExecutor(
                 ACTOR_KEY,
                 actor,
-                SwapVMKernel.RootOp.CALL,
+                SwaputerKernel.RootOp.CALL,
                 src20,
                 donationPayload,
                 TOKEN_LIMIT,
@@ -231,7 +234,7 @@ contract SwapVMSRC20MarketTest is Test {
         );
         assertEq(_balanceOfId(escrow), donation);
 
-        SwapVMKernel.VMEnvelope memory deposit =
+        SwaputerKernel.VMEnvelope memory deposit =
             _signedEscrowDeposit(ACTOR_KEY, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         uint256 orderId = market.createSellOrder{value: VM_INPUT}(
@@ -242,7 +245,7 @@ contract SwapVMSRC20MarketTest is Test {
         assertEq(market.escrowedTokenAmount(), ORDER_AMOUNT);
         assertTrue(market.isSellOrderSolvent(orderId));
 
-        SwapVMKernel.VMEnvelope memory release =
+        SwaputerKernel.VMEnvelope memory release =
             _signedEscrowRelease(ACTOR_KEY, actor, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         market.cancelSellOrder{value: VM_INPUT}(orderId, release, TickMath.MIN_SQRT_PRICE + 1);
@@ -255,7 +258,8 @@ contract SwapVMSRC20MarketTest is Test {
         uint128 tooMuch = 3_000 ether;
         uint64 nonceBefore = _nonce(actor);
         uint256 balanceBefore = _balanceOf(actor);
-        SwapVMKernel.VMEnvelope memory deposit = _signedEscrowDeposit(ACTOR_KEY, actor, tooMuch, nonceBefore, VM_INPUT);
+        SwaputerKernel.VMEnvelope memory deposit =
+            _signedEscrowDeposit(ACTOR_KEY, actor, tooMuch, nonceBefore, VM_INPUT);
 
         vm.prank(actor);
         vm.expectRevert();
@@ -275,10 +279,10 @@ contract SwapVMSRC20MarketTest is Test {
         bytes memory wrongDepositPayload = abi.encodePacked(
             bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(buyer), ORDER_AMOUNT)
         );
-        SwapVMKernel.VMEnvelope memory wrongDeposit = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory wrongDeposit = _signedEnvelope(
             ACTOR_KEY,
             actor,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             escrow,
             wrongDepositPayload,
             ESCROW_LIMIT,
@@ -297,14 +301,14 @@ contract SwapVMSRC20MarketTest is Test {
             TickMath.MIN_SQRT_PRICE + 1
         );
 
-        SwapVMKernel.VMEnvelope memory deposit =
+        SwaputerKernel.VMEnvelope memory deposit =
             _signedEscrowDeposit(ACTOR_KEY, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         uint256 orderId = market.createSellOrder{value: VM_INPUT}(
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, uint64(block.timestamp + 1 days), deposit, TickMath.MIN_SQRT_PRICE + 1
         );
 
-        SwapVMKernel.VMEnvelope memory wrongRelease =
+        SwaputerKernel.VMEnvelope memory wrongRelease =
             _signedEscrowRelease(BUYER_KEY, buyer, actor, ORDER_AMOUNT, _nonce(buyer), VM_INPUT);
         vm.prank(buyer);
         vm.expectRevert(SwapVMSRC20Market.InvalidEnvelope.selector);
@@ -317,7 +321,7 @@ contract SwapVMSRC20MarketTest is Test {
     }
 
     function test_sellOrdersRequireSignedEscrowReleaseForCancellationOrExpiry() public {
-        SwapVMKernel.VMEnvelope memory deposit =
+        SwaputerKernel.VMEnvelope memory deposit =
             _signedEscrowDeposit(ACTOR_KEY, actor, ORDER_AMOUNT, _nonce(actor), VM_INPUT);
         vm.prank(actor);
         uint256 orderId = market.createSellOrder{value: VM_INPUT}(
@@ -429,14 +433,14 @@ contract SwapVMSRC20MarketTest is Test {
     function _worldParams(bytes32 tokenSalt, bytes32 bootstrapSalt)
         private
         view
-        returns (SwapVMWorldFactory.CreateWorldParams memory params)
+        returns (SwaputerWorldFactory.CreateWorldParams memory params)
     {
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedWorldDeployer = factory.predictWorldDeployer(bootstrapSalt);
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -449,10 +453,10 @@ contract SwapVMSRC20MarketTest is Test {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        params = SwapVMWorldFactory.CreateWorldParams({
+        params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -471,25 +475,26 @@ contract SwapVMSRC20MarketTest is Test {
     function _signedTransfer(uint256 signingKey, address from, address to, uint128 amount, uint64 nonce, uint128 ethIn)
         internal
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(to), amount)
         );
-        action =
-            _signedEnvelope(signingKey, from, SwapVMKernel.RootOp.CALL, src20, payload, TOKEN_LIMIT, nonce, to, ethIn);
+        action = _signedEnvelope(
+            signingKey, from, SwaputerKernel.RootOp.CALL, src20, payload, TOKEN_LIMIT, nonce, to, ethIn
+        );
     }
 
     function _signedEscrowDeposit(uint256 signingKey, address seller, uint128 amount, uint64 nonce, uint128 ethIn)
         internal
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(seller), amount)
         );
         action = _signedEnvelope(
-            signingKey, seller, SwapVMKernel.RootOp.CALL, escrow, payload, ESCROW_LIMIT, nonce, seller, ethIn
+            signingKey, seller, SwaputerKernel.RootOp.CALL, escrow, payload, ESCROW_LIMIT, nonce, seller, ethIn
         );
     }
 
@@ -500,12 +505,12 @@ contract SwapVMSRC20MarketTest is Test {
         uint128 amount,
         uint64 nonce,
         uint128 ethIn
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("release(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(recipient), amount)
         );
         action = _signedEnvelope(
-            signingKey, signer, SwapVMKernel.RootOp.CALL, escrow, payload, ESCROW_LIMIT, nonce, recipient, ethIn
+            signingKey, signer, SwaputerKernel.RootOp.CALL, escrow, payload, ESCROW_LIMIT, nonce, recipient, ethIn
         );
     }
 
@@ -518,11 +523,11 @@ contract SwapVMSRC20MarketTest is Test {
         address recipient,
         uint128 ethIn,
         address executor
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
         action = _signedEnvelopeWithExecutor(
             signingKey,
             vm.addr(signingKey),
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             payload,
             limit,
@@ -542,11 +547,11 @@ contract SwapVMSRC20MarketTest is Test {
         address recipient,
         uint128 ethIn,
         address executor
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
         action = _signedEnvelopeWithExecutor(
             signingKey,
             vm.addr(signingKey),
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             target,
             payload,
             limit,
@@ -560,14 +565,14 @@ contract SwapVMSRC20MarketTest is Test {
     function _signedEnvelope(
         uint256 signingKey,
         address signer,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 limit,
         uint64 nonce,
         address recipient,
         uint128 ethIn
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
         action = _signedEnvelopeWithExecutor(
             signingKey, signer, op, target, payload, limit, nonce, recipient, ethIn, address(market)
         );
@@ -576,7 +581,7 @@ contract SwapVMSRC20MarketTest is Test {
     function _signedEnvelopeWithExecutor(
         uint256 signingKey,
         address signer,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 limit,
@@ -584,8 +589,8 @@ contract SwapVMSRC20MarketTest is Test {
         address recipient,
         uint128 ethIn,
         address executor
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: signer,
@@ -623,7 +628,7 @@ contract SwapVMSRC20MarketTest is Test {
         action.signature = abi.encodePacked(r, s, v);
     }
 
-    function _buyVM(address caller, SwapVMKernel.VMEnvelope memory action, uint128 ethIn) internal {
+    function _buyVM(address caller, SwaputerKernel.VMEnvelope memory action, uint128 ethIn) internal {
         vm.prank(caller);
         router.buyVMExactInput{value: ethIn}(worldId, TickMath.MIN_SQRT_PRICE + 1, action);
     }

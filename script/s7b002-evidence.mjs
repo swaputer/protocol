@@ -17,7 +17,7 @@ const EXPECTED_CASES = Object.freeze([
   "test_tokenSaltCollisionRollsBackAndRecoversWithRecomputedAddresses()"
 ]);
 const SOURCE_FILES = Object.freeze([
-  "src/SwapVMWorldFactory.sol",
+  "src/SwaputerWorldFactory.sol",
   "test/Stage7MSaltRecovery.t.sol",
   "script/accept-s7b002.sh",
   "script/s7b002-evidence.mjs",

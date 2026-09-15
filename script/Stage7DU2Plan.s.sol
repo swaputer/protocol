@@ -7,12 +7,12 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMWorldDeployer} from "../src/SwapVMWorldDeployer.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerWorldDeployer} from "../src/SwaputerWorldDeployer.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Read-only address planner for the rc2 Base Sepolia release flow.
 /// @dev It accepts only public data, has no broadcast call and never reads a key.
@@ -40,18 +40,18 @@ contract Stage7DU2PlanScript is Script {
         address router = vm.computeCreateAddress(factory, 2);
 
         bytes32 tokenInitCodeHash =
-            keccak256(abi.encodePacked(type(SwapVMGasToken).creationCode, abi.encode(INITIAL_SUPPLY, deployer)));
+            keccak256(abi.encodePacked(type(SwaputerToken).creationCode, abi.encode(INITIAL_SUPPLY, deployer)));
         address token = _create2(factory, TOKEN_SALT, tokenInitCodeHash);
 
         bytes32 worldDeployerInitCodeHash = keccak256(
             abi.encodePacked(
-                type(SwapVMWorldDeployer).creationCode,
+                type(SwaputerWorldDeployer).creationCode,
                 abi.encode(
                     factory,
                     kernelStore,
                     hookStore,
-                    keccak256(type(SwapVMKernel).creationCode),
-                    keccak256(type(SwapVMHook).creationCode)
+                    keccak256(type(SwaputerKernel).creationCode),
+                    keccak256(type(SwaputerHook).creationCode)
                 )
             )
         );
@@ -59,7 +59,7 @@ contract Stage7DU2PlanScript is Script {
         address kernel = vm.computeCreateAddress(worldDeployer, 1);
         bytes memory hookArguments = abi.encode(
             BASE_SEPOLIA_POOL_MANAGER,
-            SwapVMKernel(kernel),
+            SwaputerKernel(kernel),
             token,
             protocolFeeAdmin,
             feeController,
@@ -72,14 +72,14 @@ contract Stage7DU2PlanScript is Script {
             worldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArguments
         );
-        bytes32 hookInitCodeHash = keccak256(abi.encodePacked(type(SwapVMHook).creationCode, hookArguments));
+        bytes32 hookInitCodeHash = keccak256(abi.encodePacked(type(SwaputerHook).creationCode, hookArguments));
 
         bytes32 factoryInitCodeHash = keccak256(
             abi.encodePacked(
-                type(SwapVMWorldFactory).creationCode,
+                type(SwaputerWorldFactory).creationCode,
                 abi.encode(
                     BASE_SEPOLIA_POOL_MANAGER,
                     BASE_SEPOLIA_POOL_MANAGER_CODE_HASH,
@@ -91,10 +91,12 @@ contract Stage7DU2PlanScript is Script {
             )
         );
         bytes32 kernelStoreInitCodeHash = keccak256(
-            abi.encodePacked(type(SwapVMCreationCodeStore).creationCode, abi.encode(type(SwapVMKernel).creationCode))
+            abi.encodePacked(
+                type(SwaputerCreationCodeStore).creationCode, abi.encode(type(SwaputerKernel).creationCode)
+            )
         );
         bytes32 hookStoreInitCodeHash = keccak256(
-            abi.encodePacked(type(SwapVMCreationCodeStore).creationCode, abi.encode(type(SwapVMHook).creationCode))
+            abi.encodePacked(type(SwaputerCreationCodeStore).creationCode, abi.encode(type(SwaputerHook).creationCode))
         );
 
         console2.log("STAGE7D_U2_DEPLOYER", deployer);

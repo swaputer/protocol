@@ -5,8 +5,8 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
 
 /// @notice Deploys and exercises the zero-value SRC20 market on the existing Base Sepolia U2 World.
@@ -16,8 +16,8 @@ contract Stage7DU2SRC20MarketScript is Script {
     uint256 private constant RELEASE_ETH_CAP = 0.5 ether;
 
     address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
-    SwapVMKernel private constant KERNEL = SwapVMKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
+    SwaputerKernel private constant KERNEL = SwaputerKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
     bytes32 private constant WORLD_ID = 0x9c414214b34b78217698b02c5b1a7af65f6d43c500ed2bd865ea4c54ed4360b9;
     bytes32 private constant TOKEN = 0x012928db8f5a86bc849ed1a66d4ff19bb5af3a9a49688aa9d6d060f41f82d8d8;
     bytes32 private constant TOKEN_CODE_HASH = 0x1a049200e47e150864788daeba7b106628283d0d6219ddf7be80f89ebb691b2e;
@@ -91,18 +91,18 @@ contract Stage7DU2SRC20MarketScript is Script {
     }
 
     function _fillBuyOrder(uint256 orderId) private {
-        SwapVMKernel.VMEnvelope memory envelope = _signedTransfer();
+        SwaputerKernel.VMEnvelope memory envelope = _signedTransfer();
         vm.startBroadcast(actorKey);
         market.fillBuyOrder(orderId, envelope, TickMath.MIN_SQRT_PRICE + 1);
         vm.stopBroadcast();
     }
 
-    function _signedTransfer() private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    function _signedTransfer() private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = KERNEL.eoaAccountId(ACTOR);
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(actorId, ORDER_AMOUNT));
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: WORLD_ID,
             actor: ACTOR,
             targetOrCodeHash: TOKEN,

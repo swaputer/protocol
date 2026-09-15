@@ -5,7 +5,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 
 /// @notice Read-only production boundary consumed by the canonical SwapVM Router.
-interface ISwapVMWorldFactory {
+interface ISwaputerWorldFactory {
     function poolManager() external view returns (IPoolManager);
 
     function router() external view returns (address);

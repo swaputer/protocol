@@ -1,11 +1,11 @@
 # Stage 7A2 production Router interface and implementation freeze
 
-This document freezes the minimum Stage 7A2 Router API, implemented by `src/SwapVMRouter.sol`. It reuses `SwapVMKernel.VMEnvelope` directly and does not create a second representation of `VMAction`.
+This document freezes the minimum Stage 7A2 Router API, implemented by `src/SwaputerAppRouter.sol`. It reuses `SwaputerKernel.VMEnvelope` directly and does not create a second representation of `VMAction`.
 
 ## 1. Public ABI
 
 ```solidity
-interface ISwapVMRouter is IUnlockCallback {
+interface ISwaputerAppRouter is IUnlockCallback {
     function buyNOPExactInput(
         bytes32 worldId,
         uint128 minTokenOut,
@@ -16,7 +16,7 @@ interface ISwapVMRouter is IUnlockCallback {
     function buyVMExactInput(
         bytes32 worldId,
         uint160 sqrtPriceLimitX96,
-        SwapVMKernel.VMEnvelope calldata envelope
+        SwaputerKernel.VMEnvelope calldata envelope
     ) external payable returns (BalanceDelta delta);
 
     function sellExactInput(
@@ -138,7 +138,7 @@ error InvalidRecipient(address recipient);
 error InvalidExactInput(uint256 amount);
 error EnvelopeWorldMismatch(bytes32 expected, bytes32 supplied);
 error SignedNOPForbidden();
-error InvalidVMOperation(SwapVMKernel.RootOp op);
+error InvalidVMOperation(SwaputerKernel.RootOp op);
 error UnauthorizedExecutor(address expected, address actual);
 error ExactOutputBuyUnsupported();
 error SellInstructionsForbidden();

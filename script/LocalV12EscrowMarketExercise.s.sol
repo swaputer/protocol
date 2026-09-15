@@ -5,8 +5,8 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
 
 /// @notice Exercises both sides of an already deployed local v1.2 escrow market.
@@ -25,8 +25,8 @@ contract LocalV12EscrowMarketExerciseScript is Script {
     address private seller;
     address private buyer;
     SwapVMSRC20Market private market;
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
     bytes32 private token;
     bytes32 private escrow;
@@ -77,7 +77,7 @@ contract LocalV12EscrowMarketExerciseScript is Script {
         vm.stopBroadcast();
         require(orderId == 1, "BUY_ORDER_ID");
 
-        SwapVMKernel.VMEnvelope memory transfer = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory transfer = _signedEnvelope(
             sellerKey,
             seller,
             token,
@@ -96,7 +96,7 @@ contract LocalV12EscrowMarketExerciseScript is Script {
     }
 
     function _approveEscrow(uint256 amount) private {
-        SwapVMKernel.VMEnvelope memory approval = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory approval = _signedEnvelope(
             sellerKey,
             seller,
             token,
@@ -112,7 +112,7 @@ contract LocalV12EscrowMarketExerciseScript is Script {
     }
 
     function _exerciseSellOrder() private {
-        SwapVMKernel.VMEnvelope memory deposit = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory deposit = _signedEnvelope(
             sellerKey,
             seller,
             escrow,
@@ -132,7 +132,7 @@ contract LocalV12EscrowMarketExerciseScript is Script {
         require(orderId == 2, "SELL_ORDER_ID");
         require(_balanceOfId(escrow) == ORDER_AMOUNT, "SELL_NOT_ESCROWED");
 
-        SwapVMKernel.VMEnvelope memory release = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory release = _signedEnvelope(
             buyerKey,
             buyer,
             escrow,
@@ -159,10 +159,10 @@ contract LocalV12EscrowMarketExerciseScript is Script {
         address recipient,
         address executor,
         uint128 ethIn
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: worldId,
             actor: actor,
             targetOrCodeHash: target,

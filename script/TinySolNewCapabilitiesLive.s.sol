@@ -4,8 +4,8 @@ pragma solidity 0.8.26;
 import {Script, console2} from "forge-std/Script.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 
 contract TinySolNewCapabilitiesLiveScript is Script {
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
@@ -13,8 +13,8 @@ contract TinySolNewCapabilitiesLiveScript is Script {
     uint128 private constant VM_ETH_IN = 1_000_000_000_000;
     uint32 private constant ACTION_LIMIT = 8_000;
 
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
     address private actor;
     uint256 private actorKey;
@@ -24,8 +24,8 @@ contract TinySolNewCapabilitiesLiveScript is Script {
         require(block.chainid == BASE_SEPOLIA_CHAIN_ID, "BASE_SEPOLIA_ONLY");
         actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         actor = vm.addr(actorKey);
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
 
         bytes memory packageBytes = vm.envBytes("TINYSOL_NEW_CAPABILITIES_PACKAGE");
@@ -36,10 +36,10 @@ contract TinySolNewCapabilitiesLiveScript is Script {
         nonce = kernel.nonces(worldId, actorId);
 
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        _broadcast(SwapVMKernel.RootOp.DEPLOY, codeHash, deployPayload);
+        _broadcast(SwaputerKernel.RootOp.DEPLOY, codeHash, deployPayload);
         require(kernel.programCodeHash(worldId, programId) == codeHash, "DEPLOY_HASH_MISMATCH");
 
-        _broadcast(SwapVMKernel.RootOp.CALL, programId, abi.encodePacked(bytes4(keccak256("write()"))));
+        _broadcast(SwaputerKernel.RootOp.CALL, programId, abi.encodePacked(bytes4(keccak256("write()"))));
         (bytes memory output,) =
             kernel.staticCall(worldId, programId, abi.encodePacked(bytes4(keccak256("read()"))), ACTION_LIMIT);
         bytes memory expected = bytes.concat(
@@ -60,8 +60,8 @@ contract TinySolNewCapabilitiesLiveScript is Script {
         console2.log("TINYSOL_NEW_CAPABILITIES_OUTPUT_BYTES", output.length);
     }
 
-    function _broadcast(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory action = SwapVMKernel.VMEnvelope({
+    function _broadcast(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload) private {
+        SwaputerKernel.VMEnvelope memory action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

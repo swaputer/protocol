@@ -11,13 +11,13 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Deploys the complete v1.2 escrow market onto an isolated Anvil chain.
 /// @dev The liquidity helper is test-only. Public releases must bootstrap with the official PositionManager.
@@ -36,10 +36,10 @@ contract LocalV12EscrowMarketScript is Script {
     uint256 private actorKey;
     address private actor;
     PoolManager private manager;
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
-    SwapVMGasToken private gasToken;
-    SwapVMKernel private kernel;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
+    SwaputerToken private gasToken;
+    SwaputerKernel private kernel;
     bytes32 private worldId;
 
     function run() external {
@@ -74,9 +74,9 @@ contract LocalV12EscrowMarketScript is Script {
     function _deployWorldAndLiquidity() private {
         vm.startBroadcast(actorKey);
         manager = new PoolManager(actor);
-        SwapVMCreationCodeStore kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        SwapVMCreationCodeStore hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        SwaputerCreationCodeStore kernelStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        SwaputerCreationCodeStore hookStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelStore),
@@ -85,14 +85,14 @@ contract LocalV12EscrowMarketScript is Script {
             vm.envAddress("SVM_FEE_CONTROLLER")
         );
         vm.stopBroadcast();
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
         address predictedToken = factory.predictGasToken(TOKEN_SALT, INITIAL_GAS_TOKEN_SUPPLY, actor);
         address predictedWorldDeployer = factory.predictWorldDeployer(BOOTSTRAP_SALT);
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -105,10 +105,10 @@ contract LocalV12EscrowMarketScript is Script {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: TOKEN_SALT,
             bootstrapSalt: BOOTSTRAP_SALT,
             hookSalt: hookSalt,
@@ -171,14 +171,14 @@ contract LocalV12EscrowMarketScript is Script {
     }
 
     function _executeDeploy(bytes32 codeHash, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory envelope = _signedDeploy(codeHash, payload);
+        SwaputerKernel.VMEnvelope memory envelope = _signedDeploy(codeHash, payload);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, TickMath.MIN_SQRT_PRICE + 1, envelope);
         vm.stopBroadcast();
     }
 
     function _executeCall(bytes32 target, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory envelope = _signedCall(target, payload);
+        SwaputerKernel.VMEnvelope memory envelope = _signedCall(target, payload);
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, TickMath.MIN_SQRT_PRICE + 1, envelope);
         vm.stopBroadcast();
@@ -187,11 +187,11 @@ contract LocalV12EscrowMarketScript is Script {
     function _signedDeploy(bytes32 codeHash, bytes memory payload)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.DEPLOY,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.DEPLOY,
             worldId: worldId,
             actor: actor,
             targetOrCodeHash: codeHash,
@@ -231,11 +231,11 @@ contract LocalV12EscrowMarketScript is Script {
     function _signedCall(bytes32 target, bytes memory payload)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: worldId,
             actor: actor,
             targetOrCodeHash: target,

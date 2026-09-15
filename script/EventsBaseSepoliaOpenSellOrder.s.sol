@@ -5,8 +5,8 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
 
 /// @notice Leaves one fully collateralized SRC20 sell order open on the current Base Sepolia World.
@@ -14,8 +14,8 @@ contract EventsBaseSepoliaOpenSellOrderScript is Script {
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
     address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
 
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0xEe164c82878AE80F2BE88B10771FAB2c4E29b24B));
-    SwapVMKernel private constant KERNEL = SwapVMKernel(0xA751dAFFD61C2d259414573EfCD743cfB24ed10b);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0xEe164c82878AE80F2BE88B10771FAB2c4E29b24B));
+    SwaputerKernel private constant KERNEL = SwaputerKernel(0xA751dAFFD61C2d259414573EfCD743cfB24ed10b);
     SwapVMSRC20Market private constant MARKET = SwapVMSRC20Market(payable(0xE183C4d7Ad2F5D882B4c6025DBf4f47cD0669446));
 
     bytes32 private constant WORLD_ID = 0x20f614ee9d36602f82422765fa005cedcb6c042fe7fbf5b368124820a829f757;
@@ -70,7 +70,7 @@ contract EventsBaseSepoliaOpenSellOrderScript is Script {
     function _executeApprove() private {
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("approve(bytes32,uint256)")), abi.encode(ESCROW, ORDER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signed(TOKEN, payload, TOKEN_LIMIT, ACTOR, ACTOR);
+        SwaputerKernel.VMEnvelope memory envelope = _signed(TOKEN, payload, TOKEN_LIMIT, ACTOR, ACTOR);
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: VM_INPUT}(WORLD_ID, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -79,7 +79,7 @@ contract EventsBaseSepoliaOpenSellOrderScript is Script {
     function _createOpenSellOrder() private returns (uint256 orderId) {
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(actorId, ORDER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory envelope = _signed(ESCROW, payload, ESCROW_LIMIT, ACTOR, address(MARKET));
+        SwaputerKernel.VMEnvelope memory envelope = _signed(ESCROW, payload, ESCROW_LIMIT, ACTOR, address(MARKET));
         vm.startBroadcast(actorKey);
         orderId = MARKET.createSellOrder{value: VM_INPUT}(
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, uint64(block.timestamp + 30 days), envelope, SQRT_PRICE_LIMIT
@@ -90,10 +90,10 @@ contract EventsBaseSepoliaOpenSellOrderScript is Script {
     function _signed(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: WORLD_ID,
             actor: ACTOR,
             targetOrCodeHash: target,

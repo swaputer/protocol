@@ -8,16 +8,16 @@ import {PoolManager} from "@uniswap/v4-core/src/PoolManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 
-import {SwapVMGasToken} from "../../src/SwapVMGasToken.sol";
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../../src/SwaputerToken.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../../src/SwaputerWorldFactory.sol";
 import {SwapVMStage7A2Test} from "../SwapVMStage7A2.t.sol";
 
 contract SwapVMStage7BRouterHandler is Test {
-    SwapVMRouter private immutable _router;
-    SwapVMGasToken private immutable _token;
-    SwapVMKernel private immutable _kernel;
+    SwaputerAppRouter private immutable _router;
+    SwaputerToken private immutable _token;
+    SwaputerKernel private immutable _kernel;
     bytes32 private immutable _worldId;
     address[3] private _actors;
     uint256[3] private _actorKeys;
@@ -27,7 +27,7 @@ contract SwapVMStage7BRouterHandler is Test {
     uint256 public forcedEth;
     uint256 public accidentalToken;
 
-    constructor(SwapVMRouter router_, SwapVMGasToken token_, SwapVMKernel kernel_, bytes32 worldId_) {
+    constructor(SwaputerAppRouter router_, SwaputerToken token_, SwaputerKernel kernel_, bytes32 worldId_) {
         _router = router_;
         _token = token_;
         _kernel = kernel_;
@@ -114,9 +114,9 @@ contract SwapVMStage7BRouterHandler is Test {
         bytes32 actorId = _kernel.eoaAccountId(actor);
         bytes32 target = _kernel.contractAccountId(_worldId, actorId, _kernel.creatorNonce(_worldId, actorId), codeHash);
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             actorIndex,
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             _worldId,
             codeHash,
             payload,
@@ -148,9 +148,9 @@ contract SwapVMStage7BRouterHandler is Test {
         if (target == bytes32(0)) return;
         address actor = _actors[actorIndex];
         bytes32 actorId = _kernel.eoaAccountId(actor);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             actorIndex,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             _worldId,
             target,
             bytes(""),
@@ -183,9 +183,9 @@ contract SwapVMStage7BRouterHandler is Test {
         bytes32 actorId = _kernel.eoaAccountId(actor);
         uint128 signedInput = 0.25 ether;
         uint160 signedPrice = TickMath.MIN_SQRT_PRICE + 1;
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             actorIndex,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             _worldId,
             bytes32(uint256(1)),
             hex"00",
@@ -214,7 +214,7 @@ contract SwapVMStage7BRouterHandler is Test {
         if (mode == 5) action.recipient = address(0xBAD5);
         if (mode == 6) action.authorizedExecutor = address(0xBAD6);
         if (mode == 7) action.payload[0] = 0x01;
-        if (mode == 8) action.op = SwapVMKernel.RootOp.DEPLOY;
+        if (mode == 8) action.op = SwaputerKernel.RootOp.DEPLOY;
         uint128 actualInput = mode == 9 ? uint128(0.2 ether) : signedInput;
         uint160 actualPrice = mode == 10 ? TickMath.MIN_SQRT_PRICE + 2 : signedPrice;
         uint256 supplyBefore = _token.totalSupply();
@@ -243,7 +243,7 @@ contract SwapVMStage7BRouterHandler is Test {
 
     function _signedAction(
         uint256 actorIndex,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 actionWorldId,
         bytes32 target,
         bytes memory payload,
@@ -255,8 +255,8 @@ contract SwapVMStage7BRouterHandler is Test {
         uint128 exactEthInput,
         uint160 priceLimit,
         address routerBinding
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: actionWorldId,
             actor: _actors[actorIndex],
@@ -275,11 +275,11 @@ contract SwapVMStage7BRouterHandler is Test {
 
     function _resign(
         uint256 actorIndex,
-        SwapVMKernel.VMEnvelope memory action,
+        SwaputerKernel.VMEnvelope memory action,
         uint128 exactEthInput,
         uint160 priceLimit,
         address routerBinding
-    ) private view returns (SwapVMKernel.VMEnvelope memory) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory) {
         bytes32 structHash = keccak256(
             abi.encode(
                 _kernel.VM_ACTION_TYPEHASH(),
@@ -345,7 +345,7 @@ contract SwapVMStage7BRouterInvariantTest is StdInvariant, SwapVMStage7A2Test {
     }
 
     function invariant_factoryBindingsRemainImmutable() public view {
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         assertTrue(config.isSealed);
         assertEq(config.kernel, address(kernel));
         assertEq(config.hook, address(hook));

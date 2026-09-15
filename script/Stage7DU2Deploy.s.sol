@@ -6,11 +6,11 @@ import {Script, console2} from "forge-std/Script.sol";
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 abstract contract Stage7DU2BaseSepoliaScript is Script {
     uint256 internal constant BASE_SEPOLIA_CHAIN_ID = 84_532;
@@ -57,8 +57,8 @@ contract Stage7DU2StoreBootstrapScript is Stage7DU2BaseSepoliaScript {
         require(KERNEL_STORE.code.length == 0 && HOOK_STORE.code.length == 0, "STORE_ADDRESS_OCCUPIED");
 
         vm.startBroadcast(key);
-        SwapVMCreationCodeStore kernelStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        SwapVMCreationCodeStore hookStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
+        SwaputerCreationCodeStore kernelStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        SwaputerCreationCodeStore hookStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
         vm.stopBroadcast();
 
         require(address(kernelStore) == KERNEL_STORE, "KERNEL_STORE_ADDRESS_MISMATCH");
@@ -80,7 +80,7 @@ contract Stage7DU2FactoryWorldScript is Stage7DU2BaseSepoliaScript {
         require(FACTORY.code.length == 0, "FACTORY_ADDRESS_OCCUPIED");
 
         vm.startBroadcast(key);
-        SwapVMWorldFactory factory = new SwapVMWorldFactory(
+        SwaputerWorldFactory factory = new SwaputerWorldFactory(
             MANAGER,
             MANAGER_CODE_HASH,
             KERNEL_STORE,
@@ -98,13 +98,13 @@ contract Stage7DU2FactoryWorldScript is Stage7DU2BaseSepoliaScript {
         require(factory.predictKernel(WORLD_DEPLOYER) == KERNEL, "KERNEL_PREDICTION_MISMATCH");
         require(
             factory.predictHook(
-                WORLD_DEPLOYER, HOOK_SALT, KERNEL, SwapVMGasToken(TOKEN), BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
+                WORLD_DEPLOYER, HOOK_SALT, KERNEL, SwaputerToken(TOKEN), BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
             ) == HOOK,
             "HOOK_PREDICTION_MISMATCH"
         );
         require(uint160(HOOK) & Hooks.ALL_HOOK_MASK == 0x20cc, "HOOK_PERMISSION_BITS_MISMATCH");
 
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: TOKEN_SALT,
             bootstrapSalt: BOOTSTRAP_SALT,
             hookSalt: HOOK_SALT,
@@ -120,10 +120,10 @@ contract Stage7DU2FactoryWorldScript is Stage7DU2BaseSepoliaScript {
         });
 
         vm.startBroadcast(key);
-        (bytes32 worldId, SwapVMGasToken token, SwapVMKernel kernel, SwapVMHook hook) = factory.createWorld(params);
+        (bytes32 worldId, SwaputerToken token, SwaputerKernel kernel, SwaputerHook hook) = factory.createWorld(params);
         vm.stopBroadcast();
 
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         require(config.isSealed, "WORLD_NOT_SEALED");
         require(address(token) == TOKEN && address(kernel) == KERNEL && address(hook) == HOOK, "WORLD_ADDRESS_MISMATCH");
         require(kernel.hook() == HOOK && address(hook.kernel()) == KERNEL, "HOOK_KERNEL_BINDING_MISMATCH");

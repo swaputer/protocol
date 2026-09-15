@@ -7,7 +7,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
 import {SwapVMStage2Test} from "../SwapVMStage2.t.sol";
 
 contract SwapVMResourceInvariantTest is StdInvariant, SwapVMStage2Test {
@@ -93,7 +93,7 @@ contract SwapVMResourceInvariantTest is StdInvariant, SwapVMStage2Test {
         else if (mode == 7) byteLimit = 201;
         else byteLimit = 2_000;
 
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             attackTargets[mode],
             bytes(""),

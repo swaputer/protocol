@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {SwapVMKernel} from "./SwapVMKernel.sol";
-import {SwapVMRouter} from "./SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "./SwapVMWorldFactory.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
+import {SwaputerAppRouter} from "./SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "./SwaputerWorldFactory.sol";
 
 /// @notice Experimental atomic native ETH <-> MiniVM sETH bridge for one immutable SwapVM World.
 /// @dev One sETH wei is backed by one native ETH wei counted in `lockedEth`. VM execution input is
@@ -15,8 +15,8 @@ contract SwapVMSETHVault {
     bytes4 public constant TOTAL_SUPPLY_SELECTOR = bytes4(keccak256("totalSupply()"));
     bytes4 public constant VAULT_SELECTOR = bytes4(keccak256("vault()"));
 
-    SwapVMRouter public immutable router;
-    SwapVMKernel public immutable kernel;
+    SwaputerAppRouter public immutable router;
+    SwaputerKernel public immutable kernel;
     bytes32 public immutable worldId;
     bytes32 public immutable seth;
     bytes32 public immutable sethCodeHash;
@@ -62,16 +62,16 @@ contract SwapVMSETHVault {
         }
     }
 
-    constructor(SwapVMRouter boundRouter, bytes32 boundWorldId, bytes32 boundSETH, bytes32 expectedSETHCodeHash) {
+    constructor(SwaputerAppRouter boundRouter, bytes32 boundWorldId, bytes32 boundSETH, bytes32 expectedSETHCodeHash) {
         if (address(boundRouter) == address(0)) revert ZeroAddress();
         if (boundWorldId == bytes32(0)) revert InvalidWorld();
         if (boundSETH == bytes32(0) || expectedSETHCodeHash == bytes32(0)) revert InvalidSETH();
 
-        SwapVMWorldFactory boundFactory = SwapVMWorldFactory(address(boundRouter.factory()));
+        SwaputerWorldFactory boundFactory = SwaputerWorldFactory(address(boundRouter.factory()));
         if (boundFactory.router() != address(boundRouter)) revert InvalidRouter();
-        SwapVMWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
+        SwaputerWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
         if (!config.isSealed) revert InvalidWorld();
-        SwapVMKernel boundKernel = SwapVMKernel(config.kernel);
+        SwaputerKernel boundKernel = SwaputerKernel(config.kernel);
         if (
             address(boundKernel) == address(0)
                 || boundKernel.programCodeHash(boundWorldId, boundSETH) != expectedSETHCodeHash
@@ -89,7 +89,7 @@ contract SwapVMSETHVault {
     function deposit(
         uint128 amount,
         uint128 vmEthAmount,
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         uint160 sqrtPriceLimitX96
     ) external payable nonReentrant {
         if (amount == 0) revert InvalidAmount();
@@ -110,7 +110,7 @@ contract SwapVMSETHVault {
         uint128 amount,
         uint128 vmEthAmount,
         address recipient,
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         uint160 sqrtPriceLimitX96
     ) external payable nonReentrant {
         if (amount == 0) revert InvalidAmount();
@@ -143,7 +143,7 @@ contract SwapVMSETHVault {
     }
 
     function _runVM(
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         uint256 vmEthAmount,
         uint160 sqrtPriceLimitX96,
         address refundRecipient
@@ -161,12 +161,12 @@ contract SwapVMSETHVault {
         if (refund != 0) _pay(refundRecipient, refund);
     }
 
-    function _validateMintEnvelope(SwapVMKernel.VMEnvelope calldata envelope, address payer, uint128 amount)
+    function _validateMintEnvelope(SwaputerKernel.VMEnvelope calldata envelope, address payer, uint128 amount)
         private
         view
     {
         if (
-            envelope.op != SwapVMKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != payer
+            envelope.op != SwaputerKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != payer
                 || envelope.targetOrCodeHash != seth || envelope.recipient == address(0)
                 || envelope.authorizedExecutor != address(this)
         ) revert InvalidEnvelope();
@@ -174,13 +174,13 @@ contract SwapVMSETHVault {
     }
 
     function _validateBurnEnvelope(
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         address owner,
         address recipient,
         uint128 amount
     ) private view {
         if (
-            envelope.op != SwapVMKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != owner
+            envelope.op != SwaputerKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != owner
                 || envelope.targetOrCodeHash != seth || envelope.recipient != recipient
                 || envelope.authorizedExecutor != address(this)
         ) revert InvalidEnvelope();

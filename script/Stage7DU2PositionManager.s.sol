@@ -11,10 +11,10 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface IPositionManagerMinimal {
     error NotApproved(address caller);
@@ -54,10 +54,10 @@ contract Stage7DU2PositionManagerScript is Script {
     uint256 private constant RELEASE_ETH_CAP = 0.5 ether;
 
     address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
-    SwapVMWorldFactory private constant FACTORY = SwapVMWorldFactory(0xF327e35FEA7EE7c92a765D1f00eD6A2A3db5b340);
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
-    SwapVMGasToken private constant TOKEN = SwapVMGasToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
-    SwapVMKernel private constant KERNEL = SwapVMKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
+    SwaputerWorldFactory private constant FACTORY = SwaputerWorldFactory(0xF327e35FEA7EE7c92a765D1f00eD6A2A3db5b340);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
+    SwaputerToken private constant TOKEN = SwaputerToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
+    SwaputerKernel private constant KERNEL = SwaputerKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
 
     address private constant POOL_MANAGER = 0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408;
     bytes32 private constant POOL_MANAGER_CODE_HASH =

@@ -18,13 +18,13 @@ import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiqui
 import {PoolSwapTest} from "@uniswap/v4-core/src/test/PoolSwapTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldDeployer} from "../src/SwapVMWorldDeployer.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldDeployer} from "../src/SwaputerWorldDeployer.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 contract SwapVMStage7A2Test is Test {
     using BalanceDeltaLibrary for BalanceDelta;
@@ -41,13 +41,13 @@ contract SwapVMStage7A2Test is Test {
     address internal constant FEE_CONTROLLER = address(0xC0FFEE);
 
     PoolManager internal manager;
-    SwapVMCreationCodeStore internal kernelCodeStore;
-    SwapVMCreationCodeStore internal hookCodeStore;
-    SwapVMWorldFactory internal factory;
-    SwapVMRouter internal router;
-    SwapVMGasToken internal token;
-    SwapVMKernel internal kernel;
-    SwapVMHook internal hook;
+    SwaputerCreationCodeStore internal kernelCodeStore;
+    SwaputerCreationCodeStore internal hookCodeStore;
+    SwaputerWorldFactory internal factory;
+    SwaputerAppRouter internal router;
+    SwaputerToken internal token;
+    SwaputerKernel internal kernel;
+    SwaputerHook internal hook;
     PoolKey internal key;
     bytes32 internal worldId;
     address internal actor;
@@ -58,9 +58,9 @@ contract SwapVMStage7A2Test is Test {
         vm.deal(actor, 100 ether);
 
         manager = new PoolManager(address(this));
-        kernelCodeStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        hookCodeStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        kernelCodeStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        hookCodeStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelCodeStore),
@@ -68,9 +68,9 @@ contract SwapVMStage7A2Test is Test {
             FEE_ADMIN,
             FEE_CONTROLLER
         );
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
-        SwapVMWorldFactory.CreateWorldParams memory params = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
+        SwaputerWorldFactory.CreateWorldParams memory params = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
         (worldId, token, kernel, hook) = factory.createWorld(params);
         bool isSealed;
         (key, isSealed) = factory.getPoolKey(worldId);
@@ -83,6 +83,8 @@ contract SwapVMStage7A2Test is Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        vm.prank(FEE_ADMIN);
+        hook.live();
     }
 
     function test_factoryPinsArtifactsDeploysAndSealsExactlyOnce() public view {
@@ -95,13 +97,15 @@ contract SwapVMStage7A2Test is Test {
         assertEq(factory.initialProtocolFeeBps(), factory.DEFAULT_PROTOCOL_FEE_BPS());
         assertEq(hook.feeController(), FEE_CONTROLLER);
         assertEq(hook.protocolFeeBps(), 300);
+        assertEq(hook.owner(), FEE_ADMIN);
         assertEq(hook.feeAdmin(), FEE_ADMIN);
+        assertTrue(hook.tradingLive());
         assertTrue(hook.poolBound());
         assertEq(hook.boundPoolId(), worldId);
-        assertEq(factory.kernelCreationCodeHash(), keccak256(type(SwapVMKernel).creationCode));
-        assertEq(factory.hookCreationCodeHash(), keccak256(type(SwapVMHook).creationCode));
-        assertEq(factory.EXPECTED_KERNEL_CREATION_CODE_HASH(), keccak256(type(SwapVMKernel).creationCode));
-        assertEq(factory.EXPECTED_HOOK_CREATION_CODE_HASH(), keccak256(type(SwapVMHook).creationCode));
+        assertEq(factory.kernelCreationCodeHash(), keccak256(type(SwaputerKernel).creationCode));
+        assertEq(factory.hookCreationCodeHash(), keccak256(type(SwaputerHook).creationCode));
+        assertEq(factory.EXPECTED_KERNEL_CREATION_CODE_HASH(), keccak256(type(SwaputerKernel).creationCode));
+        assertEq(factory.EXPECTED_HOOK_CREATION_CODE_HASH(), keccak256(type(SwaputerHook).creationCode));
         assertEq(PoolId.unwrap(key.toId()), worldId);
         assertEq(Currency.unwrap(key.currency0), address(0));
         assertEq(Currency.unwrap(key.currency1), address(token));
@@ -116,7 +120,7 @@ contract SwapVMStage7A2Test is Test {
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG
         );
 
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         assertTrue(config.isSealed);
         assertEq(config.configHash == bytes32(0), false);
         assertEq(config.gasToken, address(token));
@@ -126,12 +130,55 @@ contract SwapVMStage7A2Test is Test {
         assertEq(config.gasTokenCodeHash, address(token).codehash);
         assertEq(config.kernelCodeHash, address(kernel).codehash);
         assertEq(config.hookCodeHash, address(hook).codehash);
-        assertTrue(SwapVMWorldDeployer(config.worldDeployer).used());
+        assertTrue(SwaputerWorldDeployer(config.worldDeployer).used());
         assertEq(config.configHash, _worldConfigHash(worldId, config));
     }
 
+    function test_tradingStartsClosedAndOnlyOwnerCanPermanentlyOpenIt() public {
+        SwaputerWorldFactory.CreateWorldParams memory params =
+            _worldParams(bytes32(uint256(101)), bytes32(uint256(102)));
+        (bytes32 secondWorldId, SwaputerToken secondToken,, SwaputerHook secondHook) = factory.createWorld(params);
+        (PoolKey memory secondKey, bool isSealed) = factory.getPoolKey(secondWorldId);
+
+        assertTrue(isSealed);
+        assertEq(secondHook.owner(), FEE_ADMIN);
+        assertFalse(secondHook.tradingLive());
+
+        PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
+        secondToken.approve(address(liquidityRouter), type(uint256).max);
+        liquidityRouter.modifyLiquidity{value: 1e25}(
+            secondKey,
+            ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
+            bytes("")
+        );
+
+        bytes memory wrappedError = abi.encodeWithSelector(
+            CustomRevert.WrappedError.selector,
+            address(secondHook),
+            IHooks.beforeSwap.selector,
+            abi.encodePacked(SwaputerHook.TradingNotLive.selector),
+            abi.encodePacked(Hooks.HookCallFailed.selector)
+        );
+        vm.expectRevert(wrappedError);
+        router.buyNOPExactInput{value: 1 ether}(secondWorldId, 1, TickMath.MIN_SQRT_PRICE + 1, address(this));
+
+        vm.prank(actor);
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.OnlyOwner.selector, actor));
+        secondHook.live();
+
+        vm.prank(FEE_ADMIN);
+        secondHook.live();
+        assertTrue(secondHook.tradingLive());
+
+        router.buyNOPExactInput{value: 1 ether}(secondWorldId, 1, TickMath.MIN_SQRT_PRICE + 1, address(this));
+
+        vm.prank(FEE_ADMIN);
+        vm.expectRevert(SwaputerHook.TradingAlreadyLive.selector);
+        secondHook.live();
+    }
+
     function test_hookPermanentlyRejectsAnyOtherPoolBinding() public {
-        SwapVMGasToken otherToken = new SwapVMGasToken(1 ether, address(this));
+        SwaputerToken otherToken = new SwaputerToken(1 ether, address(this));
         PoolKey memory otherKey = PoolKey({
             currency0: Currency.wrap(address(0)),
             currency1: Currency.wrap(address(otherToken)),
@@ -145,7 +192,7 @@ contract SwapVMStage7A2Test is Test {
                 CustomRevert.WrappedError.selector,
                 address(hook),
                 IHooks.beforeInitialize.selector,
-                abi.encodePacked(SwapVMHook.InvalidWorld.selector),
+                abi.encodePacked(SwaputerHook.InvalidWorld.selector),
                 abi.encodePacked(Hooks.HookCallFailed.selector)
             )
         );
@@ -158,7 +205,7 @@ contract SwapVMStage7A2Test is Test {
                 CustomRevert.WrappedError.selector,
                 address(hook),
                 IHooks.beforeInitialize.selector,
-                abi.encodeWithSelector(SwapVMHook.HookAlreadyBound.selector, worldId),
+                abi.encodeWithSelector(SwaputerHook.HookAlreadyBound.selector, worldId),
                 abi.encodePacked(Hooks.HookCallFailed.selector)
             )
         );
@@ -230,7 +277,7 @@ contract SwapVMStage7A2Test is Test {
             CustomRevert.WrappedError.selector,
             address(hook),
             IHooks.beforeSwap.selector,
-            abi.encodePacked(SwapVMHook.ExactOutputUnsupported.selector),
+            abi.encodePacked(SwaputerHook.ExactOutputUnsupported.selector),
             abi.encodePacked(Hooks.HookCallFailed.selector)
         );
         vm.expectRevert(wrappedError);
@@ -293,20 +340,20 @@ contract SwapVMStage7A2Test is Test {
     }
 
     function test_worldDeployerIsOneShotAndFactoryOnly() public {
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
-        SwapVMWorldDeployer deployer = SwapVMWorldDeployer(config.worldDeployer);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldDeployer deployer = SwaputerWorldDeployer(config.worldDeployer);
 
-        vm.expectPartialRevert(SwapVMWorldDeployer.OnlyFactory.selector);
+        vm.expectPartialRevert(SwaputerWorldDeployer.OnlyFactory.selector);
         deployer.deploy(address(0), address(0), manager, token, FEE_ADMIN, FEE_CONTROLLER, 300, 0, 0, 0, bytes32(0));
 
         vm.prank(address(factory));
-        vm.expectRevert(SwapVMWorldDeployer.AlreadyUsed.selector);
+        vm.expectRevert(SwaputerWorldDeployer.AlreadyUsed.selector);
         deployer.deploy(address(0), address(0), manager, token, FEE_ADMIN, FEE_CONTROLLER, 300, 0, 0, 0, bytes32(0));
     }
 
     function test_factoryRejectsWrongManagerAndArtifactHashes() public {
-        vm.expectPartialRevert(SwapVMWorldFactory.PoolManagerCodeHashMismatch.selector);
-        new SwapVMWorldFactory(
+        vm.expectPartialRevert(SwaputerWorldFactory.PoolManagerCodeHashMismatch.selector);
+        new SwaputerWorldFactory(
             manager,
             bytes32(uint256(1)),
             address(kernelCodeStore),
@@ -315,9 +362,9 @@ contract SwapVMStage7A2Test is Test {
             address(0xC0FFEE)
         );
 
-        SwapVMCreationCodeStore badStore = new SwapVMCreationCodeStore(hex"00");
-        vm.expectPartialRevert(SwapVMWorldDeployer.KernelCreationCodeMismatch.selector);
-        new SwapVMWorldFactory(
+        SwaputerCreationCodeStore badStore = new SwaputerCreationCodeStore(hex"00");
+        vm.expectPartialRevert(SwaputerWorldDeployer.KernelCreationCodeMismatch.selector);
+        new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(badStore),
@@ -330,12 +377,12 @@ contract SwapVMStage7A2Test is Test {
     function test_factoryWrongHookPredictionRollsBackTokenAndWorldDeployer() public {
         bytes32 tokenSalt = bytes32(uint256(101));
         bytes32 bootstrapSalt = bytes32(uint256(102));
-        SwapVMWorldFactory.CreateWorldParams memory params = _worldParams(tokenSalt, bootstrapSalt);
+        SwaputerWorldFactory.CreateWorldParams memory params = _worldParams(tokenSalt, bootstrapSalt);
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedWorldDeployer = factory.predictWorldDeployer(bootstrapSalt);
         params.predictedHook = address(uint160(params.predictedHook) + 1);
 
-        vm.expectPartialRevert(SwapVMWorldFactory.HookPredictionMismatch.selector);
+        vm.expectPartialRevert(SwaputerWorldFactory.HookPredictionMismatch.selector);
         factory.createWorld(params);
         assertEq(predictedToken.code.length, 0);
         assertEq(predictedWorldDeployer.code.length, 0);
@@ -369,7 +416,7 @@ contract SwapVMStage7A2Test is Test {
         assertEq(hook.netNativeAfterFee(100 ether), 97 ether);
 
         vm.prank(actor);
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.UnauthorizedFeeController.selector, FEE_CONTROLLER, actor));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.UnauthorizedFeeController.selector, FEE_CONTROLLER, actor));
         hook.setProtocolFeeBps(250);
 
         vm.prank(FEE_CONTROLLER);
@@ -379,7 +426,7 @@ contract SwapVMStage7A2Test is Test {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                SwapVMHook.ProtocolFeeTooHigh.selector, uint256(1_001), uint256(hook.MAX_PROTOCOL_FEE_BPS())
+                SwaputerHook.ProtocolFeeTooHigh.selector, uint256(1_001), uint256(hook.MAX_PROTOCOL_FEE_BPS())
             )
         );
         vm.prank(FEE_CONTROLLER);
@@ -394,16 +441,17 @@ contract SwapVMStage7A2Test is Test {
         assertEq(address(hook).balance, 7 ether);
 
         vm.prank(actor);
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.OnlyFeeAdmin.selector, actor));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.OnlyFeeAdmin.selector, actor));
         hook.claimProtocolFees();
 
         address newAdmin = address(0xBEEF);
         vm.prank(FEE_ADMIN);
         hook.transferAdmin(newAdmin);
         assertEq(hook.feeAdmin(), newAdmin);
+        assertEq(hook.owner(), FEE_ADMIN, "one-time launch owner must remain immutable");
 
         vm.prank(FEE_ADMIN);
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.OnlyFeeAdmin.selector, FEE_ADMIN));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.OnlyFeeAdmin.selector, FEE_ADMIN));
         hook.transferAdmin(actor);
 
         uint256 adminBalanceBefore = newAdmin.balance;
@@ -462,7 +510,7 @@ contract SwapVMStage7A2Test is Test {
         uint256 supplyBefore = token.totalSupply();
         uint256 balanceBefore = token.balanceOf(address(this));
 
-        vm.expectPartialRevert(SwapVMRouter.MinimumOutputNotMet.selector);
+        vm.expectPartialRevert(SwaputerAppRouter.MinimumOutputNotMet.selector);
         router.buyNOPExactInput{value: 1 ether}(worldId, type(uint128).max, TickMath.MIN_SQRT_PRICE + 1, address(this));
 
         assertEq(token.totalSupply(), supplyBefore);
@@ -474,8 +522,8 @@ contract SwapVMStage7A2Test is Test {
 
     function test_routerFailedSignedVMExecutionRollsBackNonceBurnAndHeight() public {
         bytes32 missingTarget = bytes32(uint256(0x0101));
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
-            SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
+            SwaputerKernel.RootOp.CALL,
             missingTarget,
             bytes(""),
             10,
@@ -502,16 +550,16 @@ contract SwapVMStage7A2Test is Test {
     }
 
     function test_routerRejectsSignedNOPAndInputPastUint128() public {
-        SwapVMKernel.VMEnvelope memory action;
-        action.op = SwapVMKernel.RootOp.NOP;
+        SwaputerKernel.VMEnvelope memory action;
+        action.op = SwaputerKernel.RootOp.NOP;
         action.worldId = worldId;
 
-        vm.expectRevert(SwapVMRouter.SignedNOPForbidden.selector);
+        vm.expectRevert(SwaputerAppRouter.SignedNOPForbidden.selector);
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, action);
 
         uint256 tooLarge = uint256(type(uint128).max) + 1;
         vm.deal(address(this), tooLarge);
-        vm.expectPartialRevert(SwapVMRouter.InvalidExactInput.selector);
+        vm.expectPartialRevert(SwaputerAppRouter.InvalidExactInput.selector);
         router.buyNOPExactInput{value: tooLarge}(worldId, 0, TickMath.MIN_SQRT_PRICE + 1, address(this));
     }
 
@@ -519,8 +567,8 @@ contract SwapVMStage7A2Test is Test {
         bytes memory packageBytes = _package(0, 0, keccak256("Stage7A2.Relay"), hex"00");
         bytes32 codeHash = keccak256(packageBytes);
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory wrongInput = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory wrongInput = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             payload,
             10,
@@ -535,8 +583,8 @@ contract SwapVMStage7A2Test is Test {
         vm.expectRevert();
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, wrongInput);
 
-        SwapVMKernel.VMEnvelope memory relayed = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory relayed = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             payload,
             10,
@@ -559,8 +607,8 @@ contract SwapVMStage7A2Test is Test {
         bytes memory packageBytes = _package(0, 0, keccak256("Stage7A2.Stop"), hex"00");
         bytes32 codeHash = keccak256(packageBytes);
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             deployPayload,
             10,
@@ -580,8 +628,8 @@ contract SwapVMStage7A2Test is Test {
         assertEq(kernel.programCodeHash(worldId, contractId), codeHash);
         assertEq(kernel.executionHeight(worldId), 1);
 
-        SwapVMKernel.VMEnvelope memory callAction = _signedAction(
-            SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory callAction = _signedAction(
+            SwaputerKernel.RootOp.CALL,
             contractId,
             bytes(""),
             10,
@@ -604,8 +652,8 @@ contract SwapVMStage7A2Test is Test {
         bytes memory packageBytes = _package(0, 1, keccak256("Stage7A2.Result"), hex"00602a5f5260205ff3");
         bytes32 codeHash = keccak256(packageBytes);
         bytes memory deployPayload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory deployAction = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory deployAction = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             codeHash,
             deployPayload,
             1,
@@ -623,8 +671,8 @@ contract SwapVMStage7A2Test is Test {
         vm.prank(actor);
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, deployAction);
 
-        SwapVMKernel.VMEnvelope memory callAction = _signedAction(
-            SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory callAction = _signedAction(
+            SwaputerKernel.RootOp.CALL,
             contractId,
             bytes(""),
             8,
@@ -642,39 +690,39 @@ contract SwapVMStage7A2Test is Test {
         assertEq(result, bytes32(uint256(42)));
         assertEq(resultLength, 32);
 
-        vm.expectRevert(abi.encodeWithSelector(SwapVMHook.VMResultUnavailable.selector, address(this)));
+        vm.expectRevert(abi.encodeWithSelector(SwaputerHook.VMResultUnavailable.selector, address(this)));
         hook.consumeVMResult();
     }
 
     function test_routerRejectsUnauthorizedExecutorUnsealedWorldAndDirectCallback() public {
-        SwapVMKernel.VMEnvelope memory action;
-        action.op = SwapVMKernel.RootOp.CALL;
+        SwaputerKernel.VMEnvelope memory action;
+        action.op = SwaputerKernel.RootOp.CALL;
         action.worldId = worldId;
         action.actor = actor;
         action.recipient = actor;
         action.authorizedExecutor = actor;
 
-        vm.expectPartialRevert(SwapVMRouter.UnauthorizedExecutor.selector);
+        vm.expectPartialRevert(SwaputerAppRouter.UnauthorizedExecutor.selector);
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, action);
 
-        vm.expectPartialRevert(SwapVMRouter.WorldNotSealed.selector);
+        vm.expectPartialRevert(SwaputerAppRouter.WorldNotSealed.selector);
         router.buyNOPExactInput{value: 1 ether}(bytes32(uint256(0xBAD)), 0, TickMath.MIN_SQRT_PRICE + 1, address(this));
 
-        vm.expectPartialRevert(SwapVMRouter.OnlyPoolManager.selector);
+        vm.expectPartialRevert(SwaputerAppRouter.OnlyPoolManager.selector);
         router.unlockCallback(bytes(""));
     }
 
     function _worldParams(bytes32 tokenSalt, bytes32 bootstrapSalt)
         internal
         view
-        returns (SwapVMWorldFactory.CreateWorldParams memory params)
+        returns (SwaputerWorldFactory.CreateWorldParams memory params)
     {
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedWorldDeployer = factory.predictWorldDeployer(bootstrapSalt);
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -687,10 +735,10 @@ contract SwapVMStage7A2Test is Test {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        params = SwapVMWorldFactory.CreateWorldParams({
+        params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -706,7 +754,7 @@ contract SwapVMStage7A2Test is Test {
         });
     }
 
-    function _worldConfigHash(bytes32 id, SwapVMWorldFactory.WorldConfig memory config)
+    function _worldConfigHash(bytes32 id, SwaputerWorldFactory.WorldConfig memory config)
         internal
         view
         returns (bytes32)
@@ -740,7 +788,7 @@ contract SwapVMStage7A2Test is Test {
     }
 
     function _signedAction(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 limit,
@@ -751,8 +799,8 @@ contract SwapVMStage7A2Test is Test {
         uint128 ethIn,
         uint160 priceLimit,
         address routerAddress
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: vm.addr(ACTOR_KEY),

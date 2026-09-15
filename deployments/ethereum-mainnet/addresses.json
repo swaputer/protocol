@@ -1,0 +1,22 @@
+{
+  "network": "ethereum-mainnet",
+  "chainId": 1,
+  "deploymentBlock": 25977415,
+  "indexerStartBlock": 25977415,
+  "owner": "0x0712F7272522bfCc5c08526Bdd1aF768cFF3bC7f",
+  "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+  "positionManager": "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
+  "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+  "kernelCreationCodeStore": "0x672b1CcCe7EA54F121b02E9caC909eBd9a95c70B",
+  "hookCreationCodeStore": "0x2087cc7D1bF901356b0d054417E5ce09aBB46344",
+  "factory": "0x77E7AeCA1D83f823ACCcDDB1E3838c985Dbb16b4",
+  "programRegistry": "0x09328608d1D61B28bea4864De6D98a369CaA4B6A",
+  "appRouter": "0xC9c786Ee02FeeAdC1DD0a3CD74Ec64B07C831B51",
+  "worldDeployer": "0xc40733BF2e71988315aDCE929D524912C4c64733",
+  "sPuter": "0xfcf4e38B9166CB1968DeA7D0321a7a0766bB8Cff",
+  "kernel": "0x67b591767B3DDc732944e122f99FF18dD78aa21e",
+  "hook": "0xB858093c6E514fE94DCEE0996e0ce1D17CA560CC",
+  "worldId": "0x242ee39a165853ce39695feb1547bfa5228c367841a724ab9816bebef305dfbd",
+  "tradingLive": false,
+  "manifest": "deployments/ethereum-mainnet/swaputer-mainnet-20260915.json"
+}

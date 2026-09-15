@@ -4,17 +4,17 @@
 
 | Component | Status | 解释 |
 |---|---|---|
-| `SwapVMHook` | `release-candidate complete / unaudited` | V1.1 运行时语义稳定（v1 freeze），但未经过独立生产审计，不宣称 production-complete。 |
-| `SwapVMKernel` | `release-candidate complete / unaudited` | 同上；核心共识与索引语义在 Stage 6E 中对齐并复现。 |
+| `SwaputerHook` | `release-candidate complete / unaudited` | V1.1 运行时语义稳定（v1 freeze），但未经过独立生产审计，不宣称 production-complete。 |
+| `SwaputerKernel` | `release-candidate complete / unaudited` | 同上；核心共识与索引语义在 Stage 6E 中对齐并复现。 |
 | `SwapVMMiniVM` | `release-candidate complete / unaudited` | 解释器在本地 simulator 与 Solidity 执行上已做严格差分验证，但仍不是生产可审计完成状态。 |
-| `SwapVMGasToken` | `release-candidate complete / unaudited` | 18 decimals、固定供应、burn 会减少 `totalSupply`、仅销毁能力。 |
-| `SwapVMReferenceRegistry` | `release-candidate complete / unaudited` | 固定四个参考 program hash（SRC-20、SRC-721、SRC-1155、CPAMM）是刻意的不可变安全边界。 |
-| `WorldFactory` | `release-candidate complete / unaudited` | `SwapVMWorldFactory` + one-shot `SwapVMWorldDeployer` 已实现；仍需 7B/7C。 |
-| `MiniVMInterpreter` | `integrated into another component` | 解释器语义在 `SwapVMKernel / SwapVMMiniVM` 中内化。 |
-| `MiniVMCodeStore` | `integrated into another component` | 通过 `SwapVMKernel` 的不可变映射与内存账本持有 codeHash，不独立部署。 |
-| `StandardProgramRegistry` | `integrated into another component` | 不存在可变治理 registry；四项固定 `SwapVMReferenceRegistry` 就是冻结边界。 |
+| `SwaputerToken` | `release-candidate complete / unaudited` | 18 decimals、固定供应、burn 会减少 `totalSupply`、仅销毁能力。 |
+| `SwaputerProgramRegistry` | `release-candidate complete / unaudited` | 固定四个参考 program hash（SRC-20、SRC-721、SRC-1155、CPAMM）是刻意的不可变安全边界。 |
+| `WorldFactory` | `release-candidate complete / unaudited` | `SwaputerWorldFactory` + one-shot `SwaputerWorldDeployer` 已实现；仍需 7B/7C。 |
+| `MiniVMInterpreter` | `integrated into another component` | 解释器语义在 `SwaputerKernel / SwapVMMiniVM` 中内化。 |
+| `MiniVMCodeStore` | `integrated into another component` | 通过 `SwaputerKernel` 的不可变映射与内存账本持有 codeHash，不独立部署。 |
+| `StandardProgramRegistry` | `integrated into another component` | 不存在可变治理 registry；四项固定 `SwaputerProgramRegistry` 就是冻结边界。 |
 | `ReferencePrograms` | `release-candidate complete / unaudited` | 固定离线 package + immutable exact codeHash registry；无管理员发布路径。 |
-| `SwapVMRouter` | `release-candidate complete / unaudited` | 最小 exact-input Router 已位于 `src/`，无通用 swap/hookData/admin/custody 入口。 |
+| `SwaputerAppRouter` | `release-candidate complete / unaudited` | 最小 exact-input Router 已位于 `src/`，无通用 swap/hookData/admin/custody 入口。 |
 | `TinySol toolchain` | `integrated into another component` | 已有 `tooling/tinysol`，在 Stage 7A1-R 阶段仅做设计审查和部署边界对齐，不新增编译器功能。 |
 | `VM event indexer` | `requires operational implementation` | `tooling/indexer` 支持重组扫描和事件解码，但未进入生产运维编排与 HA。 |
 
@@ -28,7 +28,7 @@
 
 ## 3. PoolManager 与 Factory 模型
 
-- **`SwapVMWorldFactory` 不会部署 PoolManager。**
+- **`SwaputerWorldFactory` 不会部署 PoolManager。**
 - Factory 仅绑定既有 PoolManager（或在构造时通过 codeHash 验证已确认地址）：
   - `poolManager` 地址与其 `codeHash` 记录在不可变配置；
   - worldId **不包含** PoolManager 地址，严格等于 `PoolId.unwrap(poolKey.toId())`；
@@ -55,8 +55,8 @@ Stage 7A1-R 明确采用以下之一，并给出最小攻击面解释：
 ## 5. Hook/Kernel 地址循环与已证明解法（不改构造语义）
 
 - 不修改现有 Hook/Kernel 构造函数语义：
-  - `SwapVMKernel(address hook, uint128 price)`
-  - `SwapVMHook(IPoolManager manager, SwapVMKernel boundKernel, ..., uint128 price, ...)`，并内部要求 `boundKernel.hook() == address(this)`。
+  - `SwaputerKernel(address hook, uint128 price)`
+  - `SwaputerHook(IPoolManager manager, SwaputerKernel boundKernel, ..., uint128 price, ...)`，并内部要求 `boundKernel.hook() == address(this)`。
 - 两个合约若都由 Factory 直接 CREATE2，存在真实固定点循环：
   - `K = CREATE2(factory, saltK, hash(KernelCreationCode || H || price))`；
   - `H = CREATE2(factory, saltH, hash(HookCreationCode || manager || K || token || ...))`。
@@ -66,9 +66,9 @@ Stage 7A1-R 明确采用以下之一，并给出最小攻击面解释：
 - 错误预测、错误 salt、已有代码、重复调用和绑定不一致都会失败；单事务创建时 P/K/H 与 Factory 状态原子回滚。
 - 完整公式、部署顺序和测试证据见 `docs/security/WORLD-FACTORY-DESIGN.md` 与 `docs/STAGE7A1P.md`。
 
-## 6. Sealing 与 `SwapVMReferenceRegistry` 的边界定位
+## 6. Sealing 与 `SwaputerProgramRegistry` 的边界定位
 
-- `SwapVMReferenceRegistry` 的四个 hard-coded hash 不是缺陷，而是“不可变安全边界”：
+- `SwaputerProgramRegistry` 的四个 hard-coded hash 不是缺陷，而是“不可变安全边界”：
   - 不支持运行时管理员替换；
   - 不支持 mutable governance update；
   - 不提供 rate-limit / pause / upgrade / owner；
@@ -77,8 +77,8 @@ Stage 7A1-R 明确采用以下之一，并给出最小攻击面解释：
 
 ## 7. Stage 7A2 已落地的生产边界项
 
-- `SwapVMWorldFactory`、`SwapVMWorldDeployer` 与不可变 creation-code stores；
-- `SwapVMRouter`（无管理员、无代理、最小无状态）；
+- `SwaputerWorldFactory`、`SwaputerWorldDeployer` 与不可变 creation-code stores；
+- `SwaputerAppRouter`（无管理员、无代理、最小无状态）；
 - WorldConfig 一次写入、PoolManager pool 初始化与 sealed discovery；
 - RPC-free canonical manifest finalize/hash/signature/observation validation；
 - 真实 v4 exact-input NOP、签名 DEPLOY/CALL 与 sell 回归。

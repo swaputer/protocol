@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "swaputer-ethereum-mainnet/1",
+  "status": "deployed-trading-closed",
+  "source": {
+    "commit": "25c29ac97fdd701cb57dae6163e83926adc7e740",
+    "treeStatus": "dirty-authorized-sPuter-mainnet-deployment-changes",
+    "script": "script/SwaputerEthereumMainnetDeploy.s.sol:SwaputerEthereumMainnetDeployScript"
+  },
+  "network": {
+    "name": "Ethereum Mainnet",
+    "chainId": 1,
+    "startBlock": 25977415,
+    "endBlock": 25977437,
+    "startedAt": "2026-09-14T18:13:23Z",
+    "completedAt": "2026-09-14T18:17:47Z",
+    "explorerUrl": "https://etherscan.io"
+  },
+  "owner": "0x0712F7272522bfCc5c08526Bdd1aF768cFF3bC7f",
+  "upstream": {
+    "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "positionManager": "0xbD216513d74C8cf14cf4747E6AaA6420FF64ee9e",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+  },
+  "contracts": {
+    "kernelCreationCodeStore": "0x672b1CcCe7EA54F121b02E9caC909eBd9a95c70B",
+    "hookCreationCodeStore": "0x2087cc7D1bF901356b0d054417E5ce09aBB46344",
+    "factory": "0x77E7AeCA1D83f823ACCcDDB1E3838c985Dbb16b4",
+    "programRegistry": "0x09328608d1D61B28bea4864De6D98a369CaA4B6A",
+    "appRouter": "0xC9c786Ee02FeeAdC1DD0a3CD74Ec64B07C831B51",
+    "worldDeployer": "0xc40733BF2e71988315aDCE929D524912C4c64733",
+    "token": "0xfcf4e38B9166CB1968DeA7D0321a7a0766bB8Cff",
+    "kernel": "0x67b591767B3DDc732944e122f99FF18dD78aa21e",
+    "hook": "0xB858093c6E514fE94DCEE0996e0ce1D17CA560CC"
+  },
+  "runtimeCodeHashes": {
+    "kernelCreationCodeStore": "0xd2fe6966a1648d927806bd895d945c4bf52be3f42b1dabffe5857d3e095b8329",
+    "hookCreationCodeStore": "0x48391814cc6e2733a9c7dd890290503151dcb1954db385dedab921951be3b96d",
+    "factory": "0x58b1a803d4ea8e7eeaf617c57bab7de5ac4770c7f78f8b34c2a749ac4cf22514",
+    "programRegistry": "0xbcf6aafb81540d610800b4a625d0ceb5cefb7d2ac9d36bfcb768c06943b8584e",
+    "appRouter": "0x4a18a68ef1d8e9b91066ba8bb2459a939a2792f8a8b10e92adbb4923fb4cd605",
+    "worldDeployer": "0xa953df735236ebe6df9f63c8f9598ac978798f5ac297eb3dad123eb0a8c1fd0c",
+    "token": "0xc814ed55ad36f756f4f2d91ed36ff9d7e559fc3e4b32c887495f4651919feff1",
+    "kernel": "0xfc3af86a2371f6cfbb9e10c95767acea7c3e9ee4f953a418fcd5d97d6cb2b3c0",
+    "hook": "0x70b4a8d6bf8b7f6e0e86262ebc53f9ad8a348390692dabd452420bfebc3b373a"
+  },
+  "world": {
+    "worldId": "0x242ee39a165853ce39695feb1547bfa5228c367841a724ab9816bebef305dfbd",
+    "configHash": "0xbbbc3ccf36b79858d7491992c8c494b7290f6952a15f2f564814b405195a78f0",
+    "sealedAtBlock": 25977420,
+    "distributionCommitment": "0x801f132c9270c6a086cb767768db77f9fa76f91985496c422be3f4de76f302b2",
+    "byteGasPrice": "1000000000000",
+    "protocolFeeBps": 300,
+    "poolFee": 3000,
+    "tickSpacing": 60,
+    "initialSqrtPriceX96": "3961408125713216879677197516800",
+    "initialPriceEthPerSPuter": "0.0004",
+    "sealed": true
+  },
+  "tradingGate": {
+    "owner": "0x0712F7272522bfCc5c08526Bdd1aF768cFF3bC7f",
+    "liveCalled": false,
+    "tradingLive": false,
+    "tradingLiveEventCount": 0,
+    "preLiveSwapEthCallReverted": true,
+    "closeFunctionExists": false
+  },
+  "token": {
+    "name": "Swaputer",
+    "symbol": "sPuter",
+    "decimals": 18,
+    "totalSupplyBaseUnits": "10000000000000000000000",
+    "ownerRoundingDustBaseUnits": "23"
+  },
+  "positions": [
+    {"tokenId": 403974, "tickLower": 74160, "tickUpper": 78240, "targetSPuter": "50", "liquidity": "5420377974442509339"},
+    {"tokenId": 403975, "tickLower": 70080, "tickUpper": 74160, "targetSPuter": "150", "liquidity": "19940795119692010537"},
+    {"tokenId": 403976, "tickLower": 67200, "tickUpper": 70080, "targetSPuter": "800", "liquidity": "179452675901261906358"},
+    {"tokenId": 403977, "tickLower": 60300, "tickUpper": 67200, "targetSPuter": "1500", "liquidity": "178606782036845916145"},
+    {"tokenId": 403978, "tickLower": 46440, "tickUpper": 60300, "targetSPuter": "2500", "liquidity": "245310754536118268283"},
+    {"tokenId": 403979, "tickLower": -887220, "tickUpper": 46440, "targetSPuter": "5000", "liquidity": "490443107591012380120"}
+  ],
+  "liquidity": {
+    "depositedSPuterBaseUnits": "9999999999999999999977",
+    "roundingDustBaseUnits": "23",
+    "initialNativeDepositedWei": "0",
+    "allPositionNftsOwnedByOwner": true,
+    "erc20Permit2Allowance": "0",
+    "permit2PositionManagerAllowance": "0"
+  },
+  "cost": {
+    "gasMode": "standard",
+    "transactionCount": 14,
+    "successfulReceiptCount": 14,
+    "totalGasUsed": "21974755",
+    "transactionFeesWei": "3330714718078542",
+    "transactionFeesEth": "0.003330714718078542",
+    "startingBalanceWei": "15746640932308082",
+    "endingBalanceWei": "12415926214229540"
+  },
+  "transactions": [
+    {"purpose": "deployKernelCreationCodeStore", "block": 25977415, "hash": "0x937b7295e87361964862fd3494bebda7c740653b8c10f4711e96efea110a7649"},
+    {"purpose": "deployHookCreationCodeStore", "block": 25977418, "hash": "0x92a417ddd631373deef28511cc6f801c6af13dde64039a06d17113c02b748293"},
+    {"purpose": "deployFactoryRegistryAndRouter", "block": 25977419, "hash": "0xfe838ceda47b160bd07aff6d39a8e40715d46171e8b416a5896b1aefe8a3e58d"},
+    {"purpose": "createWorldTokenKernelHookAndPool", "block": 25977420, "hash": "0x6824d338c3da67ee31fc5d19b7b86b139135d00dbe0ce0046fe057c74fd1a042"},
+    {"purpose": "approveTokenToPermit2", "block": 25977423, "hash": "0xba6264870e2da67a193090af48465c898a3fed932ed831629ec9b9475c3e8b52"},
+    {"purpose": "approvePermit2ToPositionManager", "block": 25977425, "hash": "0x7a5f641dee22bd28336f9544f1bf174afd4b8afd39260d57c321937e64acae8c"},
+    {"purpose": "mintPosition403974", "block": 25977426, "hash": "0xda8cf87ea77e857037acc60f6068a15777ea6c68acf8f532aae79647b6772c38"},
+    {"purpose": "mintPosition403975", "block": 25977427, "hash": "0xafb7387f6b7e1ba4a76b7bea5ed7bfe77172abddbf1d34ed2b86ba19704689f9"},
+    {"purpose": "mintPosition403976", "block": 25977428, "hash": "0xb93e45ad191f372b680307d3bbe1023250cb3b74c82ff16f106289399aa9141c"},
+    {"purpose": "mintPosition403977", "block": 25977430, "hash": "0xa0f1e3d9675387cdf02e1f1839563339a201efb813c89e682609ae77d9c8a466"},
+    {"purpose": "mintPosition403978", "block": 25977431, "hash": "0xffc19cf73d4fe0cab04770091342396b573868e03082f08c56d60ded3615b0a5"},
+    {"purpose": "mintPosition403979", "block": 25977432, "hash": "0x3a94cdfc84bff5f1ac940aa0be6e538d2d79b3f895198df20dd9d20bbcc35f98"},
+    {"purpose": "revokePermit2PositionManagerAllowance", "block": 25977434, "hash": "0x3fe15f1d4783df384042e8f10f3583bc1c2a850514d085c1ab5d768409eef7f0"},
+    {"purpose": "revokeTokenPermit2Allowance", "block": 25977437, "hash": "0xcfa973ba570e17d2a40d355a2f78af74d05a5a9d487e9bc98cd9e8ec5486294c"}
+  ]
+}

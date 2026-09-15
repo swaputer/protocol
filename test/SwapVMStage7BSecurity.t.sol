@@ -8,11 +8,11 @@ import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {PoolId} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
-import {SwapVMWorldDeployer} from "../src/SwapVMWorldDeployer.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
+import {SwaputerWorldDeployer} from "../src/SwaputerWorldDeployer.sol";
 import {SwapVMStage7A2Test} from "./SwapVMStage7A2.t.sol";
 
 contract Stage7BForcedEther {
@@ -30,14 +30,14 @@ contract Stage7BMaliciousRecipient {
         RevertAlways
     }
 
-    SwapVMRouter public immutable router;
+    SwaputerAppRouter public immutable router;
     bytes32 public immutable worldId;
     Mode public mode;
     bool public swallow;
     bool public attempted;
     bool public nestedSucceeded;
 
-    constructor(SwapVMRouter router_, bytes32 worldId_) {
+    constructor(SwaputerAppRouter router_, bytes32 worldId_) {
         router = router_;
         worldId = worldId_;
     }
@@ -78,9 +78,9 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
     using TransientStateLibrary for PoolManager;
 
     function test_stage7B_duplicateSaltsCopiedTransactionAndCrossConfigRollback() public {
-        SwapVMWorldFactory.WorldConfig memory first = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory first = factory.getWorldConfig(worldId);
         bytes32 configHash = first.configHash;
-        SwapVMWorldFactory.CreateWorldParams memory copied = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
+        SwaputerWorldFactory.CreateWorldParams memory copied = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
         address copiedToken = factory.predictGasToken(copied.tokenSalt, copied.initialSupply, copied.initialHolder);
 
         vm.expectRevert();
@@ -88,12 +88,12 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
         assertEq(factory.getWorldConfig(worldId).configHash, configHash);
         assertEq(copiedToken, address(token));
 
-        SwapVMWorldFactory.CreateWorldParams memory sameToken = copied;
+        SwaputerWorldFactory.CreateWorldParams memory sameToken = copied;
         sameToken.bootstrapSalt = bytes32(uint256(9002));
         vm.expectRevert();
         factory.createWorld(sameToken);
 
-        SwapVMWorldFactory.CreateWorldParams memory sameBootstrap = copied;
+        SwaputerWorldFactory.CreateWorldParams memory sameBootstrap = copied;
         sameBootstrap.tokenSalt = bytes32(uint256(9001));
         vm.expectRevert();
         factory.createWorld(sameBootstrap);
@@ -104,12 +104,12 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
     function test_stage7B_wrongPredictionsPermissionBitsAndAllPreSealStateRollback() public {
         bytes32 tokenSalt = bytes32(uint256(3001));
         bytes32 bootstrapSalt = bytes32(uint256(3002));
-        SwapVMWorldFactory.CreateWorldParams memory params = _worldParams(tokenSalt, bootstrapSalt);
+        SwaputerWorldFactory.CreateWorldParams memory params = _worldParams(tokenSalt, bootstrapSalt);
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedDeployer = factory.predictWorldDeployer(bootstrapSalt);
 
         params.predictedKernel = address(uint160(params.predictedKernel) ^ 1);
-        vm.expectPartialRevert(SwapVMWorldFactory.KernelPredictionMismatch.selector);
+        vm.expectPartialRevert(SwaputerWorldFactory.KernelPredictionMismatch.selector);
         factory.createWorld(params);
         assertEq(predictedToken.code.length, 0);
         assertEq(predictedDeployer.code.length, 0);
@@ -120,7 +120,7 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
             predictedDeployer,
             params.hookSalt,
             params.predictedKernel,
-            SwapVMGasToken(predictedToken),
+            SwaputerToken(predictedToken),
             params.byteGasPrice,
             params.poolFee,
             params.tickSpacing
@@ -134,23 +134,23 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
             predictedDeployer,
             params.hookSalt,
             params.predictedKernel,
-            SwapVMGasToken(predictedToken),
+            SwaputerToken(predictedToken),
             params.byteGasPrice,
             params.poolFee,
             params.tickSpacing
         );
-        vm.expectPartialRevert(SwapVMWorldFactory.InvalidHookPermissionBits.selector);
+        vm.expectPartialRevert(SwaputerWorldFactory.InvalidHookPermissionBits.selector);
         factory.createWorld(params);
         assertEq(predictedToken.code.length, 0);
         assertEq(predictedDeployer.code.length, 0);
     }
 
     function test_stage7B_multipleWorldsRemainSealedAndCrossWorldIsolated() public {
-        SwapVMWorldFactory.WorldConfig memory original = factory.getWorldConfig(worldId);
-        SwapVMWorldFactory.CreateWorldParams memory params =
+        SwaputerWorldFactory.WorldConfig memory original = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.CreateWorldParams memory params =
             _worldParams(bytes32(uint256(4101)), bytes32(uint256(4102)));
         params.distributionCommitment = keccak256("stage7b-world-two");
-        (bytes32 worldTwo,, SwapVMKernel kernelTwo,) = factory.createWorld(params);
+        (bytes32 worldTwo,, SwaputerKernel kernelTwo,) = factory.createWorld(params);
         assertTrue(worldTwo != worldId);
         assertEq(factory.getWorldConfig(worldId).configHash, original.configHash);
         assertEq(factory.getWorldConfig(worldTwo).distributionCommitment, params.distributionCommitment);
@@ -220,8 +220,8 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
     function test_stage7B_signatureMutationAndReplayMatrix() public {
         bytes memory packageBytes = _package(0, 0, keccak256("Stage7B.Signature"), hex"00");
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory valid = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory valid = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             payload,
             10,
@@ -233,7 +233,7 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
             TickMath.MIN_SQRT_PRICE + 1,
             address(router)
         );
-        SwapVMKernel.VMEnvelope memory changed = valid;
+        SwaputerKernel.VMEnvelope memory changed = valid;
         changed.payload[changed.payload.length - 1] = 0x01;
         vm.expectRevert();
         router.buyVMExactInput{value: 1 ether}(worldId, TickMath.MIN_SQRT_PRICE + 1, changed);
@@ -248,7 +248,7 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
         vm.chainId(block.chainid - 1);
 
         valid = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             payload,
             10,
@@ -271,8 +271,8 @@ contract SwapVMStage7BSecurityTest is SwapVMStage7A2Test {
     function test_stage7B_permissionlessRelayCannotChangeFundingRecipientOrBounds() public {
         bytes memory packageBytes = _package(0, 0, keccak256("Stage7B.Relay"), hex"00");
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             payload,
             10,

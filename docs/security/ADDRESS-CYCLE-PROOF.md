@@ -10,7 +10,7 @@ H = CREATE2(F, saltH, keccak256(HookCreationCode || manager || K || token || ...
 调整计算顺序不能求解该固定点。`test/SwapVMStage7A1P.t.sol` 保存了单轮预测发散和
 Hook constructor 双向绑定失败的最小复现。
 
-生产实现使用 per-world `SwapVMWorldDeployer` 打破循环：Factory 先以固定 init-code
+生产实现使用 per-world `SwaputerWorldDeployer` 打破循环：Factory 先以固定 init-code
 shape 和 `bootstrapSalt` CREATE2 得到 P；Kernel 是 P 的 nonce-1 CREATE 子地址；随后以
 P、已知 K、精确 Hook init code 和离线挖出的 `hookSalt` CREATE2 得到 H。P 仅 Factory
 可调用且 one-shot，任一步失败都会把 Token、P、K、H、pool initialization 和 config

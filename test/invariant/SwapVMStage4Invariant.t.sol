@@ -18,9 +18,9 @@ import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/Pool
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
+import {SwaputerToken} from "../../src/SwaputerToken.sol";
+import {SwaputerHook} from "../../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
 import {SwapVMKernelStage2Harness, SwapVMStage2Router} from "../SwapVMStage2.t.sol";
 
 contract SwapVMStage4Handler is Test {
@@ -30,7 +30,7 @@ contract SwapVMStage4Handler is Test {
     uint32 private constant LIMIT = 5_000;
 
     SwapVMStage2Router private immutable _router;
-    SwapVMKernel private immutable _kernel;
+    SwaputerKernel private immutable _kernel;
     PoolKey private _key;
     bytes32 private immutable _worldId;
     bytes32 private immutable _tokenId;
@@ -45,7 +45,7 @@ contract SwapVMStage4Handler is Test {
 
     constructor(
         SwapVMStage2Router router,
-        SwapVMKernel kernel,
+        SwaputerKernel kernel,
         PoolKey memory key_,
         bytes32 worldId_,
         bytes32 tokenId
@@ -68,8 +68,8 @@ contract SwapVMStage4Handler is Test {
         uint64 nonce = actorToOperator ? 1 + actorCalls : operatorCalls;
         bytes memory payload =
             abi.encodePacked(bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(recipientId, amount));
-        SwapVMKernel.VMEnvelope memory action = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory action = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: _worldId,
             actor: vm.addr(privateKey),
             targetOrCodeHash: _tokenId,
@@ -143,9 +143,9 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
     uint32 private constant LIMIT = 5_000;
 
     PoolManager private manager;
-    SwapVMGasToken private token;
+    SwaputerToken private token;
     SwapVMKernelStage2Harness private kernel;
-    SwapVMHook private hook;
+    SwaputerHook private hook;
     SwapVMStage2Router private router;
     PoolKey private key;
     bytes32 private worldId;
@@ -160,7 +160,7 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
         address actor = vm.addr(ACTOR_KEY);
         vm.deal(actor, 100 ether);
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(INITIAL_SUPPLY, address(this));
+        token = new SwaputerToken(INITIAL_SUPPLY, address(this));
         PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
         router = new SwapVMStage2Router(manager);
         uint64 nextNonce = vm.getNonce(address(this));
@@ -169,7 +169,7 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory args = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -178,9 +178,10 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
             POOL_FEE,
             TICK_SPACING
         );
-        (address expectedHook, bytes32 salt) = HookMiner.find(address(this), flags, type(SwapVMHook).creationCode, args);
+        (address expectedHook, bytes32 salt) =
+            HookMiner.find(address(this), flags, type(SwaputerHook).creationCode, args);
         kernel = new SwapVMKernelStage2Harness(expectedHook, BYTE_GAS_PRICE);
-        hook = new SwapVMHook{salt: salt}(
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
         key = PoolKey({
@@ -198,6 +199,7 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        hook.live();
 
         actorId = kernel.eoaAccountId(actor);
         operatorId = kernel.eoaAccountId(vm.addr(0x51524321));
@@ -246,8 +248,8 @@ contract SwapVMStage4InvariantTest is StdInvariant, Test {
         private
     {
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorInput);
-        SwapVMKernel.VMEnvelope memory action = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory action = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.DEPLOY,
             worldId: worldId,
             actor: actor,
             targetOrCodeHash: codeHash,

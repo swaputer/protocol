@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 /// @notice Immutable registry of the canonical SwapVM v1 reference packages.
 /// @dev Recognition requires the interface ID, exact ABI hash and exact ProgramPackageV1 hash.
-contract SwapVMReferenceRegistry {
+contract SwaputerProgramRegistry {
     bytes4 public constant SRC165_INTERFACE_ID = 0x01ffc9a7;
 
     bytes4 public constant SRC20_INTERFACE_ID = 0x2633673d;

@@ -3,9 +3,9 @@ pragma solidity 0.8.26;
 
 import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
 
 error ProbeNotFactory();
 error ProbeAlreadyUsed();
@@ -43,7 +43,7 @@ contract WorldDeployerProbe {
         address predictedKernel,
         address predictedHook,
         IPoolManager manager,
-        SwapVMGasToken token,
+        SwaputerToken token,
         uint128 byteGasPrice,
         uint24 fee,
         int24 tickSpacing,
@@ -66,7 +66,7 @@ contract WorldDeployerProbe {
             hookCreationCode,
             abi.encode(
                 manager,
-                SwapVMKernel(kernel),
+                SwaputerKernel(kernel),
                 token,
                 address(this),
                 address(this),
@@ -81,8 +81,8 @@ contract WorldDeployerProbe {
         }
         if (hook != predictedHook) revert ProbeHookPredictionMismatch();
 
-        if (SwapVMKernel(kernel).hook() != hook) revert ProbeBindingMismatch();
-        SwapVMHook hookRef = SwapVMHook(payable(hook));
+        if (SwaputerKernel(kernel).hook() != hook) revert ProbeBindingMismatch();
+        SwaputerHook hookRef = SwaputerHook(payable(hook));
         if (address(hookRef.kernel()) != kernel) revert ProbeBindingMismatch();
         if (address(hookRef.poolManager()) != address(manager)) revert ProbeBindingMismatch();
         if (hookRef.byteGasPrice() != byteGasPrice) revert ProbeBindingMismatch();
@@ -140,7 +140,7 @@ contract WorldDeployerProbeFactory {
         address predictedHook,
         bytes32 hookSalt,
         IPoolManager manager,
-        SwapVMGasToken token,
+        SwaputerToken token,
         uint128 byteGasPrice,
         uint24 fee,
         int24 tickSpacing
@@ -167,7 +167,7 @@ contract WorldDeployerProbeFactory {
         address predictedHook,
         bytes32 hookSalt,
         IPoolManager manager,
-        SwapVMGasToken token,
+        SwaputerToken token,
         uint128 byteGasPrice,
         uint24 fee,
         int24 tickSpacing

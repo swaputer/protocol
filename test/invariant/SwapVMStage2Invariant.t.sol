@@ -17,17 +17,17 @@ import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/Pool
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
+import {SwaputerToken} from "../../src/SwaputerToken.sol";
+import {SwaputerHook} from "../../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
 import {SwapVMKernelStage2Harness, SwapVMStage2Router} from "../SwapVMStage2.t.sol";
 
 contract SwapVMStage2Handler is Test {
     uint256 private constant ACTOR_KEY = 0xC0DE;
 
     SwapVMStage2Router private immutable _router;
-    SwapVMGasToken private immutable _token;
-    SwapVMKernel private immutable _kernel;
+    SwaputerToken private immutable _token;
+    SwaputerKernel private immutable _kernel;
     PoolKey private _key;
     bytes32 private immutable _worldId;
     bytes32 private immutable _stopTarget;
@@ -41,8 +41,8 @@ contract SwapVMStage2Handler is Test {
 
     constructor(
         SwapVMStage2Router router,
-        SwapVMGasToken token,
-        SwapVMKernel kernel,
+        SwaputerToken token,
+        SwaputerKernel kernel,
         PoolKey memory key_,
         bytes32 worldId_,
         bytes32 stopTarget_,
@@ -80,8 +80,8 @@ contract SwapVMStage2Handler is Test {
         bytes32 target = loop ? _loopTarget : _stopTarget;
         uint64 nonce = uint64(successfulCalls);
         uint64 deadline = uint64(block.timestamp + 1 days);
-        SwapVMKernel.VMEnvelope memory action = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory action = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: _worldId,
             actor: vm.addr(ACTOR_KEY),
             targetOrCodeHash: target,
@@ -161,9 +161,9 @@ contract SwapVMStage2InvariantTest is StdInvariant, Test {
     bytes32 internal constant LOOP_TARGET = 0x0100000000000000000000000000000000000000000000000000000000002002;
 
     PoolManager internal manager;
-    SwapVMGasToken internal token;
+    SwaputerToken internal token;
     SwapVMKernelStage2Harness internal kernel;
-    SwapVMHook internal hook;
+    SwaputerHook internal hook;
     SwapVMStage2Router internal router;
     PoolKey internal key;
     bytes32 internal worldId;
@@ -172,7 +172,7 @@ contract SwapVMStage2InvariantTest is StdInvariant, Test {
     function setUp() public {
         vm.deal(address(this), 1e30);
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(INITIAL_SUPPLY, address(this));
+        token = new SwaputerToken(INITIAL_SUPPLY, address(this));
         PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
         router = new SwapVMStage2Router(manager);
 
@@ -182,7 +182,7 @@ contract SwapVMStage2InvariantTest is StdInvariant, Test {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory args = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -191,9 +191,10 @@ contract SwapVMStage2InvariantTest is StdInvariant, Test {
             POOL_FEE,
             TICK_SPACING
         );
-        (address expectedHook, bytes32 salt) = HookMiner.find(address(this), flags, type(SwapVMHook).creationCode, args);
+        (address expectedHook, bytes32 salt) =
+            HookMiner.find(address(this), flags, type(SwaputerHook).creationCode, args);
         kernel = new SwapVMKernelStage2Harness(expectedHook, BYTE_GAS_PRICE);
-        hook = new SwapVMHook{salt: salt}(
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
 
@@ -212,6 +213,7 @@ contract SwapVMStage2InvariantTest is StdInvariant, Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        hook.live();
         kernel.install(worldId, STOP_TARGET, hex"00");
         kernel.install(worldId, LOOP_TARGET, hex"60035b600103806002575000");
 

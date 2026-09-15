@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "swaputer-ethereum-mainnet-public-parameters/1",
+  "status": "draft-no-broadcast-authorization",
+  "network": {
+    "name": "Ethereum Mainnet",
+    "chainId": 1
+  },
+  "contracts": {
+    "creationCodeStore": "SwaputerCreationCodeStore",
+    "token": "SwaputerToken",
+    "kernel": "SwaputerKernel",
+    "hook": "SwaputerHook",
+    "appRouter": "SwaputerAppRouter",
+    "worldFactory": "SwaputerWorldFactory",
+    "worldDeployer": "SwaputerWorldDeployer",
+    "programRegistry": "SwaputerProgramRegistry",
+    "vmEngine": "SwapVMMiniVM"
+  },
+  "token": {
+    "name": "Swaputer",
+    "symbol": "sPuter",
+    "decimals": 18,
+    "initialSupplyHuman": "10000",
+    "initialSupplyBaseUnits": "10000000000000000000000"
+  },
+  "pool": {
+    "quoteAsset": "native ETH",
+    "initialPriceEthPerSPuter": "0.0004",
+    "initialSqrtPriceX96": "3961408125713216879677197516800",
+    "protocolFeeBps": 300,
+    "lpFee": 3000,
+    "tickSpacing": 60,
+    "initialNativeLiquidityWei": "0",
+    "initialTokenAllocation": "100% single-sided across six positions"
+  },
+  "domains": {
+    "ecosystem": "https://swaputer.com",
+    "explorer": "https://scan.swaputer.com",
+    "indexerApi": "https://api.swaputer.com",
+    "ecosystemAppsApi": "https://apps.swaputer.com/ecosystem/apps",
+    "docs": "https://docs.swaputer.com",
+    "studio": "https://studio.swaputer.com",
+    "wwwRedirect": "https://swaputer.com"
+  },
+  "dnsIntent": {
+    "apex": "ecosystem site",
+    "scan": "Swaputer block explorer",
+    "api": "indexer API",
+    "apps": "Cloudflare ecosystem app registry Worker",
+    "docs": "documentation site",
+    "studio": "Swaputer Studio",
+    "www": "permanent redirect to apex"
+  },
+  "secrets": {
+    "rpcUrlsStoredInPublicConfig": false,
+    "privateKeysStoredInPublicConfig": false
+  },
+  "containsUnresolvedParameters": true,
+  "unresolvedParameters": [
+    "primary and fallback Ethereum Mainnet RPC secret names",
+    "deployment and authority address approvals",
+    "release and audit approval references",
+    "deployment gas policy and total ETH budget"
+  ]
+}

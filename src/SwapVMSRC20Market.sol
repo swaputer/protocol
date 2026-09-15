@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {SwapVMKernel} from "./SwapVMKernel.sol";
-import {SwapVMRouter} from "./SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "./SwapVMWorldFactory.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
+import {SwaputerAppRouter} from "./SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "./SwaputerWorldFactory.sol";
 
 /// @notice Experimental zero-value SRC20/ETH escrow order settlement for one immutable SwapVM World.
 /// @dev Buy orders escrow native ETH in this EVM contract. Sell orders escrow SRC20 inside the bound
@@ -41,8 +41,8 @@ contract SwapVMSRC20Market {
         uint128 vmEthAmount;
     }
 
-    SwapVMRouter public immutable router;
-    SwapVMKernel public immutable kernel;
+    SwaputerAppRouter public immutable router;
+    SwaputerKernel public immutable kernel;
     bytes32 public immutable worldId;
     bytes32 public immutable token;
     bytes32 public immutable tokenCodeHash;
@@ -124,7 +124,7 @@ contract SwapVMSRC20Market {
     }
 
     constructor(
-        SwapVMRouter boundRouter,
+        SwaputerAppRouter boundRouter,
         bytes32 boundWorldId,
         bytes32 boundToken,
         bytes32 expectedTokenCodeHash,
@@ -135,12 +135,12 @@ contract SwapVMSRC20Market {
         if (boundWorldId == bytes32(0)) revert InvalidWorld();
         if (boundToken == bytes32(0) || expectedTokenCodeHash == bytes32(0)) revert InvalidToken();
         if (boundEscrow == bytes32(0) || expectedEscrowCodeHash == bytes32(0)) revert InvalidEscrow();
-        SwapVMWorldFactory boundFactory = SwapVMWorldFactory(address(boundRouter.factory()));
+        SwaputerWorldFactory boundFactory = SwaputerWorldFactory(address(boundRouter.factory()));
         if (boundFactory.router() != address(boundRouter)) revert InvalidRouter();
-        SwapVMWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
+        SwaputerWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
         if (!config.isSealed) revert InvalidWorld();
         address kernelAddress = config.kernel;
-        SwapVMKernel boundKernel = SwapVMKernel(kernelAddress);
+        SwaputerKernel boundKernel = SwaputerKernel(kernelAddress);
         if (
             address(boundKernel) == address(0)
                 || boundKernel.programCodeHash(boundWorldId, boundToken) != expectedTokenCodeHash
@@ -217,7 +217,7 @@ contract SwapVMSRC20Market {
         uint128 unitPriceWei,
         uint128 vmEthAmount,
         uint64 expiry,
-        SwapVMKernel.VMEnvelope calldata depositEnvelope,
+        SwaputerKernel.VMEnvelope calldata depositEnvelope,
         uint160 sqrtPriceLimitX96
     ) external payable nonReentrant returns (uint256 orderId) {
         uint128 priceWei = quotePrice(amount, unitPriceWei);
@@ -251,7 +251,7 @@ contract SwapVMSRC20Market {
         emit SellEscrowed(orderId, msg.sender, amount, vmEthSpent);
     }
 
-    function fillBuyOrder(uint256 orderId, SwapVMKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
+    function fillBuyOrder(uint256 orderId, SwaputerKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
         external
         nonReentrant
     {
@@ -265,7 +265,7 @@ contract SwapVMSRC20Market {
         _settleBuyOrder(orderId, order, seller, buyer, envelope, sqrtPriceLimitX96);
     }
 
-    function settleSellOrder(uint256 orderId, SwapVMKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
+    function settleSellOrder(uint256 orderId, SwaputerKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
         external
         payable
         nonReentrant
@@ -306,7 +306,7 @@ contract SwapVMSRC20Market {
         emit OrderCancelled(orderId, order.maker);
     }
 
-    function cancelSellOrder(uint256 orderId, SwapVMKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
+    function cancelSellOrder(uint256 orderId, SwaputerKernel.VMEnvelope calldata envelope, uint160 sqrtPriceLimitX96)
         external
         payable
         nonReentrant
@@ -350,7 +350,7 @@ contract SwapVMSRC20Market {
         Order storage order,
         address seller,
         address buyer,
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         uint160 sqrtPriceLimitX96
     ) private {
         uint256 liability = uint256(order.priceWei) + uint256(order.vmEthAmount);
@@ -362,7 +362,7 @@ contract SwapVMSRC20Market {
     }
 
     function _runVM(
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         uint256 vmEthAmount,
         uint160 sqrtPriceLimitX96,
         address refundRecipient
@@ -381,25 +381,25 @@ contract SwapVMSRC20Market {
     }
 
     function _validateTokenTransferEnvelope(
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         address seller,
         address buyer,
         uint128 amount
     ) private view {
         if (
-            envelope.op != SwapVMKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != seller
+            envelope.op != SwaputerKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != seller
                 || envelope.targetOrCodeHash != token || envelope.recipient != buyer
                 || envelope.authorizedExecutor != address(this)
         ) revert InvalidEnvelope();
         _validatePayload(envelope.payload, TRANSFER_SELECTOR, kernel.eoaAccountId(buyer), amount);
     }
 
-    function _validateEscrowDepositEnvelope(SwapVMKernel.VMEnvelope calldata envelope, address seller, uint128 amount)
+    function _validateEscrowDepositEnvelope(SwaputerKernel.VMEnvelope calldata envelope, address seller, uint128 amount)
         private
         view
     {
         if (
-            envelope.op != SwapVMKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != seller
+            envelope.op != SwaputerKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != seller
                 || envelope.targetOrCodeHash != escrow || envelope.recipient != seller
                 || envelope.authorizedExecutor != address(this)
         ) revert InvalidEnvelope();
@@ -407,13 +407,13 @@ contract SwapVMSRC20Market {
     }
 
     function _validateEscrowReleaseEnvelope(
-        SwapVMKernel.VMEnvelope calldata envelope,
+        SwaputerKernel.VMEnvelope calldata envelope,
         address actor,
         address recipient,
         uint128 amount
     ) private view {
         if (
-            envelope.op != SwapVMKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != actor
+            envelope.op != SwaputerKernel.RootOp.CALL || envelope.worldId != worldId || envelope.actor != actor
                 || envelope.targetOrCodeHash != escrow || envelope.recipient != recipient
                 || envelope.authorizedExecutor != address(this)
         ) revert InvalidEnvelope();

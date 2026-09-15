@@ -8,19 +8,19 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 
-import {ISwapVMWorldFactory} from "./interfaces/ISwapVMWorldFactory.sol";
-import {SwapVMCreationCodeReader} from "./SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "./SwapVMGasToken.sol";
-import {SwapVMHook} from "./SwapVMHook.sol";
-import {SwapVMKernel} from "./SwapVMKernel.sol";
-import {SwapVMReferenceRegistry} from "./SwapVMReferenceRegistry.sol";
-import {SwapVMRouter} from "./SwapVMRouter.sol";
-import {SwapVMWorldDeployer} from "./SwapVMWorldDeployer.sol";
+import {ISwaputerWorldFactory} from "./interfaces/ISwaputerWorldFactory.sol";
+import {SwaputerCreationCodeReader} from "./SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "./SwaputerToken.sol";
+import {SwaputerHook} from "./SwaputerHook.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
+import {SwaputerProgramRegistry} from "./SwaputerProgramRegistry.sol";
+import {SwaputerAppRouter} from "./SwaputerAppRouter.sol";
+import {SwaputerWorldDeployer} from "./SwaputerWorldDeployer.sol";
 
 /// @notice Immutable Factory for sealed SwapVM Worlds on one existing PoolManager.
-contract SwapVMWorldFactory is ISwapVMWorldFactory {
+contract SwaputerWorldFactory is ISwaputerWorldFactory {
     using PoolIdLibrary for PoolKey;
-    using SwapVMCreationCodeReader for address;
+    using SwaputerCreationCodeReader for address;
 
     uint160 private constant REQUIRED_HOOK_FLAGS = Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG
         | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
@@ -28,9 +28,9 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
     uint16 public constant DEFAULT_PROTOCOL_FEE_BPS = 300;
     uint16 public constant MAX_PROTOCOL_FEE_BPS = 1_000;
     bytes32 public constant EXPECTED_KERNEL_CREATION_CODE_HASH =
-        0x39325bff0318571ddcd4d4d9c7abe2d04b4577abb7629fe6118861ad099809af;
+        0xc17ee416ca022c35267b123e804755bc50a01bb8c2cce60cb6d1d5ed2016af5f;
     bytes32 public constant EXPECTED_HOOK_CREATION_CODE_HASH =
-        0xa2b1a6fc39aed06ca3000b30b29000cca79adee54b93306a16b82ba03197e844;
+        0xf698860684b2b4421f822c303620631630ed35b20de3a397ebc334f75c4e8906;
     bytes32 public constant WORLD_CONFIG_TYPEHASH = keccak256(
         "SwapVMWorldConfigV1(uint256 chainId,address factory,address poolManager,bytes32 poolManagerCodeHash,address router,address referenceRegistry,bytes32 worldId,address worldDeployer,address gasToken,address kernel,address hook,uint256 initialSupply,address initialHolder,bytes32 distributionCommitment,uint128 byteGasPrice,uint24 poolFee,int24 tickSpacing,uint160 initialSqrtPriceX96,bytes32 gasTokenCodeHash,bytes32 kernelCodeHash,bytes32 hookCodeHash)"
     );
@@ -40,7 +40,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
     address public immutable override router;
     address public immutable initialProtocolFeeAdmin;
     address public immutable feeController;
-    SwapVMReferenceRegistry public immutable referenceRegistry;
+    SwaputerProgramRegistry public immutable referenceRegistry;
     address public immutable kernelCreationCodeStore;
     address public immutable hookCreationCodeStore;
     bytes32 public immutable kernelCreationCodeHash;
@@ -139,12 +139,12 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         bytes32 actualKernelCreationCodeHash = keccak256(kernelCreationCodeStore_.read());
         bytes32 actualHookCreationCodeHash = keccak256(hookCreationCodeStore_.read());
         if (actualKernelCreationCodeHash != EXPECTED_KERNEL_CREATION_CODE_HASH) {
-            revert SwapVMWorldDeployer.KernelCreationCodeMismatch(
+            revert SwaputerWorldDeployer.KernelCreationCodeMismatch(
                 EXPECTED_KERNEL_CREATION_CODE_HASH, actualKernelCreationCodeHash
             );
         }
         if (actualHookCreationCodeHash != EXPECTED_HOOK_CREATION_CODE_HASH) {
-            revert SwapVMWorldDeployer.HookCreationCodeMismatch(
+            revert SwaputerWorldDeployer.HookCreationCodeMismatch(
                 EXPECTED_HOOK_CREATION_CODE_HASH, actualHookCreationCodeHash
             );
         }
@@ -153,13 +153,13 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         kernelCreationCodeStore = kernelCreationCodeStore_;
         hookCreationCodeStore = hookCreationCodeStore_;
 
-        referenceRegistry = new SwapVMReferenceRegistry();
-        router = address(new SwapVMRouter(manager, ISwapVMWorldFactory(address(this))));
+        referenceRegistry = new SwaputerProgramRegistry();
+        router = address(new SwaputerAppRouter(manager, ISwaputerWorldFactory(address(this))));
     }
 
     function createWorld(CreateWorldParams calldata params)
         external
-        returns (bytes32 worldId, SwapVMGasToken gasToken, SwapVMKernel kernel, SwapVMHook hook)
+        returns (bytes32 worldId, SwaputerToken gasToken, SwaputerKernel kernel, SwaputerHook hook)
     {
         if (address(poolManager).codehash != poolManagerCodeHash) {
             revert PoolManagerCodeHashMismatch(poolManagerCodeHash, address(poolManager).codehash);
@@ -169,7 +169,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         if (params.distributionCommitment == bytes32(0)) revert InvalidDistributionCommitment();
         if (block.number > type(uint64).max) revert BlockNumberOutOfRange(block.number);
 
-        gasToken = new SwapVMGasToken{salt: params.tokenSalt}(params.initialSupply, params.initialHolder);
+        gasToken = new SwaputerToken{salt: params.tokenSalt}(params.initialSupply, params.initialHolder);
         address predictedWorldDeployer = predictWorldDeployer(params.bootstrapSalt);
         if (predictedWorldDeployer.code.length != 0) revert WorldDeployerCollision(predictedWorldDeployer);
         address expectedKernel = predictKernel(predictedWorldDeployer);
@@ -190,7 +190,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
             revert InvalidHookPermissionBits(expectedHook);
         }
 
-        SwapVMWorldDeployer worldDeployer = new SwapVMWorldDeployer{salt: params.bootstrapSalt}(
+        SwaputerWorldDeployer worldDeployer = new SwaputerWorldDeployer{salt: params.bootstrapSalt}(
             address(this), kernelCreationCodeStore, hookCreationCodeStore, kernelCreationCodeHash, hookCreationCodeHash
         );
         if (address(worldDeployer) != predictedWorldDeployer) {
@@ -282,16 +282,15 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         view
         returns (address)
     {
-        bytes32 initCodeHash = keccak256(
-            abi.encodePacked(type(SwapVMGasToken).creationCode, abi.encode(initialSupply, initialHolder))
-        );
+        bytes32 initCodeHash =
+            keccak256(abi.encodePacked(type(SwaputerToken).creationCode, abi.encode(initialSupply, initialHolder)));
         return _computeCreate2(address(this), tokenSalt, initCodeHash);
     }
 
     function predictWorldDeployer(bytes32 bootstrapSalt) public view returns (address) {
         bytes32 initCodeHash = keccak256(
             abi.encodePacked(
-                type(SwapVMWorldDeployer).creationCode,
+                type(SwaputerWorldDeployer).creationCode,
                 abi.encode(
                     address(this),
                     kernelCreationCodeStore,
@@ -317,7 +316,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
         address worldDeployer,
         bytes32 hookSalt,
         address kernel,
-        SwapVMGasToken gasToken,
+        SwaputerToken gasToken,
         uint128 byteGasPrice,
         uint24 fee,
         int24 tickSpacing
@@ -328,7 +327,7 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
                 hookCode,
                 abi.encode(
                     poolManager,
-                    SwapVMKernel(kernel),
+                    SwaputerKernel(kernel),
                     gasToken,
                     initialProtocolFeeAdmin,
                     feeController,
@@ -343,10 +342,10 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
     }
 
     function _validateDeployment(
-        SwapVMWorldDeployer worldDeployer,
-        SwapVMGasToken gasToken,
-        SwapVMKernel kernel,
-        SwapVMHook hook,
+        SwaputerWorldDeployer worldDeployer,
+        SwaputerToken gasToken,
+        SwaputerKernel kernel,
+        SwaputerHook hook,
         CreateWorldParams calldata params
     ) private view {
         if (
@@ -357,9 +356,10 @@ contract SwapVMWorldFactory is ISwapVMWorldFactory {
             worldDeployer.factory() != address(this) || !worldDeployer.used() || kernel.hook() != address(hook)
                 || address(hook.kernel()) != address(kernel) || address(hook.poolManager()) != address(poolManager)
                 || address(hook.gasToken()) != address(gasToken) || kernel.byteGasPrice() != params.byteGasPrice
-                || hook.feeAdmin() != initialProtocolFeeAdmin || hook.feeController() != feeController
-                || hook.protocolFeeBps() != DEFAULT_PROTOCOL_FEE_BPS || hook.byteGasPrice() != params.byteGasPrice
-                || hook.poolFee() != params.poolFee || hook.poolTickSpacing() != params.tickSpacing
+                || hook.owner() != initialProtocolFeeAdmin || hook.feeAdmin() != initialProtocolFeeAdmin
+                || hook.feeController() != feeController || hook.protocolFeeBps() != DEFAULT_PROTOCOL_FEE_BPS
+                || hook.byteGasPrice() != params.byteGasPrice || hook.poolFee() != params.poolFee
+                || hook.poolTickSpacing() != params.tickSpacing || hook.tradingLive()
                 || gasToken.totalSupply() != params.initialSupply
                 || gasToken.balanceOf(params.initialHolder) != params.initialSupply
         ) revert DeploymentBindingMismatch();

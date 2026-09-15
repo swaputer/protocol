@@ -2,9 +2,9 @@
 
 ## Implemented scope
 
-Stage 1 implements one immutable native ETH / `SwapVMGasToken` v4 World:
+Stage 1 implements one immutable native ETH / `SwaputerToken` v4 World:
 
-1. An exact-input ETH-to-TOKEN swap reaches `SwapVMHook.afterSwap` with empty `hookData`.
+1. An exact-input ETH-to-TOKEN swap reaches `SwaputerHook.afterSwap` with empty `hookData`.
 2. The Hook reads the positive output/unspecified TOKEN delta as gross output and requires `grossTokenOut > byteGasPrice`.
 3. The bound Kernel executes the canonical one-byte `STOP`, records `executedBytes = 1`, advances the World execution height, and emits one `VMLog` containing one Kernel `WorldExecution` record.
 4. The Hook calls `PoolManager.take` for exactly `byteGasPrice` TOKEN, burns those tokens from its own balance, and returns the same positive unspecified-currency delta.
@@ -52,7 +52,7 @@ Final local verification used Foundry `1.5.1-stable`:
 - each of two stateful invariants: 64 runs × 32 calls = 2,048 randomized real-v4 actions, with zero handler reverts;
 - `.gas-snapshot` generated successfully.
 
-The gas report for this test configuration records 22,715 gas for the first `SwapVMKernel.executeNOP` call, a 25,263 gas median for `SwapVMHook.afterSwap` across buy/sell and boundary calls, and a 201,235 gas median for the official `PoolSwapTest.swap` calls in the suite. The end-to-end proof test snapshot is 263,775 gas. These are local test-harness figures, not production Router estimates.
+The gas report for this test configuration records 22,715 gas for the first `SwaputerKernel.executeNOP` call, a 25,263 gas median for `SwaputerHook.afterSwap` across buy/sell and boundary calls, and a 201,235 gas median for the official `PoolSwapTest.swap` calls in the suite. The end-to-end proof test snapshot is 263,775 gas. These are local test-harness figures, not production Router estimates.
 
 ## Out of scope
 

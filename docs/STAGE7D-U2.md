@@ -82,7 +82,7 @@ or allowance liability. Current evidence is
 - PoolManager: `0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408`.
 - PoolManager EXTCODEHASH:
   `0x03c45db6d09b14da7c1f7239a5a49697f976d395277e6d2acb6fbed3f9e0249f`.
-- Pool: native ETH / rc2 `SwapVMGasToken`; no ERC-20 test ETH was deployed.
+- Pool: native ETH / rc2 `SwaputerToken`; no ERC-20 test ETH was deployed.
 - Token identity: `SwapVM Gas Token`, symbol `SVMG`, 18 decimals. No `tSVM`
   bytecode change was made.
 - World ID:

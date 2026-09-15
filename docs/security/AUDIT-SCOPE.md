@@ -7,11 +7,11 @@
 
 ### 1.1 已有生产协商一致组件（当前实现状态）
 
-- `src/SwapVMHook.sol`
-- `src/SwapVMKernel.sol`
+- `src/SwaputerHook.sol`
+- `src/SwaputerKernel.sol`
 - `src/SwapVMMiniVM.sol`
-- `src/SwapVMGasToken.sol`
-- `src/SwapVMReferenceRegistry.sol`
+- `src/SwaputerToken.sol`
+- `src/SwaputerProgramRegistry.sol`
 
 其中：
 
@@ -37,11 +37,11 @@
 
 ## 2. Stage 7A2 新增生产源码范围
 
-- `src/SwapVMCreationCodeStore.sol`
-- `src/SwapVMWorldDeployer.sol`
-- `src/SwapVMWorldFactory.sol`
-- `src/SwapVMRouter.sol`
-- `src/interfaces/ISwapVMWorldFactory.sol`
+- `src/SwaputerCreationCodeStore.sol`
+- `src/SwaputerWorldDeployer.sol`
+- `src/SwaputerWorldFactory.sol`
+- `src/SwaputerAppRouter.sol`
+- `src/interfaces/ISwaputerWorldFactory.sol`
 - `script/Stage7A2Deploy.s.sol`
 - `tooling/deployment-manifest/**`（锁文件、schema、canonicalization、hash/signature/observation verifier）
 - `test/SwapVMStage7A1P.t.sol`、`test/WorldDeployerProbe.sol`、`test/SwapVMStage7A2.t.sol`

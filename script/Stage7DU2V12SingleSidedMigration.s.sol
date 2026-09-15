@@ -13,12 +13,12 @@ import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/src/types/PoolId.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface IPositionManagerSingleSided {
     function poolManager() external view returns (address);
@@ -71,9 +71,9 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
     IStateViewSingleSided private constant STATE_VIEW =
         IStateViewSingleSided(0x571291b572ed32ce6751a2Cb2486EbEe8DEfB9B4);
 
-    SwapVMWorldFactory private constant FACTORY = SwapVMWorldFactory(0x25be74e0FaB494D7cF0e7d681a3897f9d82908c1);
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0x6719Fa2876EBce93c32490905C53e05ac1Da0109));
-    SwapVMGasToken private constant OLD_TOKEN = SwapVMGasToken(0xC86ACee2A9fCf996cFaD1F31d6CC23Ee6ca0b27c);
+    SwaputerWorldFactory private constant FACTORY = SwaputerWorldFactory(0x25be74e0FaB494D7cF0e7d681a3897f9d82908c1);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0x6719Fa2876EBce93c32490905C53e05ac1Da0109));
+    SwaputerToken private constant OLD_TOKEN = SwaputerToken(0xC86ACee2A9fCf996cFaD1F31d6CC23Ee6ca0b27c);
     uint256 private constant OLD_POSITION_TOKEN_ID = 27_216;
     uint128 private constant OLD_POSITION_LIQUIDITY = 3 ether;
 
@@ -103,9 +103,9 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
     uint256 private actorKey;
     uint256 private releaseStartBalance;
     bytes32 private worldId;
-    SwapVMGasToken private gasToken;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
+    SwaputerToken private gasToken;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
     bytes32 private token;
     bytes32 private tokenCodeHash;
     bytes32 private escrow;
@@ -161,7 +161,7 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
         address predictedKernel = FACTORY.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             IPoolManager(POOL_MANAGER),
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             FACTORY.initialProtocolFeeAdmin(),
             FACTORY.feeController(),
@@ -174,10 +174,10 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        SwapVMWorldFactory.CreateWorldParams memory params = SwapVMWorldFactory.CreateWorldParams({
+        SwaputerWorldFactory.CreateWorldParams memory params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: TOKEN_SALT,
             bootstrapSalt: BOOTSTRAP_SALT,
             hookSalt: hookSalt,
@@ -286,7 +286,7 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
         uint256 buyOrderId =
             market.createBuyOrder{value: ORDER_PRICE + VM_INPUT}(ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry);
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory transfer = _signedCall(
+        SwaputerKernel.VMEnvelope memory transfer = _signedCall(
             token,
             abi.encodePacked(
                 bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -306,7 +306,7 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
             ACTOR,
             ACTOR
         );
-        SwapVMKernel.VMEnvelope memory deposit = _signedCall(
+        SwaputerKernel.VMEnvelope memory deposit = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -320,7 +320,7 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
             ORDER_AMOUNT, UNIT_PRICE, VM_INPUT, expiry, deposit, SQRT_PRICE_LIMIT
         );
         vm.stopBroadcast();
-        SwapVMKernel.VMEnvelope memory release = _signedCall(
+        SwaputerKernel.VMEnvelope memory release = _signedCall(
             escrow,
             abi.encodePacked(
                 bytes4(keccak256("release(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(ACTOR), ORDER_AMOUNT)
@@ -335,8 +335,8 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
     }
 
     function _executeDeploy(bytes32 codeHash, bytes memory payload) private {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, ACTOR, ACTOR);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.DEPLOY, codeHash, payload, DEPLOY_LIMIT, ACTOR, ACTOR);
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -345,8 +345,8 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
     function _executeCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
     {
-        SwapVMKernel.VMEnvelope memory envelope =
-            _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+        SwaputerKernel.VMEnvelope memory envelope =
+            _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, envelope);
         vm.stopBroadcast();
@@ -355,21 +355,21 @@ contract Stage7DU2V12SingleSidedMigrationScript is Script {
     function _signedCall(bytes32 target, bytes memory payload, uint32 byteLimit, address recipient, address executor)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory envelope)
+        returns (SwaputerKernel.VMEnvelope memory envelope)
     {
-        return _signed(SwapVMKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
+        return _signed(SwaputerKernel.RootOp.CALL, target, payload, byteLimit, recipient, executor);
     }
 
     function _signed(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         address recipient,
         address executor
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = kernel.eoaAccountId(ACTOR);
-        envelope = SwapVMKernel.VMEnvelope({
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: ACTOR,

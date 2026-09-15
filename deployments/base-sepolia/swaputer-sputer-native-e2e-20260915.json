@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "swaputer-testnet-native-e2e/2",
+  "status": "successful-testnet-only",
+  "warning": "Unaudited Base Sepolia test deployment. Not an active release and not suitable for real-value funds.",
+  "source": {
+    "commit": "25c29ac97fdd701cb57dae6163e83926adc7e740",
+    "treeStatus": "dirty-authorized-sPuter-trading-live-testnet-changes",
+    "script": "script/SwaputerBaseSepoliaNativeE2E.s.sol:SwaputerBaseSepoliaNativeE2EScript"
+  },
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": 84532,
+    "startBlock": 46820230,
+    "endBlock": 46820252,
+    "explorerUrl": "https://sepolia.basescan.org"
+  },
+  "deployer": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+  "upstream": {
+    "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+    "positionManager": "0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    "stateView": "0x571291b572ed32ce6751a2Cb2486EbEe8DEfB9B4"
+  },
+  "contracts": {
+    "kernelCreationCodeStore": "0x5607E5E00bBb19fdc2E34796e249175E68cB13F5",
+    "hookCreationCodeStore": "0xd7c641f05087500E4247A2c70cA552E38FE47a9D",
+    "factory": "0xFD33Aea8DF95529D65dac79907D36e9E5498636E",
+    "referenceRegistry": "0xA88F9305184A7aAF5D924c73CeC8918b04bCd1e1",
+    "router": "0x45f6FEd944a59b96D166e6830a2Ff17C488F9849",
+    "worldDeployer": "0xD5FB6A3de61B14b2114D089B3a944aD0A51aD367",
+    "gasToken": "0xA0E5357c80c5C20617450c743964eFf308C336cF",
+    "kernel": "0x66413333da8769b57f8ae263BD8c38833Cc02A2d",
+    "hook": "0x5b1b1D8e1a73E30DC3313936c34da77a20a420Cc"
+  },
+  "runtimeCodeHashes": {
+    "kernelCreationCodeStore": "0xd2fe6966a1648d927806bd895d945c4bf52be3f42b1dabffe5857d3e095b8329",
+    "hookCreationCodeStore": "0x48391814cc6e2733a9c7dd890290503151dcb1954db385dedab921951be3b96d",
+    "factory": "0x8e8151b400998281a797121ea6909414b0c17e45388577c3464c18d56d92e321",
+    "referenceRegistry": "0xbcf6aafb81540d610800b4a625d0ceb5cefb7d2ac9d36bfcb768c06943b8584e",
+    "router": "0xf57f98fa900bf34f3c3670353d7b345c9cb87f74d6aed4960823775ec252c818",
+    "worldDeployer": "0x1d3af5df731802100bf6ce45e980be7001dc7f17f169aacbcf69beefa53cab8a",
+    "gasToken": "0xc814ed55ad36f756f4f2d91ed36ff9d7e559fc3e4b32c887495f4651919feff1",
+    "kernel": "0x80983f7631a141d089a01b895a7fac370ae1156d90ea5e0b5574b71eb2435b71",
+    "hook": "0x354f8e1903d9e9c033d18820487c6d483f0a1b7aee828c2987946079c7dea6f0"
+  },
+  "world": {
+    "worldId": "0x642a4c6d247b32b56a09929c847317a94485d48f2453f818a46a0cb5adbffa2b",
+    "configHash": "0x56a9ee07e8cfb90369bc39da230366e45a6b3aac32f264155aa29fcec24544ef",
+    "sealedAtBlock": 46820234,
+    "distributionCommitment": "0x2789769f045b5061b071281c2aed1e406c2815e1fb96222e8f09ad4e2f13def6",
+    "byteGasPrice": "1000000000000",
+    "protocolFeeBps": 300,
+    "poolFee": 3000,
+    "tickSpacing": 60,
+    "initialSqrtPriceX96": "3961408125713216879677197516800",
+    "initialPriceEthPerSPuter": "0.0004"
+  },
+  "tradingGate": {
+    "owner": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+    "initiallyClosedValidatedByWorldCreation": true,
+    "liveTransaction": "0xced565d42d51097a1b097e1e249f2b66c18ac674a58b1ec698d1ed46b086da53",
+    "liveBlock": 46820248,
+    "tradingLive": true,
+    "tradingLiveEventValidated": true,
+    "historicalPreLiveSwapCallReverts": true,
+    "secondLiveCallReverts": true,
+    "nonOwnerLiveCallReverts": true,
+    "closeFunctionExists": false,
+    "revertChecksWereReadOnlyEthCalls": true
+  },
+  "token": {
+    "name": "Swaputer",
+    "symbol": "sPuter",
+    "decimals": 18,
+    "initialSupplyBaseUnits": "10000000000000000000000",
+    "postSmokeSupplyBaseUnits": "9999999999000000000000",
+    "nopBurnBaseUnits": "1000000000000"
+  },
+  "positions": [
+    {"tokenId": 28018, "tickLower": 74160, "tickUpper": 78240, "targetSPuter": "50", "liquidity": "5420377974442509339"},
+    {"tokenId": 28019, "tickLower": 70080, "tickUpper": 74160, "targetSPuter": "150", "liquidity": "19940795119692010537"},
+    {"tokenId": 28020, "tickLower": 67200, "tickUpper": 70080, "targetSPuter": "800", "liquidity": "179452675901261906358"},
+    {"tokenId": 28021, "tickLower": 60300, "tickUpper": 67200, "targetSPuter": "1500", "liquidity": "178606782036845916145"},
+    {"tokenId": 28022, "tickLower": 46440, "tickUpper": 60300, "targetSPuter": "2500", "liquidity": "245310754536118268283"},
+    {"tokenId": 28023, "tickLower": -887220, "tickUpper": 46440, "targetSPuter": "5000", "liquidity": "490443107591012380120"}
+  ],
+  "liquidity": {
+    "initialSPuterDepositedBaseUnits": "9999999999999999999977",
+    "roundingDustBaseUnits": "23",
+    "initialNativeDepositedWei": "0",
+    "allPositionNftsOwnedByDeployer": true
+  },
+  "smokeTest": {
+    "nativeBuyInputWei": "1000000000000",
+    "sPuterOutputBaseUnits": "2415646684564315",
+    "nativeSellOutputWei": "934876087947",
+    "finalSqrtPriceX96": "3960542166139843844758972025849",
+    "finalTick": 78239,
+    "protocolFeesAccruedWei": "58913693441",
+    "executionHeight": 1,
+    "executedBytes": 1,
+    "erc20AllowancesRevoked": true,
+    "permit2AllowanceRevoked": true
+  },
+  "cost": {
+    "transactionCount": 19,
+    "successfulReceiptCount": 19,
+    "totalGasUsed": "22533378",
+    "transactionFeesWei": "135200268000000"
+  },
+  "keyTransactions": {
+    "createWorld": "0x89dcb887dbc3d9f4e09174c2e26baf353465dc66691d0d2cb4eb03c06c062dfe",
+    "live": "0xced565d42d51097a1b097e1e249f2b66c18ac674a58b1ec698d1ed46b086da53",
+    "buy": "0xa120357f4ba12841de0d40d11543532c46fa50d5966e9f8abc3d102e8e594e2c",
+    "sell": "0x1709260ea726ffe34830312be3857a97648d97096aa0968e23c14a6e035ea378"
+  }
+}

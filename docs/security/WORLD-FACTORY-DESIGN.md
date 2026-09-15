@@ -1,10 +1,10 @@
 # Stage 7A2 WorldFactory deterministic deployment design and implementation
 
-This document replaces the sequential CREATE2 prediction described in Stage 7A1-R. Stage 7A1-P supplied the independent executable proof; Stage 7A2 implements the same shape in `src/SwapVMWorldFactory.sol`, `src/SwapVMWorldDeployer.sol`, and immutable creation-code stores without changing Hook or Kernel.
+This document replaces the sequential CREATE2 prediction described in Stage 7A1-R. Stage 7A1-P supplied the independent executable proof; Stage 7A2 implements the same shape in `src/SwaputerWorldFactory.sol`, `src/SwaputerWorldDeployer.sol`, and immutable creation-code stores without changing Hook or Kernel.
 
 ## 1. PoolManager model
 
-`SwapVMWorldFactory` does not deploy PoolManager. Stage 7A2 shall use one immutable Factory per supported, already-deployed PoolManager:
+`SwaputerWorldFactory` does not deploy PoolManager. Stage 7A2 shall use one immutable Factory per supported, already-deployed PoolManager:
 
 - the Factory constructor binds `poolManager` and the expected `extcodehash`;
 - there is no method to replace either value;
@@ -23,7 +23,7 @@ K = CREATE2(factory, saltK, keccak256(KernelCreationCode || H || price))
 H = CREATE2(factory, saltH, keccak256(HookCreationCode || manager || K || token || price || fee || tickSpacing))
 ```
 
-`SwapVMKernel` must receive `H` in its constructor. `SwapVMHook` must receive the deployed `K`, and its constructor requires `K.hook() == address(this)`. Hook address permission bits also constrain `H`.
+`SwaputerKernel` must receive `H` in its constructor. `SwaputerHook` must receive the deployed `K`, and its constructor requires `K.hook() == address(this)`. Hook address permission bits also constrain `H`.
 
 Consequently, “predict H, then predict K” is not an algorithm: changing K changes Hook init code and therefore H; changing H changes Kernel init code and therefore K. Merely reordering the same two CREATE2 calculations does not solve the fixed-point problem. The Stage 7A1-P tests demonstrate both divergent one-pass prediction and constructor failure from a naive two-pass deployment.
 
@@ -63,13 +63,13 @@ The Factory is the CREATE2 deployer only for P. P is the ordinary CREATE deploye
 5. Mine `hookSalt` offchain using P, exact Hook creation code and constructor arguments containing K.
 6. Compute H and verify its v4 permission bits.
 7. Factory deploys P with CREATE2 and verifies `address(P)` and `P.factory()`.
-8. Factory calls P once. P sets its one-shot guard, deploys `SwapVMKernel(H, byteGasPrice)` with ordinary CREATE, and verifies the actual address equals K.
-9. P deploys `SwapVMHook(manager, K, token, byteGasPrice, fee, tickSpacing)` with CREATE2 and `hookSalt`, then verifies the actual address equals H.
+8. Factory calls P once. P sets its one-shot guard, deploys `SwaputerKernel(H, byteGasPrice)` with ordinary CREATE, and verifies the actual address equals K.
+9. P deploys `SwaputerHook(manager, K, token, byteGasPrice, fee, tickSpacing)` with CREATE2 and `hookSalt`, then verifies the actual address equals H.
 10. P and Factory verify `kernel.hook() == H`, `hook.kernel() == K`, `hook.poolManager() == manager`, both gas prices, pool parameters, v4 permission bits, and exact runtime code hashes for the fixed compiler/build and immutable arguments.
 
 P exposes no arbitrary deployment, withdrawal, upgrade, or retry entry. It has immutable `factory` and creation-code-hash commitments, `onlyFactory`, and one-shot `used` state. Creation code supplied by the Factory is rejected unless its hash matches those commitments. Its first contract-creation operation must remain Kernel CREATE; adding an earlier CREATE would invalidate the nonce-1 derivation and must be caught by prediction tests.
 
-The code bytes must not be embedded in P's runtime through Solidity `new SwapVMKernel` / `new SwapVMHook`: doing so made the first proof version exceed EIP-170. Stage 7A2 instead uses separately code-hash-bound immutable bytecode stores and preserves the same no-arbitrary-code property and artifact commitments. Factory constructor validation and Stage 7A2 tests recompute the exact pinned Kernel/Hook creation-code hashes.
+The code bytes must not be embedded in P's runtime through Solidity `new SwaputerKernel` / `new SwaputerHook`: doing so made the first proof version exceed EIP-170. Stage 7A2 instead uses separately code-hash-bound immutable bytecode stores and preserves the same no-arbitrary-code property and artifact commitments. Factory constructor validation and Stage 7A2 tests recompute the exact pinned Kernel/Hook creation-code hashes.
 
 ## 5. Collision and rollback semantics
 

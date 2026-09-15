@@ -3,9 +3,9 @@ pragma solidity 0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 import {SwaputerSRC20MarketFactory} from "../src/SwaputerSRC20MarketFactory.sol";
 
 contract MarketFactoryKernelMock {
@@ -45,7 +45,7 @@ contract MarketFactoryKernelMock {
 }
 
 contract MarketFactoryWorldMock {
-    SwapVMWorldFactory.WorldConfig internal _config;
+    SwaputerWorldFactory.WorldConfig internal _config;
     address public router;
 
     constructor(address kernel) {
@@ -53,7 +53,7 @@ contract MarketFactoryWorldMock {
         _config.isSealed = true;
     }
 
-    function getWorldConfig(bytes32) external view returns (SwapVMWorldFactory.WorldConfig memory) {
+    function getWorldConfig(bytes32) external view returns (SwaputerWorldFactory.WorldConfig memory) {
         return _config;
     }
 
@@ -78,13 +78,13 @@ contract SwaputerSRC20MarketFactoryTest is Test {
     bytes32 internal constant ESCROW_CODE_HASH = keccak256("market-escrow");
 
     MarketFactoryKernelMock internal kernel;
-    SwapVMRouter internal router;
+    SwaputerAppRouter internal router;
     SwaputerSRC20MarketFactory internal marketFactory;
 
     function setUp() public {
         kernel = new MarketFactoryKernelMock();
         MarketFactoryWorldMock worldFactory = new MarketFactoryWorldMock(address(kernel));
-        router = SwapVMRouter(payable(address(new MarketFactoryRouterMock(address(worldFactory)))));
+        router = SwaputerAppRouter(payable(address(new MarketFactoryRouterMock(address(worldFactory)))));
         worldFactory.setRouter(address(router));
         marketFactory = new SwaputerSRC20MarketFactory(router, WORLD, ESCROW_CODE_HASH, TOKEN_CODE_HASH);
         kernel.setCodeHash(TOKEN, TOKEN_CODE_HASH);
@@ -166,7 +166,8 @@ contract SwaputerSRC20MarketFactoryTest is Test {
 
     function test_rejectsRouterThatIsNotFactoryBound() public {
         MarketFactoryWorldMock worldFactory = new MarketFactoryWorldMock(address(kernel));
-        SwapVMRouter rogueRouter = SwapVMRouter(payable(address(new MarketFactoryRouterMock(address(worldFactory)))));
+        SwaputerAppRouter rogueRouter =
+            SwaputerAppRouter(payable(address(new MarketFactoryRouterMock(address(worldFactory)))));
         worldFactory.setRouter(address(0xBEEF));
 
         vm.expectRevert(SwaputerSRC20MarketFactory.InvalidRouter.selector);

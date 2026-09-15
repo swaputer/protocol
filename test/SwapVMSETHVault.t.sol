@@ -12,13 +12,13 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMCreationCodeStore} from "../src/SwapVMCreationCodeStore.sol";
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerCreationCodeStore} from "../src/SwaputerCreationCodeStore.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSETHVault} from "../src/SwapVMSETHVault.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 contract RejectETH {
     receive() external payable {
@@ -42,10 +42,10 @@ contract SwapVMSETHVaultTest is Test {
     bytes32 internal constant VAULT_SALT = keccak256("SwapVMSETHVault.atomic.test");
 
     PoolManager internal manager;
-    SwapVMWorldFactory internal factory;
-    SwapVMRouter internal router;
-    SwapVMGasToken internal gasToken;
-    SwapVMKernel internal kernel;
+    SwaputerWorldFactory internal factory;
+    SwaputerAppRouter internal router;
+    SwaputerToken internal gasToken;
+    SwaputerKernel internal kernel;
     PoolKey internal key;
     bytes32 internal worldId;
     address internal actor;
@@ -65,9 +65,9 @@ contract SwapVMSETHVaultTest is Test {
         vm.deal(buyer, 100 ether);
 
         manager = new PoolManager(address(this));
-        SwapVMCreationCodeStore kernelCodeStore = new SwapVMCreationCodeStore(type(SwapVMKernel).creationCode);
-        SwapVMCreationCodeStore hookCodeStore = new SwapVMCreationCodeStore(type(SwapVMHook).creationCode);
-        factory = new SwapVMWorldFactory(
+        SwaputerCreationCodeStore kernelCodeStore = new SwaputerCreationCodeStore(type(SwaputerKernel).creationCode);
+        SwaputerCreationCodeStore hookCodeStore = new SwaputerCreationCodeStore(type(SwaputerHook).creationCode);
+        factory = new SwaputerWorldFactory(
             manager,
             address(manager).codehash,
             address(kernelCodeStore),
@@ -75,9 +75,11 @@ contract SwapVMSETHVaultTest is Test {
             address(0xFEE),
             address(0xC0FFEE)
         );
-        router = SwapVMRouter(payable(factory.router()));
+        router = SwaputerAppRouter(payable(factory.router()));
 
-        (worldId, gasToken, kernel,) = factory.createWorld(_worldParams(bytes32(uint256(11)), bytes32(uint256(12))));
+        SwaputerHook hook;
+        (worldId, gasToken, kernel, hook) =
+            factory.createWorld(_worldParams(bytes32(uint256(11)), bytes32(uint256(12))));
         bool isSealed;
         (key, isSealed) = factory.getPoolKey(worldId);
         assertTrue(isSealed);
@@ -89,13 +91,15 @@ contract SwapVMSETHVaultTest is Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        vm.prank(address(0xFEE));
+        hook.live();
 
         _deploySETHAndVault();
     }
 
     function test_depositAtomicallyLocksEthAndMintsSETH() public {
         uint64 nonceBefore = _nonce(actor);
-        SwapVMKernel.VMEnvelope memory mint = _signedMint(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, nonceBefore);
+        SwaputerKernel.VMEnvelope memory mint = _signedMint(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, nonceBefore);
 
         vm.prank(actor);
         vault.deposit{value: BRIDGE_AMOUNT + VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, mint, TickMath.MIN_SQRT_PRICE + 1);
@@ -113,7 +117,7 @@ contract SwapVMSETHVaultTest is Test {
     function test_depositRejectsContractRecipientThatCannotAuthorizeFutureTransfers() public {
         RejectETH contractRecipient = new RejectETH();
         uint64 nonceBefore = _nonce(actor);
-        SwapVMKernel.VMEnvelope memory mint =
+        SwaputerKernel.VMEnvelope memory mint =
             _signedMint(ACTOR_KEY, actor, address(contractRecipient), BRIDGE_AMOUNT, nonceBefore);
 
         vm.prank(actor);
@@ -134,7 +138,7 @@ contract SwapVMSETHVaultTest is Test {
         _deposit(actor, actor, ACTOR_KEY, BRIDGE_AMOUNT);
         uint256 buyerBefore = buyer.balance;
         uint64 nonceBefore = _nonce(actor);
-        SwapVMKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, buyer, BRIDGE_AMOUNT, nonceBefore);
+        SwaputerKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, buyer, BRIDGE_AMOUNT, nonceBefore);
 
         vm.prank(actor);
         vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, buyer, burn, TickMath.MIN_SQRT_PRICE + 1);
@@ -154,8 +158,8 @@ contract SwapVMSETHVaultTest is Test {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(actor), BRIDGE_AMOUNT)
         );
-        SwapVMKernel.VMEnvelope memory action = _signedEnvelope(
-            ACTOR_KEY, actor, SwapVMKernel.RootOp.CALL, seth, payload, SETH_LIMIT, nonceBefore, actor, VM_INPUT, actor
+        SwaputerKernel.VMEnvelope memory action = _signedEnvelope(
+            ACTOR_KEY, actor, SwaputerKernel.RootOp.CALL, seth, payload, SETH_LIMIT, nonceBefore, actor, VM_INPUT, actor
         );
 
         vm.prank(actor);
@@ -173,8 +177,17 @@ contract SwapVMSETHVaultTest is Test {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(buyer), transferAmount)
         );
-        SwapVMKernel.VMEnvelope memory action = _signedEnvelope(
-            ACTOR_KEY, actor, SwapVMKernel.RootOp.CALL, seth, payload, SETH_LIMIT, _nonce(actor), actor, VM_INPUT, actor
+        SwaputerKernel.VMEnvelope memory action = _signedEnvelope(
+            ACTOR_KEY,
+            actor,
+            SwaputerKernel.RootOp.CALL,
+            seth,
+            payload,
+            SETH_LIMIT,
+            _nonce(actor),
+            actor,
+            VM_INPUT,
+            actor
         );
         _buyVM(actor, action, VM_INPUT);
 
@@ -191,10 +204,10 @@ contract SwapVMSETHVaultTest is Test {
         bytes memory wrongPayload = abi.encodePacked(
             bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(buyer), BRIDGE_AMOUNT)
         );
-        SwapVMKernel.VMEnvelope memory wrong = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory wrong = _signedEnvelope(
             ACTOR_KEY,
             actor,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             seth,
             wrongPayload,
             SETH_LIMIT,
@@ -217,7 +230,7 @@ contract SwapVMSETHVaultTest is Test {
     function test_redeemWithoutOwnerBalanceRollsBackVaultAndVMState() public {
         _deposit(actor, buyer, ACTOR_KEY, BRIDGE_AMOUNT);
         uint64 nonceBefore = _nonce(actor);
-        SwapVMKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, nonceBefore);
+        SwaputerKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, nonceBefore);
 
         vm.prank(actor);
         vm.expectRevert();
@@ -236,7 +249,7 @@ contract SwapVMSETHVaultTest is Test {
         _deposit(actor, actor, ACTOR_KEY, BRIDGE_AMOUNT);
         RejectETH rejecting = new RejectETH();
         uint64 nonceBefore = _nonce(actor);
-        SwapVMKernel.VMEnvelope memory burn =
+        SwaputerKernel.VMEnvelope memory burn =
             _signedBurn(ACTOR_KEY, actor, address(rejecting), BRIDGE_AMOUNT, nonceBefore);
 
         vm.prank(actor);
@@ -256,7 +269,7 @@ contract SwapVMSETHVaultTest is Test {
         _deposit(actor, actor, ACTOR_KEY, BRIDGE_AMOUNT);
         assertEq(vault.backingSurplus(), 7 ether);
 
-        SwapVMKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, _nonce(actor));
+        SwaputerKernel.VMEnvelope memory burn = _signedBurn(ACTOR_KEY, actor, actor, BRIDGE_AMOUNT, _nonce(actor));
         vm.prank(actor);
         vault.redeem{value: VM_INPUT}(BRIDGE_AMOUNT, VM_INPUT, actor, burn, TickMath.MIN_SQRT_PRICE + 1);
 
@@ -277,10 +290,10 @@ contract SwapVMSETHVaultTest is Test {
         address predictedVault = vm.computeCreate2Address(VAULT_SALT, keccak256(vaultInitCode), address(this));
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(predictedVault));
-        SwapVMKernel.VMEnvelope memory deploy = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory deploy = _signedEnvelope(
             ACTOR_KEY,
             actor,
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             sethCodeHash,
             deployPayload,
             20_000,
@@ -302,7 +315,7 @@ contract SwapVMSETHVaultTest is Test {
     }
 
     function _deposit(address payer, address recipient, uint256 keyValue, uint128 amount) private {
-        SwapVMKernel.VMEnvelope memory mint = _signedMint(keyValue, payer, recipient, amount, _nonce(payer));
+        SwaputerKernel.VMEnvelope memory mint = _signedMint(keyValue, payer, recipient, amount, _nonce(payer));
         vm.prank(payer);
         vault.deposit{value: amount + VM_INPUT}(amount, VM_INPUT, mint, TickMath.MIN_SQRT_PRICE + 1);
     }
@@ -310,7 +323,7 @@ contract SwapVMSETHVaultTest is Test {
     function _signedMint(uint256 keyValue, address payer, address recipient, uint128 amount, uint64 nonce)
         internal
         view
-        returns (SwapVMKernel.VMEnvelope memory)
+        returns (SwaputerKernel.VMEnvelope memory)
     {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(recipient), amount)
@@ -318,7 +331,7 @@ contract SwapVMSETHVaultTest is Test {
         return _signedEnvelope(
             keyValue,
             payer,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             seth,
             payload,
             SETH_LIMIT,
@@ -332,13 +345,13 @@ contract SwapVMSETHVaultTest is Test {
     function _signedBurn(uint256 keyValue, address owner, address recipient, uint128 amount, uint64 nonce)
         internal
         view
-        returns (SwapVMKernel.VMEnvelope memory)
+        returns (SwaputerKernel.VMEnvelope memory)
     {
         bytes memory payload = abi.encodePacked(bytes4(keccak256("bridgeBurn(uint256)")), abi.encode(amount));
         return _signedEnvelope(
             keyValue,
             owner,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             seth,
             payload,
             SETH_LIMIT,
@@ -352,7 +365,7 @@ contract SwapVMSETHVaultTest is Test {
     function _signedEnvelope(
         uint256 keyValue,
         address signer,
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 limit,
@@ -360,9 +373,9 @@ contract SwapVMSETHVaultTest is Test {
         address recipient,
         uint128 ethIn,
         address executor
-    ) internal view returns (SwapVMKernel.VMEnvelope memory action) {
+    ) internal view returns (SwaputerKernel.VMEnvelope memory action) {
         assertEq(vm.addr(keyValue), signer);
-        action = SwapVMKernel.VMEnvelope({
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: signer,
@@ -400,7 +413,7 @@ contract SwapVMSETHVaultTest is Test {
         action.signature = abi.encodePacked(r, s, v);
     }
 
-    function _buyVM(address caller, SwapVMKernel.VMEnvelope memory action, uint128 ethIn) internal {
+    function _buyVM(address caller, SwaputerKernel.VMEnvelope memory action, uint128 ethIn) internal {
         vm.prank(caller);
         router.buyVMExactInput{value: ethIn}(worldId, TickMath.MIN_SQRT_PRICE + 1, action);
     }
@@ -434,14 +447,14 @@ contract SwapVMSETHVaultTest is Test {
     function _worldParams(bytes32 tokenSalt, bytes32 bootstrapSalt)
         private
         view
-        returns (SwapVMWorldFactory.CreateWorldParams memory params)
+        returns (SwaputerWorldFactory.CreateWorldParams memory params)
     {
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedWorldDeployer = factory.predictWorldDeployer(bootstrapSalt);
         address predictedKernel = factory.predictKernel(predictedWorldDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -454,10 +467,10 @@ contract SwapVMSETHVaultTest is Test {
             predictedWorldDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        params = SwapVMWorldFactory.CreateWorldParams({
+        params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,

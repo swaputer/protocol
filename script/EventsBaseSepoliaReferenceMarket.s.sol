@@ -5,10 +5,10 @@ import {Script, console2} from "forge-std/Script.sol";
 
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "../src/SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Deploys the hardened reference market for the canonical Base Sepolia demo SRC20.
 /// @dev The exercise creates and cancels one escrowed sell order, proving token balance-delta
@@ -32,9 +32,9 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
     bytes32 private token;
     bytes32 private tokenCodeHash;
     bytes32 private worldId;
-    SwapVMWorldFactory private factory;
-    SwapVMRouter private router;
-    SwapVMKernel private kernel;
+    SwaputerWorldFactory private factory;
+    SwaputerAppRouter private router;
+    SwaputerKernel private kernel;
     SwapVMSRC20Market private market;
 
     function run() external {
@@ -49,9 +49,9 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         actor = vm.envOr("STAGE7A2_ACTOR", vm.addr(actorKey));
         require(vm.addr(actorKey) == actor, "ACTOR_MISMATCH");
-        factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         token = vm.envBytes32("SVM_DEFAULT_SRC20_ID");
         tokenCodeHash = vm.envBytes32("SVM_DEFAULT_SRC20_CODE_HASH");
@@ -59,7 +59,7 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         require(address(router).code.length != 0, "ROUTER_NOT_DEPLOYED");
         require(address(kernel).code.length != 0, "KERNEL_NOT_DEPLOYED");
         require(factory.router() == address(router), "FACTORY_ROUTER");
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         require(config.isSealed && config.kernel == address(kernel), "WORLD_BINDING");
         require(tokenCodeHash != bytes32(0), "TOKEN_CODE_HASH_ZERO");
         require(kernel.programCodeHash(worldId, token) == tokenCodeHash, "TOKEN_CODE_HASH");
@@ -76,8 +76,8 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         address predictedMarket = vm.computeCreateAddress(actor, vm.getNonce(actor) + 1);
         bytes memory deployPayload =
             abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, abi.encode(token, predictedMarket));
-        SwapVMKernel.VMEnvelope memory deploy = _signedEnvelope(
-            SwapVMKernel.RootOp.DEPLOY,
+        SwaputerKernel.VMEnvelope memory deploy = _signedEnvelope(
+            SwaputerKernel.RootOp.DEPLOY,
             ESCROW_CODE_HASH,
             deployPayload,
             DEPLOY_LIMIT,
@@ -102,8 +102,14 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
         uint256 balanceBefore = _tokenBalance(actorId);
         bytes memory approvePayload =
             abi.encodePacked(bytes4(keccak256("approve(bytes32,uint256)")), abi.encode(escrow, ORDER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory approve = _signedEnvelope(
-            SwapVMKernel.RootOp.CALL, token, approvePayload, TOKEN_LIMIT, actor, actor, kernel.nonces(worldId, actorId)
+        SwaputerKernel.VMEnvelope memory approve = _signedEnvelope(
+            SwaputerKernel.RootOp.CALL,
+            token,
+            approvePayload,
+            TOKEN_LIMIT,
+            actor,
+            actor,
+            kernel.nonces(worldId, actorId)
         );
         vm.startBroadcast(actorKey);
         router.buyVMExactInput{value: VM_INPUT}(worldId, SQRT_PRICE_LIMIT, approve);
@@ -111,8 +117,8 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
 
         bytes memory depositPayload =
             abi.encodePacked(bytes4(keccak256("deposit(bytes32,uint256)")), abi.encode(actorId, ORDER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory deposit = _signedEnvelope(
-            SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory deposit = _signedEnvelope(
+            SwaputerKernel.RootOp.CALL,
             escrow,
             depositPayload,
             ESCROW_LIMIT,
@@ -130,8 +136,8 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
 
         bytes memory releasePayload =
             abi.encodePacked(bytes4(keccak256("release(bytes32,uint256)")), abi.encode(actorId, ORDER_AMOUNT));
-        SwapVMKernel.VMEnvelope memory release = _signedEnvelope(
-            SwapVMKernel.RootOp.CALL,
+        SwaputerKernel.VMEnvelope memory release = _signedEnvelope(
+            SwaputerKernel.RootOp.CALL,
             escrow,
             releasePayload,
             ESCROW_LIMIT,
@@ -149,15 +155,15 @@ contract EventsBaseSepoliaReferenceMarketScript is Script {
     }
 
     function _signedEnvelope(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         bytes32 target,
         bytes memory payload,
         uint32 byteLimit,
         address recipient,
         address executor,
         uint64 nonce
-    ) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
-        envelope = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
+        envelope = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: actor,

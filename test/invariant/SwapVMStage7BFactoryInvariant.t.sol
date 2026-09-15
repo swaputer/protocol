@@ -8,31 +8,31 @@ import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
-import {SwapVMWorldFactory} from "../../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../../src/SwaputerToken.sol";
+import {SwaputerHook} from "../../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
+import {SwaputerWorldFactory} from "../../src/SwaputerWorldFactory.sol";
 import {SwapVMStage7A2Test} from "../SwapVMStage7A2.t.sol";
 
 contract SwapVMStage7BFactoryHandler is Test {
-    SwapVMWorldFactory private immutable _factory;
-    SwapVMWorldFactory.CreateWorldParams private _duplicate;
-    SwapVMWorldFactory.CreateWorldParams private _validSecond;
-    SwapVMWorldFactory.CreateWorldParams private _wrongKernel;
-    SwapVMWorldFactory.CreateWorldParams private _wrongHook;
-    SwapVMWorldFactory.CreateWorldParams private _wrongPermissions;
+    SwaputerWorldFactory private immutable _factory;
+    SwaputerWorldFactory.CreateWorldParams private _duplicate;
+    SwaputerWorldFactory.CreateWorldParams private _validSecond;
+    SwaputerWorldFactory.CreateWorldParams private _wrongKernel;
+    SwaputerWorldFactory.CreateWorldParams private _wrongHook;
+    SwaputerWorldFactory.CreateWorldParams private _wrongPermissions;
 
     bytes32 public createdWorldId;
     uint256 public failedAttempts;
     bool public secondCreated;
 
     constructor(
-        SwapVMWorldFactory factory_,
-        SwapVMWorldFactory.CreateWorldParams memory duplicate_,
-        SwapVMWorldFactory.CreateWorldParams memory validSecond_,
-        SwapVMWorldFactory.CreateWorldParams memory wrongKernel_,
-        SwapVMWorldFactory.CreateWorldParams memory wrongHook_,
-        SwapVMWorldFactory.CreateWorldParams memory wrongPermissions_
+        SwaputerWorldFactory factory_,
+        SwaputerWorldFactory.CreateWorldParams memory duplicate_,
+        SwaputerWorldFactory.CreateWorldParams memory validSecond_,
+        SwaputerWorldFactory.CreateWorldParams memory wrongKernel_,
+        SwaputerWorldFactory.CreateWorldParams memory wrongHook_,
+        SwaputerWorldFactory.CreateWorldParams memory wrongPermissions_
     ) {
         _factory = factory_;
         _duplicate = duplicate_;
@@ -61,7 +61,7 @@ contract SwapVMStage7BFactoryHandler is Test {
     function createSecondWorld(address caller) external {
         vm.assume(caller != address(0));
         vm.prank(caller);
-        try _factory.createWorld(_validSecond) returns (bytes32 id, SwapVMGasToken, SwapVMKernel, SwapVMHook) {
+        try _factory.createWorld(_validSecond) returns (bytes32 id, SwaputerToken, SwaputerKernel, SwaputerHook) {
             assertFalse(secondCreated, "one CREATE2 tuple cannot create twice");
             secondCreated = true;
             createdWorldId = id;
@@ -71,7 +71,7 @@ contract SwapVMStage7BFactoryHandler is Test {
         }
     }
 
-    function _expectFailure(SwapVMWorldFactory.CreateWorldParams storage params, address caller) private {
+    function _expectFailure(SwaputerWorldFactory.CreateWorldParams storage params, address caller) private {
         vm.assume(caller != address(0));
         vm.prank(caller);
         try _factory.createWorld(params) {
@@ -90,8 +90,8 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
         super.setUp();
         originalConfigHash = factory.getWorldConfig(worldId).configHash;
 
-        SwapVMWorldFactory.CreateWorldParams memory duplicate = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
-        SwapVMWorldFactory.CreateWorldParams memory validSecond = _customWorldParams(
+        SwaputerWorldFactory.CreateWorldParams memory duplicate = _worldParams(bytes32(uint256(1)), bytes32(uint256(2)));
+        SwaputerWorldFactory.CreateWorldParams memory validSecond = _customWorldParams(
             bytes32(uint256(7_001)),
             bytes32(uint256(7_002)),
             7e35,
@@ -102,15 +102,15 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
             TickMath.getSqrtPriceAtTick(120)
         );
 
-        SwapVMWorldFactory.CreateWorldParams memory wrongKernel =
+        SwaputerWorldFactory.CreateWorldParams memory wrongKernel =
             _unminedParams(bytes32(uint256(7_101)), bytes32(uint256(7_102)), bytes32(0));
         wrongKernel.predictedKernel = address(uint160(wrongKernel.predictedKernel) + 1);
 
-        SwapVMWorldFactory.CreateWorldParams memory wrongHook =
+        SwaputerWorldFactory.CreateWorldParams memory wrongHook =
             _unminedParams(bytes32(uint256(7_201)), bytes32(uint256(7_202)), bytes32(0));
         wrongHook.predictedHook = address(uint160(wrongHook.predictedHook) + 1);
 
-        SwapVMWorldFactory.CreateWorldParams memory wrongPermissions =
+        SwaputerWorldFactory.CreateWorldParams memory wrongPermissions =
             _paramsWithInvalidPermissionBits(bytes32(uint256(7_301)), bytes32(uint256(7_302)));
 
         handler =
@@ -119,7 +119,7 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
     }
 
     function invariant_originalWorldIsImmutableAndSealed() public view {
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(worldId);
         assertTrue(config.isSealed);
         assertEq(config.configHash, originalConfigHash);
         assertEq(config.configHash, _worldConfigHash(worldId, config));
@@ -131,13 +131,13 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
     function invariant_anyCreatedSecondWorldIsCompleteAndBound() public view {
         bytes32 secondId = handler.createdWorldId();
         if (secondId == bytes32(0)) return;
-        SwapVMWorldFactory.WorldConfig memory config = factory.getWorldConfig(secondId);
+        SwaputerWorldFactory.WorldConfig memory config = factory.getWorldConfig(secondId);
         assertTrue(handler.secondCreated());
         assertTrue(config.isSealed);
         assertEq(config.configHash, _worldConfigHash(secondId, config));
-        assertEq(SwapVMKernel(config.kernel).hook(), config.hook);
-        assertEq(address(SwapVMHook(payable(config.hook)).kernel()), config.kernel);
-        assertEq(address(SwapVMHook(payable(config.hook)).poolManager()), address(manager));
+        assertEq(SwaputerKernel(config.kernel).hook(), config.hook);
+        assertEq(address(SwaputerHook(payable(config.hook)).kernel()), config.kernel);
+        assertEq(address(SwaputerHook(payable(config.hook)).poolManager()), address(manager));
         assertEq(
             uint160(config.hook) & Hooks.ALL_HOOK_MASK,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
@@ -148,7 +148,7 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
     function _unminedParams(bytes32 tokenSalt, bytes32 bootstrapSalt, bytes32 hookSalt)
         private
         view
-        returns (SwapVMWorldFactory.CreateWorldParams memory params)
+        returns (SwaputerWorldFactory.CreateWorldParams memory params)
     {
         address predictedToken = factory.predictGasToken(tokenSalt, INITIAL_SUPPLY, address(this));
         address predictedDeployer = factory.predictWorldDeployer(bootstrapSalt);
@@ -157,12 +157,12 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
             predictedDeployer,
             hookSalt,
             predictedKernel,
-            SwapVMGasToken(predictedToken),
+            SwaputerToken(predictedToken),
             BYTE_GAS_PRICE,
             POOL_FEE,
             TICK_SPACING
         );
-        params = SwapVMWorldFactory.CreateWorldParams({
+        params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,
@@ -181,7 +181,7 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
     function _paramsWithInvalidPermissionBits(bytes32 tokenSalt, bytes32 bootstrapSalt)
         private
         view
-        returns (SwapVMWorldFactory.CreateWorldParams memory params)
+        returns (SwaputerWorldFactory.CreateWorldParams memory params)
     {
         for (uint256 rawSalt; rawSalt < 256; rawSalt++) {
             params = _unminedParams(tokenSalt, bootstrapSalt, bytes32(rawSalt));
@@ -203,13 +203,13 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
         uint24 fee,
         int24 tickSpacing,
         uint160 initialPrice
-    ) private view returns (SwapVMWorldFactory.CreateWorldParams memory params) {
+    ) private view returns (SwaputerWorldFactory.CreateWorldParams memory params) {
         address predictedToken = factory.predictGasToken(tokenSalt, supply, holder);
         address predictedDeployer = factory.predictWorldDeployer(bootstrapSalt);
         address predictedKernel = factory.predictKernel(predictedDeployer);
         bytes memory hookArgs = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             predictedToken,
             factory.initialProtocolFeeAdmin(),
             factory.feeController(),
@@ -222,10 +222,10 @@ contract SwapVMStage7BFactoryInvariantTest is StdInvariant, SwapVMStage7A2Test {
             predictedDeployer,
             Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG | Hooks.BEFORE_SWAP_RETURNS_DELTA_FLAG
                 | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG,
-            type(SwapVMHook).creationCode,
+            type(SwaputerHook).creationCode,
             hookArgs
         );
-        params = SwapVMWorldFactory.CreateWorldParams({
+        params = SwaputerWorldFactory.CreateWorldParams({
             tokenSalt: tokenSalt,
             bootstrapSalt: bootstrapSalt,
             hookSalt: hookSalt,

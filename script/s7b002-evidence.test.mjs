@@ -4,7 +4,7 @@ import test from "node:test";
 import { parseEvidenceText, sealEvidence, validateEvidence } from "./s7b002-evidence.mjs";
 
 const hashes = [
-  "src/SwapVMWorldFactory.sol",
+  "src/SwaputerWorldFactory.sol",
   "test/Stage7MSaltRecovery.t.sol",
   "script/accept-s7b002.sh",
   "script/s7b002-evidence.mjs",

@@ -37,14 +37,14 @@ CANDIDATE_PATH = RELEASE_DIR / "candidate.json"
 CANDIDATE_TAG = "swaputer-v1.2-stage7m-rc3"
 
 CORE_CONTRACTS = (
-    "SwapVMCreationCodeStore",
-    "SwapVMGasToken",
-    "SwapVMHook",
-    "SwapVMKernel",
-    "SwapVMReferenceRegistry",
-    "SwapVMRouter",
-    "SwapVMWorldDeployer",
-    "SwapVMWorldFactory",
+    "SwaputerCreationCodeStore",
+    "SwaputerToken",
+    "SwaputerHook",
+    "SwaputerKernel",
+    "SwaputerProgramRegistry",
+    "SwaputerAppRouter",
+    "SwaputerWorldDeployer",
+    "SwaputerWorldFactory",
 )
 EXCLUDED_APPLICATION_CONTRACTS = (
     "SwapVMSRC20Market",
@@ -443,14 +443,14 @@ def build_artifacts(root: Path = REPO) -> dict:
         "integratedComponents": {
             "SwapVMMiniVM": {
                 "standaloneDeployment": False,
-                "ownedByArtifact": "SwapVMKernel",
+                "ownedByArtifact": "SwaputerKernel",
                 "source": "src/SwapVMMiniVM.sol",
                 "sourceSha256": sha256_file(root / "src/SwapVMMiniVM.sol"),
             }
         },
         "creationCodeStoreCommitments": {
-            "kernel": contracts["SwapVMKernel"]["creationCodeHash"],
-            "hook": contracts["SwapVMHook"]["creationCodeHash"],
+            "kernel": contracts["SwaputerKernel"]["creationCodeHash"],
+            "hook": contracts["SwaputerHook"]["creationCodeHash"],
         },
     }
 

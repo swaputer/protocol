@@ -11,23 +11,23 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {BalanceDelta} from "@uniswap/v4-core/src/types/BalanceDelta.sol";
 import {SwapParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 
-import {ISwapVMWorldFactory} from "./interfaces/ISwapVMWorldFactory.sol";
-import {SwapVMGasToken} from "./SwapVMGasToken.sol";
-import {SwapVMKernel} from "./SwapVMKernel.sol";
+import {ISwaputerWorldFactory} from "./interfaces/ISwaputerWorldFactory.sol";
+import {SwaputerToken} from "./SwaputerToken.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
 
-interface ISwapVMHookResult {
+interface ISwaputerHookResult {
     function consumeVMResult() external returns (bytes32 word, uint32 length);
 }
 
 /// @notice Immutable canonical settlement Router for one Factory-bound PoolManager.
-contract SwapVMRouter is IUnlockCallback {
+contract SwaputerAppRouter is IUnlockCallback {
     using CurrencyLibrary for Currency;
     using PoolIdLibrary for PoolKey;
     using TransientStateLibrary for IPoolManager;
 
-    bytes32 private constant ACTIVE_CALLBACK_SLOT = keccak256("SwapVMRouter.activeCallback.v1");
+    bytes32 private constant ACTIVE_CALLBACK_SLOT = keccak256("SwaputerAppRouter.activeCallback.v1");
     IPoolManager public immutable poolManager;
-    ISwapVMWorldFactory public immutable factory;
+    ISwaputerWorldFactory public immutable factory;
 
     enum RouteKind {
         BuyNOPExactInput,
@@ -59,7 +59,7 @@ contract SwapVMRouter is IUnlockCallback {
     error InvalidExactInput(uint256 amount);
     error EnvelopeWorldMismatch(bytes32 expected, bytes32 supplied);
     error SignedNOPForbidden();
-    error InvalidVMOperation(SwapVMKernel.RootOp op);
+    error InvalidVMOperation(SwaputerKernel.RootOp op);
     error UnauthorizedExecutor(address expected, address actual);
     error ExactOutputBuyUnsupported();
     error SellInstructionsForbidden();
@@ -71,7 +71,7 @@ contract SwapVMRouter is IUnlockCallback {
     error NativeTransferFailed(address recipient, uint256 amount);
     error RefundAccountingMismatch(uint256 spent, uint256 budget);
 
-    constructor(IPoolManager manager, ISwapVMWorldFactory worldFactory) {
+    constructor(IPoolManager manager, ISwaputerWorldFactory worldFactory) {
         if (address(manager) == address(0)) revert InvalidPoolManager();
         if (address(worldFactory) == address(0)) revert InvalidFactory();
         poolManager = manager;
@@ -99,7 +99,7 @@ contract SwapVMRouter is IUnlockCallback {
         _refundNative(msg.sender, uint256(exactAmount), spent);
     }
 
-    function buyVMExactInput(bytes32 worldId, uint160 sqrtPriceLimitX96, SwapVMKernel.VMEnvelope calldata envelope)
+    function buyVMExactInput(bytes32 worldId, uint160 sqrtPriceLimitX96, SwaputerKernel.VMEnvelope calldata envelope)
         external
         payable
         returns (BalanceDelta delta)
@@ -110,21 +110,21 @@ contract SwapVMRouter is IUnlockCallback {
     function buyVMExactInputWithResult(
         bytes32 worldId,
         uint160 sqrtPriceLimitX96,
-        SwapVMKernel.VMEnvelope calldata envelope
+        SwaputerKernel.VMEnvelope calldata envelope
     ) external payable returns (BalanceDelta delta, bytes32 vmResult, uint32 vmResultLength) {
         return _buyVMExactInput(worldId, sqrtPriceLimitX96, envelope);
     }
 
-    function _buyVMExactInput(bytes32 worldId, uint160 sqrtPriceLimitX96, SwapVMKernel.VMEnvelope calldata envelope)
+    function _buyVMExactInput(bytes32 worldId, uint160 sqrtPriceLimitX96, SwaputerKernel.VMEnvelope calldata envelope)
         private
         returns (BalanceDelta delta, bytes32 vmResult, uint32 vmResultLength)
     {
         if (envelope.worldId != worldId) revert EnvelopeWorldMismatch(worldId, envelope.worldId);
-        if (envelope.op == SwapVMKernel.RootOp.NOP) revert SignedNOPForbidden();
-        if (envelope.op != SwapVMKernel.RootOp.CALL && envelope.op != SwapVMKernel.RootOp.DEPLOY) {
+        if (envelope.op == SwaputerKernel.RootOp.NOP) revert SignedNOPForbidden();
+        if (envelope.op != SwaputerKernel.RootOp.CALL && envelope.op != SwaputerKernel.RootOp.DEPLOY) {
             revert InvalidVMOperation(envelope.op);
         }
-        if (envelope.actor == address(0)) revert SwapVMKernel.InvalidActor();
+        if (envelope.actor == address(0)) revert SwaputerKernel.InvalidActor();
         if (envelope.recipient == address(0)) revert InvalidRecipient(envelope.recipient);
         if (envelope.authorizedExecutor != address(0) && envelope.authorizedExecutor != msg.sender) {
             revert UnauthorizedExecutor(envelope.authorizedExecutor, msg.sender);
@@ -198,7 +198,7 @@ contract SwapVMRouter is IUnlockCallback {
         bytes32 vmResult;
         uint32 vmResultLength;
         if (data.kind == RouteKind.BuyVMExactInput) {
-            (vmResult, vmResultLength) = ISwapVMHookResult(address(key.hooks)).consumeVMResult();
+            (vmResult, vmResultLength) = ISwaputerHookResult(address(key.hooks)).consumeVMResult();
         }
         int256 delta0 = poolManager.currencyDelta(address(this), key.currency0);
         int256 delta1 = poolManager.currencyDelta(address(this), key.currency1);
@@ -219,7 +219,7 @@ contract SwapVMRouter is IUnlockCallback {
             if (spent > data.exactAmount) revert RefundAccountingMismatch(spent, data.exactAmount);
             if (ethOut < data.minimumAmountOut) revert MinimumOutputNotMet(ethOut, data.minimumAmountOut);
             poolManager.sync(key.currency1);
-            if (!SwapVMGasToken(Currency.unwrap(key.currency1)).transferFrom(data.payer, address(poolManager), spent)) {
+            if (!SwaputerToken(Currency.unwrap(key.currency1)).transferFrom(data.payer, address(poolManager), spent)) {
                 revert TokenTransferFailed();
             }
             poolManager.settle();

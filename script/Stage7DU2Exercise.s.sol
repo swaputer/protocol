@@ -10,11 +10,11 @@ import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.sol";
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 /// @notice Base Sepolia-only zero-value exercise of the sealed Stage 7D-U2 World.
 /// @dev The official Uniswap test liquidity router is deliberately not a Swaputer production component.
@@ -24,11 +24,11 @@ contract Stage7DU2ExerciseScript is Script {
 
     uint256 private constant BASE_SEPOLIA_CHAIN_ID = 84_532;
     address private constant ACTOR = 0x590a77Ec892bB78206bcad2444B62d1bC31A2D03;
-    SwapVMWorldFactory private constant FACTORY = SwapVMWorldFactory(0xF327e35FEA7EE7c92a765D1f00eD6A2A3db5b340);
-    SwapVMRouter private constant ROUTER = SwapVMRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
-    SwapVMGasToken private constant TOKEN = SwapVMGasToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
-    SwapVMKernel private constant KERNEL = SwapVMKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
-    SwapVMHook private constant HOOK = SwapVMHook(payable(0x8166eb00f52399Abdf725d1bB42A8344928A0044));
+    SwaputerWorldFactory private constant FACTORY = SwaputerWorldFactory(0xF327e35FEA7EE7c92a765D1f00eD6A2A3db5b340);
+    SwaputerAppRouter private constant ROUTER = SwaputerAppRouter(payable(0xEDAbF849F3F74FE3C92FCEa50968332f77B06F07));
+    SwaputerToken private constant TOKEN = SwaputerToken(0xe7bE2F5Af5281D81394c1ed22a27EDe5fdbb8775);
+    SwaputerKernel private constant KERNEL = SwaputerKernel(0xA048C894A738185c24B4A5020Fb6708dAb160283);
+    SwaputerHook private constant HOOK = SwaputerHook(payable(0x8166eb00f52399Abdf725d1bB42A8344928A0044));
     PoolModifyLiquidityTest private constant LIQUIDITY_ROUTER =
         PoolModifyLiquidityTest(payable(0x37429cD17Cb1454C34E7F50b09725202Fd533039));
     bytes32 private constant LIQUIDITY_ROUTER_CODE_HASH =
@@ -80,21 +80,21 @@ contract Stage7DU2ExerciseScript is Script {
             bytes4(keccak256("transfer(bytes32,uint256)")),
             abi.encode(KERNEL.eoaAccountId(address(0xDEAD)), type(uint256).max)
         );
-        SwapVMKernel.VMEnvelope memory reverting =
-            _signedAction(SwapVMKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce);
+        SwaputerKernel.VMEnvelope memory reverting =
+            _signedAction(SwaputerKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce);
         console2.log("STAGE7D_U2_REVERT_CALLDATA");
         console2.logBytes(
-            abi.encodeCall(SwapVMRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, reverting))
+            abi.encodeCall(SwaputerAppRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, reverting))
         );
 
         bytes memory validTransfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(KERNEL.eoaAccountId(address(0xD00D)), uint256(1))
         );
-        SwapVMKernel.VMEnvelope memory outOfBytes =
-            _signedAction(SwapVMKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce);
+        SwaputerKernel.VMEnvelope memory outOfBytes =
+            _signedAction(SwaputerKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce);
         console2.log("STAGE7D_U2_OOG_CALLDATA");
         console2.logBytes(
-            abi.encodeCall(SwapVMRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, outOfBytes))
+            abi.encodeCall(SwaputerAppRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, outOfBytes))
         );
     }
 
@@ -125,7 +125,7 @@ contract Stage7DU2ExerciseScript is Script {
             abi.encode(bytes32("Stage7D Token"), bytes32("S7D"), uint256(18), uint256(1_000), actorId);
         bytes32 target = _nextContract(packageBytes);
         _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, constructorInput),
             ACTION_LIMIT
@@ -133,7 +133,7 @@ contract Stage7DU2ExerciseScript is Script {
         bytes memory transfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(KERNEL.eoaAccountId(address(0xCAFE)), uint256(7))
         );
-        _executeBuy(SwapVMKernel.RootOp.CALL, target, transfer, ACTION_LIMIT);
+        _executeBuy(SwaputerKernel.RootOp.CALL, target, transfer, ACTION_LIMIT);
     }
 
     function _deployAndCallTinySol() private {
@@ -141,7 +141,7 @@ contract Stage7DU2ExerciseScript is Script {
         bytes32 actorId = KERNEL.eoaAccountId(ACTOR);
         miniToken = _nextContract(packageBytes);
         _executeBuy(
-            SwapVMKernel.RootOp.DEPLOY,
+            SwaputerKernel.RootOp.DEPLOY,
             keccak256(packageBytes),
             _deployPayload(packageBytes, abi.encode(uint256(1_000), actorId)),
             ACTION_LIMIT
@@ -149,7 +149,7 @@ contract Stage7DU2ExerciseScript is Script {
         bytes memory transfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(KERNEL.eoaAccountId(address(0xBEEF)), uint256(9))
         );
-        _executeBuy(SwapVMKernel.RootOp.CALL, miniToken, transfer, ACTION_LIMIT);
+        _executeBuy(SwaputerKernel.RootOp.CALL, miniToken, transfer, ACTION_LIMIT);
     }
 
     function _sell() private {
@@ -173,11 +173,11 @@ contract Stage7DU2ExerciseScript is Script {
             bytes4(keccak256("transfer(bytes32,uint256)")),
             abi.encode(KERNEL.eoaAccountId(address(0xDEAD)), type(uint256).max)
         );
-        SwapVMKernel.VMEnvelope memory reverting =
-            _signedAction(SwapVMKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce);
+        SwaputerKernel.VMEnvelope memory reverting =
+            _signedAction(SwaputerKernel.RootOp.CALL, miniToken, impossibleTransfer, ACTION_LIMIT, nonce);
         vm.startBroadcast(actorKey);
         (bool revertUnexpectedlySucceeded,) = address(ROUTER).call{value: VM_BUY_INPUT}(
-            abi.encodeCall(SwapVMRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, reverting))
+            abi.encodeCall(SwaputerAppRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, reverting))
         );
         vm.stopBroadcast();
         require(!revertUnexpectedlySucceeded, "REVERT_BUY_SUCCEEDED");
@@ -187,11 +187,11 @@ contract Stage7DU2ExerciseScript is Script {
         bytes memory validTransfer = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(KERNEL.eoaAccountId(address(0xD00D)), uint256(1))
         );
-        SwapVMKernel.VMEnvelope memory outOfBytes =
-            _signedAction(SwapVMKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce);
+        SwaputerKernel.VMEnvelope memory outOfBytes =
+            _signedAction(SwaputerKernel.RootOp.CALL, miniToken, validTransfer, 1, nonce);
         vm.startBroadcast(actorKey);
         (bool oogUnexpectedlySucceeded,) = address(ROUTER).call{value: VM_BUY_INPUT}(
-            abi.encodeCall(SwapVMRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, outOfBytes))
+            abi.encodeCall(SwaputerAppRouter.buyVMExactInput, (WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, outOfBytes))
         );
         vm.stopBroadcast();
         require(!oogUnexpectedlySucceeded, "OUT_OF_BYTE_GAS_BUY_SUCCEEDED");
@@ -199,20 +199,20 @@ contract Stage7DU2ExerciseScript is Script {
         require(TOKEN.totalSupply() == beforeSupply, "OOG_CHANGED_SUPPLY");
     }
 
-    function _executeBuy(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit) private {
+    function _executeBuy(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit) private {
         uint64 nonce = KERNEL.nonces(WORLD_ID, KERNEL.eoaAccountId(ACTOR));
-        SwapVMKernel.VMEnvelope memory action = _signedAction(op, target, payload, limit, nonce);
+        SwaputerKernel.VMEnvelope memory action = _signedAction(op, target, payload, limit, nonce);
         vm.startBroadcast(actorKey);
         ROUTER.buyVMExactInput{value: VM_BUY_INPUT}(WORLD_ID, TickMath.MIN_SQRT_PRICE + 1, action);
         vm.stopBroadcast();
     }
 
-    function _signedAction(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, uint64 nonce)
+    function _signedAction(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload, uint32 limit, uint64 nonce)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
-        action = SwapVMKernel.VMEnvelope({
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: WORLD_ID,
             actor: ACTOR,

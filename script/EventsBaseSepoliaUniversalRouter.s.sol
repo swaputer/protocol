@@ -9,10 +9,10 @@ import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolKey} from "@uniswap/v4-core/src/types/PoolKey.sol";
 import {IV4Router} from "@uniswap/v4-periphery/src/interfaces/IV4Router.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 
 interface IOfficialUniversalRouter {
     function poolManager() external view returns (address);
@@ -45,10 +45,10 @@ contract EventsBaseSepoliaUniversalRouterScript is Script {
     uint32 private constant TOKEN_LIMIT = 1_000;
     uint160 private constant SQRT_PRICE_LIMIT = TickMath.MIN_SQRT_PRICE + 1;
 
-    SwapVMWorldFactory private factory;
-    SwapVMKernel private kernel;
-    SwapVMHook private hook;
-    SwapVMGasToken private gasToken;
+    SwaputerWorldFactory private factory;
+    SwaputerKernel private kernel;
+    SwaputerHook private hook;
+    SwaputerToken private gasToken;
     bytes32 private worldId;
     bytes32 private token;
     uint256 private actorKey;
@@ -58,7 +58,7 @@ contract EventsBaseSepoliaUniversalRouterScript is Script {
         (uint64 heightBefore, uint64 nonceBefore, uint256 balanceBefore, uint256 supplyBefore, uint256 feesBefore) =
             _snapshot();
 
-        SwapVMKernel.VMEnvelope memory envelope = _signedMintEnvelope(nonceBefore);
+        SwaputerKernel.VMEnvelope memory envelope = _signedMintEnvelope(nonceBefore);
         bytes[] memory inputs = _universalRouterInputs(envelope);
 
         vm.startBroadcast(actorKey);
@@ -99,10 +99,10 @@ contract EventsBaseSepoliaUniversalRouterScript is Script {
 
         actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         require(vm.addr(actorKey) == ACTOR, "ACTOR_MISMATCH");
-        factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
-        kernel = SwapVMKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
-        hook = SwapVMHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
-        gasToken = SwapVMGasToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
+        factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        kernel = SwaputerKernel(vm.envAddress("SVM_KERNEL_ADDRESS"));
+        hook = SwaputerHook(payable(vm.envAddress("SVM_HOOK_ADDRESS")));
+        gasToken = SwaputerToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
         worldId = vm.envBytes32("SVM_WORLD_ID");
         token = vm.envBytes32("SVM_DEFAULT_SRC20_ID");
 
@@ -126,10 +126,10 @@ contract EventsBaseSepoliaUniversalRouterScript is Script {
         fees = hook.accruedProtocolFees();
     }
 
-    function _signedMintEnvelope(uint64 nonce) private view returns (SwapVMKernel.VMEnvelope memory envelope) {
+    function _signedMintEnvelope(uint64 nonce) private view returns (SwaputerKernel.VMEnvelope memory envelope) {
         bytes32 actorId = kernel.eoaAccountId(ACTOR);
-        envelope = SwapVMKernel.VMEnvelope({
-            op: SwapVMKernel.RootOp.CALL,
+        envelope = SwaputerKernel.VMEnvelope({
+            op: SwaputerKernel.RootOp.CALL,
             worldId: worldId,
             actor: ACTOR,
             targetOrCodeHash: token,
@@ -166,7 +166,7 @@ contract EventsBaseSepoliaUniversalRouterScript is Script {
         envelope.signature = abi.encodePacked(r, s, v);
     }
 
-    function _universalRouterInputs(SwapVMKernel.VMEnvelope memory envelope)
+    function _universalRouterInputs(SwaputerKernel.VMEnvelope memory envelope)
         private
         view
         returns (bytes[] memory inputs)

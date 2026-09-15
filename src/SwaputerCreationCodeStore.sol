@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 /// @notice Immutable bytecode container used only to supply release-pinned contract creation code.
 /// @dev Runtime is STOP || payload. The leading STOP makes accidental calls inert.
-contract SwapVMCreationCodeStore {
+contract SwaputerCreationCodeStore {
     error EmptyCreationCode();
 
     constructor(bytes memory creationCode) {
@@ -15,7 +15,7 @@ contract SwapVMCreationCodeStore {
     }
 }
 
-library SwapVMCreationCodeReader {
+library SwaputerCreationCodeReader {
     error InvalidCreationCodeStore(address store);
 
     function read(address store) internal view returns (bytes memory creationCode) {

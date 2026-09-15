@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
-import {SwapVMKernel} from "./SwapVMKernel.sol";
-import {SwapVMRouter} from "./SwapVMRouter.sol";
+import {SwaputerKernel} from "./SwaputerKernel.sol";
+import {SwaputerAppRouter} from "./SwaputerAppRouter.sol";
 import {SwapVMSRC20Market} from "./SwapVMSRC20Market.sol";
-import {SwapVMWorldFactory} from "./SwapVMWorldFactory.sol";
+import {SwaputerWorldFactory} from "./SwaputerWorldFactory.sol";
 
 /// @notice Permissionless deployment registry for one isolated escrow market per SRC20 program.
 /// @dev A creator first deploys the canonical MarketEscrow Mini Contract with the address returned
@@ -14,8 +14,8 @@ contract SwaputerSRC20MarketFactory {
     bytes4 public constant TOKEN_ACCOUNT_SELECTOR = bytes4(keccak256("tokenAccount()"));
     bytes4 public constant TRUSTED_MARKET_SELECTOR = bytes4(keccak256("trustedMarket()"));
 
-    SwapVMRouter public immutable router;
-    SwapVMKernel public immutable kernel;
+    SwaputerAppRouter public immutable router;
+    SwaputerKernel public immutable kernel;
     bytes32 public immutable worldId;
     bytes32 public immutable escrowCodeHash;
     bytes32 public immutable trustedTokenCodeHash;
@@ -45,7 +45,7 @@ contract SwaputerSRC20MarketFactory {
     );
 
     constructor(
-        SwapVMRouter boundRouter,
+        SwaputerAppRouter boundRouter,
         bytes32 boundWorldId,
         bytes32 canonicalEscrowCodeHash,
         bytes32 trustedTokenCodeHash_
@@ -54,12 +54,12 @@ contract SwaputerSRC20MarketFactory {
         if (boundWorldId == bytes32(0)) revert InvalidWorld();
         if (canonicalEscrowCodeHash == bytes32(0)) revert InvalidEscrow();
         if (trustedTokenCodeHash_ == bytes32(0)) revert InvalidToken();
-        SwapVMWorldFactory boundFactory = SwapVMWorldFactory(address(boundRouter.factory()));
+        SwaputerWorldFactory boundFactory = SwaputerWorldFactory(address(boundRouter.factory()));
         if (boundFactory.router() != address(boundRouter)) revert InvalidRouter();
-        SwapVMWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
+        SwaputerWorldFactory.WorldConfig memory config = boundFactory.getWorldConfig(boundWorldId);
         if (!config.isSealed || config.kernel == address(0)) revert InvalidWorld();
         router = boundRouter;
-        kernel = SwapVMKernel(config.kernel);
+        kernel = SwaputerKernel(config.kernel);
         worldId = boundWorldId;
         escrowCodeHash = canonicalEscrowCodeHash;
         trustedTokenCodeHash = trustedTokenCodeHash_;

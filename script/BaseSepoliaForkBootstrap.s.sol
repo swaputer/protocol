@@ -10,9 +10,9 @@ import {ModifyLiquidityParams} from "@uniswap/v4-core/src/types/PoolOperation.so
 import {Currency} from "@uniswap/v4-core/src/types/Currency.sol";
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
-import {SwapVMWorldFactory} from "../src/SwapVMWorldFactory.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
+import {SwaputerWorldFactory} from "../src/SwaputerWorldFactory.sol";
 import {SwaputerSRC20MarketFactory} from "../src/SwaputerSRC20MarketFactory.sol";
 
 /// @notice Isolated-fork bootstrap for release reproducibility drills.
@@ -29,10 +29,10 @@ contract BaseSepoliaForkBootstrapScript is Script {
 
         uint256 actorKey = vm.envUint("STAGE7A2_PRIVATE_KEY");
         address actor = vm.addr(actorKey);
-        SwapVMWorldFactory factory = SwapVMWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
+        SwaputerWorldFactory factory = SwaputerWorldFactory(vm.envAddress("SVM_FACTORY_ADDRESS"));
         bytes32 worldId = vm.envBytes32("SVM_WORLD_ID");
-        SwapVMGasToken gasToken = SwapVMGasToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
-        SwapVMRouter router = SwapVMRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
+        SwaputerToken gasToken = SwaputerToken(vm.envAddress("SVM_GAS_TOKEN_ADDRESS"));
+        SwaputerAppRouter router = SwaputerAppRouter(payable(vm.envAddress("SVM_ROUTER_ADDRESS")));
         (PoolKey memory key, bool isSealed) = factory.getPoolKey(worldId);
 
         require(isSealed && PoolId.unwrap(key.toId()) == worldId, "WORLD_NOT_SEALED");

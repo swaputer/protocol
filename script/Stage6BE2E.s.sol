@@ -4,7 +4,7 @@ pragma solidity 0.8.26;
 import {Script, console2} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
 
 /// @dev Minimal bound-hook stand-in. It exercises the real Kernel receipt path without implementing a second AMM.
 contract Stage6BKernelDriver {
@@ -14,7 +14,7 @@ contract Stage6BKernelDriver {
     uint160 internal constant PRICE_LIMIT = 1;
 
     address public immutable owner;
-    SwapVMKernel public kernel;
+    SwaputerKernel public kernel;
 
     error OnlyOwner();
     error AlreadyBound();
@@ -29,16 +29,16 @@ contract Stage6BKernelDriver {
         _;
     }
 
-    function bind(SwapVMKernel target) external onlyOwner {
+    function bind(SwaputerKernel target) external onlyOwner {
         if (address(kernel) != address(0)) revert AlreadyBound();
         if (target.hook() != address(this)) revert InvalidKernel();
         kernel = target;
     }
 
     function executeNOP(bytes32 worldId) external onlyOwner {
-        SwapVMKernel target = kernel;
+        SwaputerKernel target = kernel;
         target.executeNOP(
-            SwapVMKernel.BuyReceipt({
+            SwaputerKernel.BuyReceipt({
                 worldId: worldId,
                 executionHeight: target.executionHeight(worldId) + 1,
                 actor: bytes32(0),
@@ -53,10 +53,10 @@ contract Stage6BKernelDriver {
         );
     }
 
-    function execute(SwapVMKernel.VMEnvelope calldata action) external onlyOwner {
-        SwapVMKernel target = kernel;
+    function execute(SwaputerKernel.VMEnvelope calldata action) external onlyOwner {
+        SwaputerKernel target = kernel;
         target.executeCall(
-            SwapVMKernel.BuyReceipt({
+            SwaputerKernel.BuyReceipt({
                 worldId: action.worldId,
                 executionHeight: target.executionHeight(action.worldId) + 1,
                 actor: bytes32(0),
@@ -69,7 +69,7 @@ contract Stage6BKernelDriver {
                 chainTimestamp: uint64(block.timestamp)
             }),
             action,
-            SwapVMKernel.ActionBinding({sqrtPriceLimitX96: PRICE_LIMIT, router: address(this)})
+            SwaputerKernel.ActionBinding({sqrtPriceLimitX96: PRICE_LIMIT, router: address(this)})
         );
     }
 }
@@ -89,14 +89,14 @@ contract Stage6BE2EScript is Script {
     uint256 private actorKey;
     address private actor;
     Stage6BKernelDriver private driver;
-    SwapVMKernel private kernel;
+    SwaputerKernel private kernel;
 
     function setup() external {
         actorKey = vm.envUint("STAGE6B_PRIVATE_KEY");
         actor = vm.addr(actorKey);
         vm.startBroadcast(actorKey);
         driver = new Stage6BKernelDriver(actor);
-        kernel = new SwapVMKernel(address(driver), BYTE_GAS_PRICE);
+        kernel = new SwaputerKernel(address(driver), BYTE_GAS_PRICE);
         driver.bind(kernel);
         vm.stopBroadcast();
         console2.log("STAGE6B_DRIVER", address(driver));
@@ -171,7 +171,7 @@ contract Stage6BE2EScript is Script {
         actorKey = vm.envUint("STAGE6B_PRIVATE_KEY");
         actor = vm.addr(actorKey);
         driver = Stage6BKernelDriver(vm.envAddress("STAGE6B_DRIVER"));
-        kernel = SwapVMKernel(vm.envAddress("STAGE6B_KERNEL"));
+        kernel = SwaputerKernel(vm.envAddress("STAGE6B_KERNEL"));
     }
 
     function _deploy(bytes memory packageBytes, bytes memory constructorInput) private returns (bytes32 contractId) {
@@ -179,20 +179,20 @@ contract Stage6BE2EScript is Script {
         bytes32 codeHash = keccak256(packageBytes);
         contractId = kernel.contractAccountId(WORLD_ID, actorId, kernel.creatorNonce(WORLD_ID, actorId), codeHash);
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorInput);
-        driver.execute(_signed(SwapVMKernel.RootOp.DEPLOY, codeHash, payload));
+        driver.execute(_signed(SwaputerKernel.RootOp.DEPLOY, codeHash, payload));
     }
 
     function _call(bytes32 target, bytes memory payload) private {
-        driver.execute(_signed(SwapVMKernel.RootOp.CALL, target, payload));
+        driver.execute(_signed(SwaputerKernel.RootOp.CALL, target, payload));
     }
 
-    function _signed(SwapVMKernel.RootOp op, bytes32 target, bytes memory payload)
+    function _signed(SwaputerKernel.RootOp op, bytes32 target, bytes memory payload)
         private
         view
-        returns (SwapVMKernel.VMEnvelope memory action)
+        returns (SwaputerKernel.VMEnvelope memory action)
     {
         bytes32 actorId = kernel.eoaAccountId(actor);
-        action = SwapVMKernel.VMEnvelope({
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: WORLD_ID,
             actor: actor,

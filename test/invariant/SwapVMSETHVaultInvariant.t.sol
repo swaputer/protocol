@@ -7,8 +7,8 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
-import {SwapVMRouter} from "../../src/SwapVMRouter.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
+import {SwaputerAppRouter} from "../../src/SwaputerAppRouter.sol";
 import {SwapVMSETHVaultTest} from "../SwapVMSETHVault.t.sol";
 
 contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
@@ -38,7 +38,7 @@ contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
         uint128 amount = uint128(bound(uint256(rawAmount), 1, 0.25 ether));
         if (owner.balance < uint256(amount) + VM_INPUT) return;
 
-        SwapVMKernel.VMEnvelope memory mint = _signedMint(ownerKey, owner, owner, amount, _nonce(owner));
+        SwaputerKernel.VMEnvelope memory mint = _signedMint(ownerKey, owner, owner, amount, _nonce(owner));
         vm.prank(owner);
         vault.deposit{value: uint256(amount) + VM_INPUT}(amount, VM_INPUT, mint, TickMath.MIN_SQRT_PRICE + 1);
         _recordSuccessfulVMCall();
@@ -50,7 +50,7 @@ contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
         if (balance == 0 || owner.balance < VM_INPUT) return;
         uint128 amount = uint128(bound(uint256(rawAmount), 1, balance));
 
-        SwapVMKernel.VMEnvelope memory burn = _signedBurn(ownerKey, owner, owner, amount, _nonce(owner));
+        SwaputerKernel.VMEnvelope memory burn = _signedBurn(ownerKey, owner, owner, amount, _nonce(owner));
         vm.prank(owner);
         vault.redeem{value: VM_INPUT}(amount, VM_INPUT, owner, burn, TickMath.MIN_SQRT_PRICE + 1);
         _recordSuccessfulVMCall();
@@ -66,10 +66,10 @@ contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("transfer(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(recipient), amount)
         );
-        SwapVMKernel.VMEnvelope memory transfer = _signedEnvelope(
+        SwaputerKernel.VMEnvelope memory transfer = _signedEnvelope(
             senderKey,
             sender,
-            SwapVMKernel.RootOp.CALL,
+            SwaputerKernel.RootOp.CALL,
             seth,
             payload,
             SETH_LIMIT,
@@ -89,8 +89,17 @@ contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
         bytes memory payload = abi.encodePacked(
             bytes4(keccak256("bridgeMint(bytes32,uint256)")), abi.encode(kernel.eoaAccountId(owner), amount)
         );
-        SwapVMKernel.VMEnvelope memory mint = _signedEnvelope(
-            ownerKey, owner, SwapVMKernel.RootOp.CALL, seth, payload, SETH_LIMIT, _nonce(owner), owner, VM_INPUT, owner
+        SwaputerKernel.VMEnvelope memory mint = _signedEnvelope(
+            ownerKey,
+            owner,
+            SwaputerKernel.RootOp.CALL,
+            seth,
+            payload,
+            SETH_LIMIT,
+            _nonce(owner),
+            owner,
+            VM_INPUT,
+            owner
         );
 
         uint64 nonceBefore = _nonce(owner);
@@ -101,7 +110,7 @@ contract SwapVMSETHVaultInvariantTest is StdInvariant, SwapVMSETHVaultTest {
         uint256 gasSupplyBefore = gasToken.totalSupply();
         vm.prank(owner);
         (bool success,) = address(router).call{value: VM_INPUT}(
-            abi.encodeCall(SwapVMRouter.buyVMExactInput, (worldId, TickMath.MIN_SQRT_PRICE + 1, mint))
+            abi.encodeCall(SwaputerAppRouter.buyVMExactInput, (worldId, TickMath.MIN_SQRT_PRICE + 1, mint))
         );
         assertFalse(success);
         assertEq(_nonce(owner), nonceBefore);

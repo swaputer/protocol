@@ -31,7 +31,7 @@ Failures throw `VMReceiptError`. Callers and tests compare the stable `code` fie
 
 ## Constants and source binding
 
-`scripts/generate-constants.mjs` extracts `KERNEL_EMITTER_ID`, the Kernel signature strings, the receipt version and receipt limits from `SwapVMKernel.sol` and `SwapVMMiniVM.sol`, derives both topic hashes with Keccak-256, and generates `src/constants.ts`. Build and typecheck run the generator in check mode, while `test/constants.test.ts` independently compares the exported values to the Solidity sources. Fixed v1 layout widths and flags are documented by the frozen section 23 format and tested against real Solidity output.
+`scripts/generate-constants.mjs` extracts `KERNEL_EMITTER_ID`, the Kernel signature strings, the receipt version and receipt limits from `SwaputerKernel.sol` and `SwapVMMiniVM.sol`, derives both topic hashes with Keccak-256, and generates `src/constants.ts`. Build and typecheck run the generator in check mode, while `test/constants.test.ts` independently compares the exported values to the Solidity sources. Fixed v1 layout widths and flags are documented by the frozen section 23 format and tested against real Solidity output.
 
 ## Reproducible golden fixtures
 
@@ -78,7 +78,7 @@ The Stage 6A acceptance run on 2026-08-28 produced:
 - TypeScript: 31 tests in 5 suites, all passing;
 - Foundry: 76 tests in 8 suites, all passing, including 512-run fuzz tests and invariants configured for 64 runs × 32 calls;
 - gas snapshot: `forge snapshot --check` passing after adding the fixture-test baselines;
-- production runtime sizes: `SwapVMGasToken` 1,350 bytes, `SwapVMHook` 5,842 bytes, `SwapVMKernel` 21,918 bytes and `SwapVMReferenceRegistry` 1,606 bytes;
+- production runtime sizes: `SwaputerToken` 1,350 bytes, `SwaputerHook` 5,842 bytes, `SwaputerKernel` 21,918 bytes and `SwaputerProgramRegistry` 1,606 bytes;
 - test-only `ReceiptFixture` runtime size: 5,801 bytes;
 - fixture scenario gas: unsigned NOP 326,107; authenticated CALL 563,035; DEPLOY 857,948; SRC-20 transfer 6,277,060; SRC-721 transfer 6,663,600; CPAMM swap 30,453,823.
 

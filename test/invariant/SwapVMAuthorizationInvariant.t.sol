@@ -7,7 +7,7 @@ import {IPoolManager} from "@uniswap/v4-core/src/interfaces/IPoolManager.sol";
 import {TickMath} from "@uniswap/v4-core/src/libraries/TickMath.sol";
 import {TransientStateLibrary} from "@uniswap/v4-core/src/libraries/TransientStateLibrary.sol";
 
-import {SwapVMKernel} from "../../src/SwapVMKernel.sol";
+import {SwaputerKernel} from "../../src/SwaputerKernel.sol";
 import {SwapVMStage2Test} from "../SwapVMStage2.t.sol";
 
 contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
@@ -41,7 +41,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
 
     function actionExecuteValid() external {
         uint64 nonce = kernel.nonces(worldId, kernel.eoaAccountId(actor));
-        SwapVMKernel.VMEnvelope memory action = _validAction(nonce);
+        SwaputerKernel.VMEnvelope memory action = _validAction(nonce);
         vm.prank(actor);
         router.swap{value: ETH_IN}(key, _buyParams(ETH_IN, _priceLimit()), actor, abi.encode(action));
         ++successfulCalls;
@@ -50,7 +50,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
 
     function actionRejectMutatedEnvelope(uint8 rawMode) external {
         uint64 nonce = kernel.nonces(worldId, kernel.eoaAccountId(actor));
-        SwapVMKernel.VMEnvelope memory action = _validAction(nonce);
+        SwaputerKernel.VMEnvelope memory action = _validAction(nonce);
         uint8 mode = rawMode % 11;
         if (mode == 0) action.worldId = bytes32(uint256(worldId) ^ 1);
         else if (mode == 1) action.actor = other;
@@ -91,7 +91,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
             caller = actor;
         }
 
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -113,7 +113,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
         uint8 mode = rawMode % 5;
         uint64 signedNonce = mode == 0 ? nonce + 1 : (mode == 1 && nonce != 0 ? nonce - 1 : nonce);
         uint64 deadline = mode == 2 ? uint64(block.timestamp - 1) : uint64(block.timestamp + 1 days);
-        SwapVMKernel.VMEnvelope memory action = _signedAction(
+        SwaputerKernel.VMEnvelope memory action = _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
             bytes(""),
@@ -153,7 +153,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
         assertEq(poolManager.currencyDelta(address(hook), key.currency1), 0);
     }
 
-    function _validAction(uint64 nonce) private view returns (SwapVMKernel.VMEnvelope memory) {
+    function _validAction(uint64 nonce) private view returns (SwaputerKernel.VMEnvelope memory) {
         return _signedAction(
             ACTOR_KEY,
             STATE_TARGET,
@@ -171,7 +171,7 @@ contract SwapVMAuthorizationInvariantTest is StdInvariant, SwapVMStage2Test {
     }
 
     function _expectRejected(
-        SwapVMKernel.VMEnvelope memory action,
+        SwaputerKernel.VMEnvelope memory action,
         address caller,
         address recipient,
         uint128 ethIn,

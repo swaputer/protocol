@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {Script, console2} from "forge-std/Script.sol";
 
-import {SwapVMRouter} from "../src/SwapVMRouter.sol";
+import {SwaputerAppRouter} from "../src/SwaputerAppRouter.sol";
 import {SwaputerSRC20MarketFactory} from "../src/SwaputerSRC20MarketFactory.sol";
 
 contract DeploySRC20MarketFactoryScript is Script {
@@ -17,7 +17,7 @@ contract DeploySRC20MarketFactoryScript is Script {
         bytes32 worldId = vm.envBytes32("SVM_WORLD_ID");
         vm.startBroadcast(deployerKey);
         marketFactory = new SwaputerSRC20MarketFactory(
-            SwapVMRouter(payable(router)), worldId, ESCROW_CODE_HASH, TRUSTED_TOKEN_CODE_HASH
+            SwaputerAppRouter(payable(router)), worldId, ESCROW_CODE_HASH, TRUSTED_TOKEN_CODE_HASH
         );
         vm.stopBroadcast();
 

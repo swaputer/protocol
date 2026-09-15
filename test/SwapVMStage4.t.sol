@@ -17,10 +17,10 @@ import {ModifyLiquidityParams, SwapParams} from "@uniswap/v4-core/src/types/Pool
 import {PoolModifyLiquidityTest} from "@uniswap/v4-core/src/test/PoolModifyLiquidityTest.sol";
 import {HookMiner} from "@uniswap/v4-periphery/test/shared/HookMiner.sol";
 
-import {SwapVMGasToken} from "../src/SwapVMGasToken.sol";
-import {SwapVMHook} from "../src/SwapVMHook.sol";
-import {SwapVMKernel} from "../src/SwapVMKernel.sol";
-import {SwapVMReferenceRegistry} from "../src/SwapVMReferenceRegistry.sol";
+import {SwaputerToken} from "../src/SwaputerToken.sol";
+import {SwaputerHook} from "../src/SwaputerHook.sol";
+import {SwaputerKernel} from "../src/SwaputerKernel.sol";
+import {SwaputerProgramRegistry} from "../src/SwaputerProgramRegistry.sol";
 import {SwapVMKernelStage2Harness, SwapVMStage2Router} from "./SwapVMStage2.t.sol";
 import {ReceiptFixture} from "./utils/ReceiptFixture.sol";
 
@@ -43,9 +43,9 @@ contract SwapVMStage4Test is Test {
         keccak256("TransferSingle(bytes32,bytes32,bytes32,uint256,uint256)");
 
     PoolManager private manager;
-    SwapVMGasToken private token;
+    SwaputerToken private token;
     SwapVMKernelStage2Harness private kernel;
-    SwapVMHook private hook;
+    SwaputerHook private hook;
     SwapVMStage2Router private router;
     PoolKey private key;
     bytes32 private worldId;
@@ -60,7 +60,7 @@ contract SwapVMStage4Test is Test {
         vm.deal(operator, 100 ether);
 
         manager = new PoolManager(address(this));
-        token = new SwapVMGasToken(INITIAL_SUPPLY, address(this));
+        token = new SwaputerToken(INITIAL_SUPPLY, address(this));
         PoolModifyLiquidityTest liquidityRouter = new PoolModifyLiquidityTest(manager);
         router = new SwapVMStage2Router(manager);
 
@@ -70,7 +70,7 @@ contract SwapVMStage4Test is Test {
             | Hooks.AFTER_SWAP_FLAG | Hooks.AFTER_SWAP_RETURNS_DELTA_FLAG;
         bytes memory args = abi.encode(
             manager,
-            SwapVMKernel(predictedKernel),
+            SwaputerKernel(predictedKernel),
             token,
             address(this),
             address(this),
@@ -79,9 +79,10 @@ contract SwapVMStage4Test is Test {
             POOL_FEE,
             TICK_SPACING
         );
-        (address expectedHook, bytes32 salt) = HookMiner.find(address(this), flags, type(SwapVMHook).creationCode, args);
+        (address expectedHook, bytes32 salt) =
+            HookMiner.find(address(this), flags, type(SwaputerHook).creationCode, args);
         kernel = new SwapVMKernelStage2Harness(expectedHook, BYTE_GAS_PRICE);
-        hook = new SwapVMHook{salt: salt}(
+        hook = new SwaputerHook{salt: salt}(
             manager, kernel, token, address(this), address(this), 0, BYTE_GAS_PRICE, POOL_FEE, TICK_SPACING
         );
 
@@ -100,10 +101,11 @@ contract SwapVMStage4Test is Test {
             ModifyLiquidityParams({tickLower: -600, tickUpper: 600, liquidityDelta: 1e24, salt: bytes32(0)}),
             bytes("")
         );
+        hook.live();
     }
 
     function test_referenceRegistryPinsExactPackagesAndRejectsMutation() public {
-        SwapVMReferenceRegistry registry = new SwapVMReferenceRegistry();
+        SwaputerProgramRegistry registry = new SwaputerProgramRegistry();
         bytes memory src20 = _package("SRC20-v1");
         bytes memory src721 = _package("SRC721-v1");
         bytes memory src1155 = _package("SRC1155-v1");
@@ -155,7 +157,7 @@ contract SwapVMStage4Test is Test {
     }
 
     function test_src20ConformanceAuthorizationLogsAndRollback() public {
-        SwapVMReferenceRegistry registry = new SwapVMReferenceRegistry();
+        SwaputerProgramRegistry registry = new SwaputerProgramRegistry();
         bytes memory packageBytes = _package("SRC20-v1");
         bytes32 actorId = kernel.eoaAccountId(actor);
         bytes32 operatorId = kernel.eoaAccountId(operator);
@@ -247,7 +249,7 @@ contract SwapVMStage4Test is Test {
     }
 
     function test_src721ConformanceApprovalContractOwnershipAndLogs() public {
-        SwapVMReferenceRegistry registry = new SwapVMReferenceRegistry();
+        SwaputerProgramRegistry registry = new SwaputerProgramRegistry();
         bytes32 actorId = kernel.eoaAccountId(actor);
         bytes32 operatorId = kernel.eoaAccountId(operator);
         uint256 tokenId = 7;
@@ -287,7 +289,7 @@ contract SwapVMStage4Test is Test {
     }
 
     function test_src1155ConformanceOperatorTransferContractOwnershipAndLogs() public {
-        SwapVMReferenceRegistry registry = new SwapVMReferenceRegistry();
+        SwaputerProgramRegistry registry = new SwaputerProgramRegistry();
         bytes32 actorId = kernel.eoaAccountId(actor);
         bytes32 operatorId = kernel.eoaAccountId(operator);
         uint256 id = 9;
@@ -390,8 +392,8 @@ contract SwapVMStage4Test is Test {
         bytes32 codeHash = keccak256(packageBytes);
         contractId = kernel.contractAccountId(worldId, actorId, kernel.creatorNonce(worldId, actorId), codeHash);
         bytes memory payload = abi.encodePacked(bytes4(uint32(packageBytes.length)), packageBytes, constructorInput);
-        SwapVMKernel.VMEnvelope memory action =
-            _signedAction(SwapVMKernel.RootOp.DEPLOY, privateKey, codeHash, payload, nonce, signer);
+        SwaputerKernel.VMEnvelope memory action =
+            _signedAction(SwaputerKernel.RootOp.DEPLOY, privateKey, codeHash, payload, nonce, signer);
         vm.prank(signer);
         router.swap{value: 1 ether}(key, _buyParams(), signer, abi.encode(action));
     }
@@ -405,8 +407,8 @@ contract SwapVMStage4Test is Test {
     ) private {
         address signer = vm.addr(privateKey);
         bytes memory payload = abi.encodePacked(bytes4(keccak256(bytes(signature))), arguments);
-        SwapVMKernel.VMEnvelope memory action =
-            _signedAction(SwapVMKernel.RootOp.CALL, privateKey, target, payload, nonce, signer);
+        SwaputerKernel.VMEnvelope memory action =
+            _signedAction(SwaputerKernel.RootOp.CALL, privateKey, target, payload, nonce, signer);
         vm.prank(signer);
         vm.expectRevert();
         router.swap{value: 1 ether}(key, _buyParams(), signer, abi.encode(action));
@@ -428,21 +430,21 @@ contract SwapVMStage4Test is Test {
     {
         address signer = vm.addr(privateKey);
         bytes memory payload = abi.encodePacked(bytes4(keccak256(bytes(signature))), arguments);
-        SwapVMKernel.VMEnvelope memory action =
-            _signedAction(SwapVMKernel.RootOp.CALL, privateKey, target, payload, nonce, signer);
+        SwaputerKernel.VMEnvelope memory action =
+            _signedAction(SwaputerKernel.RootOp.CALL, privateKey, target, payload, nonce, signer);
         vm.prank(signer);
         router.swap{value: 1 ether}(key, _buyParams(), signer, abi.encode(action));
     }
 
     function _signedAction(
-        SwapVMKernel.RootOp op,
+        SwaputerKernel.RootOp op,
         uint256 privateKey,
         bytes32 target,
         bytes memory payload,
         uint64 nonce,
         address recipient
-    ) private view returns (SwapVMKernel.VMEnvelope memory action) {
-        action = SwapVMKernel.VMEnvelope({
+    ) private view returns (SwaputerKernel.VMEnvelope memory action) {
+        action = SwaputerKernel.VMEnvelope({
             op: op,
             worldId: worldId,
             actor: vm.addr(privateKey),

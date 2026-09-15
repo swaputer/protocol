@@ -36,7 +36,7 @@ transient-delta clearing against this exact deployed bytecode.
 ## Fixed World shape
 
 The pool key is exactly native ETH (`currency0 = address(0)`) and the rc2
-`SwapVMGasToken` (`currency1`). No ERC-20 test ETH is deployed. Gas token name,
+`SwaputerToken` (`currency1`). No ERC-20 test ETH is deployed. Gas token name,
 symbol and decimals remain `SwapVM Gas Token`, `SVMG`, and `18`; changing the
 symbol would change rc2 bytecode and is forbidden.
 

@@ -34,6 +34,6 @@ The completed local acceptance run produced:
 - v1.1 specification/ISA and historical v1.0 specification/ISA manifests: verified;
 - all three npm audits: zero vulnerabilities.
 
-Production runtime sizes did not change: `SwapVMKernel` 21,918 bytes, `SwapVMHook` 5,842 bytes, `SwapVMGasToken` 1,350 bytes and `SwapVMReferenceRegistry` 1,606 bytes. The test-only Stage 6D2 MiniVM harness is 16,456 bytes; `Stage6BKernelDriver` remains 2,311 bytes.
+Production runtime sizes did not change: `SwaputerKernel` 21,918 bytes, `SwaputerHook` 5,842 bytes, `SwaputerToken` 1,350 bytes and `SwaputerProgramRegistry` 1,606 bytes. The test-only Stage 6D2 MiniVM harness is 16,456 bytes; `Stage6BKernelDriver` remains 2,311 bytes.
 
 Stage 6D2 harness gas snapshots are 6,600,245 for CALL/STATICCALL/CREATE and shared metering, 6,409,496 for child rollback/static defense, 4,710,383 for control-flow/signed/bool behavior, 3,813,849 for require rollback, 2,666,534 for context and ABI address validation, 2,460,862 for constructor/dispatcher/wraparound, 1,614,531 for mapping layout, 1,363,862 for dispatcher rejection, 1,226,660 for event layout and 109,889 for source-map metadata. These are Solidity test-harness costs, not compiler output fee estimates.

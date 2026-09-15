@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "swaputer-testnet-native-e2e/1",
+  "status": "successful-testnet-only",
+  "warning": "Unaudited Base Sepolia test deployment. Not an active release and not suitable for real-value funds.",
+  "source": {
+    "commit": "25c29ac97fdd701cb57dae6163e83926adc7e740",
+    "treeStatus": "dirty-authorized-sPuter-testnet-changes",
+    "script": "script/SwaputerBaseSepoliaNativeE2E.s.sol:SwaputerBaseSepoliaNativeE2EScript"
+  },
+  "network": {
+    "name": "Base Sepolia",
+    "chainId": 84532,
+    "startBlock": 46802456,
+    "endBlock": 46802475,
+    "explorerUrl": "https://sepolia.basescan.org"
+  },
+  "deployer": "0x590a77Ec892bB78206bcad2444B62d1bC31A2D03",
+  "upstream": {
+    "poolManager": "0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408",
+    "positionManager": "0x4B2C77d209D3405F41a037Ec6c77F7F5b8e2ca80",
+    "permit2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
+    "stateView": "0x571291b572ed32ce6751a2Cb2486EbEe8DEfB9B4"
+  },
+  "contracts": {
+    "kernelCreationCodeStore": "0x5A0a2c94DD53d22e9AFd3A4cE2ec986EbdB70d6d",
+    "hookCreationCodeStore": "0x8C1Ec01665EA9f38392D6A0D7EA470dd5803a91A",
+    "factory": "0x7D4A97269097F31fB7B271438C665f6917Ff7878",
+    "referenceRegistry": "0xaC1b0611614aca6e201C95296ada1e2fEF3Cd47A",
+    "router": "0x0edCbfde15fEDfdE235Af098C22f0b719e42dDAa",
+    "worldDeployer": "0x674A7937eE7FC47f2e4993E07DEeB0b6B9A27a7A",
+    "gasToken": "0xD8C87cD797C6d061639F97fBDA16783504B034ad",
+    "kernel": "0xBa784D8F27222142f0E4B7740782327b38737675",
+    "hook": "0xAC91B7E8879b4EAE97C81aB6D64Dab672719e0cC"
+  },
+  "runtimeCodeHashes": {
+    "kernelCreationCodeStore": "0xacda04eb071d2047e6ed0b5442b7175efc945453496072913d9413ee6679592e",
+    "hookCreationCodeStore": "0x0e7049bd4d5e9b0b1f68b5cdb0f813851afe868b05278157e0beb9174aff1fc0",
+    "factory": "0xb07f6ac72a41a1bbc228c9f048702d0c92fa8706790f72d3929a7895ceb91882",
+    "router": "0x9e2a232aa95e3b05d57162bca3078ad5b8d2cae37a81a525795dc10910172d95",
+    "gasToken": "0xa933f64c1ecd83ba4b9ee70033e0bc377c3d318afb7161e1a0a3e8681eb89118",
+    "kernel": "0xf0292fbebea99c1601d2502f770ce3b61f30cd34ceb8db18b154f442c0d89b59",
+    "hook": "0x46476d7b3d5a62c61c275e2a47a44a75af665877921d19096dcf09ece592ad64"
+  },
+  "world": {
+    "worldId": "0x797f9ff5b3bfcf22a41085615f6994f755008b80a73a182e6f5eac332195e2bd",
+    "configHash": "0x7976d438b12b55e94c43bd87761260fb95a14b95009858c167795628f44b629f",
+    "sealedAtBlock": 46802459,
+    "distributionCommitment": "0x2789769f045b5061b071281c2aed1e406c2815e1fb96222e8f09ad4e2f13def6",
+    "byteGasPrice": "1000000000000",
+    "protocolFeeBps": 300,
+    "poolFee": 3000,
+    "tickSpacing": 60,
+    "initialSqrtPriceX96": "3961408125713216879677197516800",
+    "initialPriceEthPerSPuter": "0.0004"
+  },
+  "token": {
+    "name": "Swaputer",
+    "symbol": "sPuter",
+    "decimals": 18,
+    "initialSupplyBaseUnits": "10000000000000000000000",
+    "postSmokeSupplyBaseUnits": "9999999999000000000000",
+    "nopBurnBaseUnits": "1000000000000"
+  },
+  "positions": [
+    {"tokenId":27994,"tickLower":74160,"tickUpper":78240,"targetSPuter":"50","liquidity":"5420377974442509339"},
+    {"tokenId":27995,"tickLower":70080,"tickUpper":74160,"targetSPuter":"150","liquidity":"19940795119692010537"},
+    {"tokenId":27996,"tickLower":67200,"tickUpper":70080,"targetSPuter":"800","liquidity":"179452675901261906358"},
+    {"tokenId":27997,"tickLower":60300,"tickUpper":67200,"targetSPuter":"1500","liquidity":"178606782036845916145"},
+    {"tokenId":27998,"tickLower":46440,"tickUpper":60300,"targetSPuter":"2500","liquidity":"245310754536118268283"},
+    {"tokenId":27999,"tickLower":-887220,"tickUpper":46440,"targetSPuter":"5000","liquidity":"490443107591012380120"}
+  ],
+  "liquidity": {
+    "initialSPuterDepositedBaseUnits": "9999999999999999999977",
+    "roundingDustBaseUnits": "23",
+    "initialNativeDepositedWei": "0"
+  },
+  "smokeTest": {
+    "nativeBuyInputWei": "1000000000000",
+    "sPuterOutputBaseUnits": "2415646684564315",
+    "nativeSellOutputWei": "934876087947",
+    "finalSqrtPriceX96": "3960542166139843844758972025849",
+    "finalTick": 78239,
+    "finalPriceWeiPerSPuter": "400174936502459",
+    "protocolFeesAccruedWei": "58913693441",
+    "executionHeight": 1,
+    "executedBytes": 1,
+    "erc20AllowancesRevoked": true,
+    "permit2AllowanceRevoked": true
+  },
+  "cost": {
+    "transactionCount": 18,
+    "totalGasUsed": "22236051",
+    "transactionFeesWei": "133416306000000",
+    "maximumNetSpendWei": "50000000000000000"
+  },
+  "transactions": [
+    "0x7d06e474879a43eaea1d00b4385ed1027da4e4dc6999da8fdc9ae941686cf150",
+    "0x13638c78c1d976478231daea340cf610d8f6c8a162baa6e4da1dfcde81cf7e84",
+    "0x630f26fc64282ccfac93a0502fc703a11907f09acf5a654db813990b6be6b9d8",
+    "0xd1a2a911e8a0c142958989afe1a3bc37486880c8e88f111c52027421247e7358",
+    "0xcf082dd1ff35338af3cb229f01c7b4948a124797840fd79c1c1c91bd33824e35",
+    "0x6ee26099fb812163b7924804f0ef859713f1cbcc485e6bac84786bbbbadbba4e",
+    "0x188b02f454cee699a39e867087d712ad817d1cc123d80eb0c30a98b979b70b70",
+    "0xd629fa194cebc06ee008b5e2ebe10b04ccabc8bd10f0de6c8d03717a0d42c7d2",
+    "0x7dd6d5e3c3141be2d6d039924c9ffffc1565a546cfc5d8df7da1542567e59718",
+    "0xec49b1fe9577097aa330923af9f8c06976dbf9d30f31bba94af441c552adcfdc",
+    "0x49326442c7cb59737018bda0fbd83fad3b970d9c27b1877ca412d7a22adade60",
+    "0x87c052433bc962727edee26f98f7a36ee9c8843d1697c3bf83c8e3feb7886fcb",
+    "0xa0a8645c61cefc1239499d9615101a0b1610bf59cd3452ebcb5369e2f26917ef",
+    "0xc8ff91208179031876f9e110d7ee0ee2a33c3ada84a04cf4ef2256bd9a447b18",
+    "0xa09fb90ba749033ab18bec986f061aba3cda8af5f63262e0b6dc6e095abbe108",
+    "0x4bab31bb4775717d2a671149cb652510296d4dbab7cc052a9940376628c6332a",
+    "0xb6ac8d5debdbb53c1afb2dcce0961d1cedbef975046b490303be51a52d83937b",
+    "0xa43037584d04bd49edb7902e2e0fbf0c67ddf345ba55c5051a38ffb0fdd9a985"
+  ]
+}

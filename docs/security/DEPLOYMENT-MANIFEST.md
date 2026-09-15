@@ -2,7 +2,7 @@
 
 ## Two distinct commitments
 
-1. `SwapVMWorldFactory.WorldConfig.configHash` is the onchain commitment. The
+1. `SwaputerWorldFactory.WorldConfig.configHash` is the onchain commitment. The
    Factory computes it with Solidity `abi.encode`, stores it once, and emits it
    in both `WorldConfigSet` and `WorldSealed`.
 2. `integrity.manifestHash` is an offchain publication commitment over canonical
